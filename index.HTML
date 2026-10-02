@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizador AlphaZero</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hidden { display: none !important; }
+        body { font-family: ui-sans-serif, system-ui, sans-serif; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.4/dist/pizzip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.37.11/build/docxtemplater.js"></script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800">
+    <div class="flex h-screen">
+        <!-- Menú Lateral -->
+        <div class="w-64 bg-slate-800 text-white p-5 flex flex-col">
+            <h2 class="text-2xl font-bold mb-8 tracking-wider">COTIZADOR</h2>
+            <button onclick="mostrarSeccion('cotizaciones')" class="text-left mb-4 hover:text-blue-400 font-bold">📄 Crear Cotización</button>
+            <button onclick="mostrarSeccion('catalogo')" class="text-left mb-4 hover:text-blue-400 font-bold">📦 Catálogo de Equipos</button>
+            <button onclick="mostrarSeccion('vendedores')" class="text-left mb-4 hover:text-blue-400 font-bold">👥 Vendedores / Formatos</button>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="flex-1 p-8 overflow-y-auto" id="main-content">
+            
+            <!-- SECCIÓN: VENDEDORES -->
+            <div id="sec-vendedores" class="hidden">
+                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Administrar Vendedores</h3>
+                <div class="bg-white p-6 rounded shadow mb-6">
+                    <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor" class="border p-2 w-full mb-3 rounded">
+                    <label class="block mb-2 text-sm font-bold">Subir formato de Word (.docx) para este vendedor:</label>
+                    <input type="file" id="vend-file" accept=".docx" class="mb-4 block">
+                    <button onclick="guardarVendedor()" class="bg-blue-600 text-white px-4 py-2 rounded shadow font-bold">Guardar Vendedor</button>
+                </div>
+                <div id="lista-vendedores" class="grid grid-cols-2 gap-4"></div>
+            </div>
+
+            <!-- SECCIÓN: CATÁLOGO -->
+            <div id="sec-catalogo" class="hidden">
+                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Catálogo de Equipos</h3>
+                <div class="bg-white p-6 rounded shadow mb-6 grid grid-cols-2 gap-4">
+                    <input type="hidden" id="cat-id">
+                    <input type="text" id="cat-desc-corta" placeholder="Descripción Corta (Azul)" class="border p-2 col-span-2 rounded font-bold text-blue-800">
+                    <textarea id="cat-desc" placeholder="Descripción Detallada a imprimir" class="border p-2 col-span-2 rounded"></textarea>
+                    <input type="text" id="cat-um" placeholder="U.M. (ej. PZA, LOTE)" class="border p-2 rounded">
+                    <input type="text" id="cat-marca" placeholder="Marca" class="border p-2 rounded">
+                    <input type="text" id="cat-modelo" placeholder="Modelo" class="border p-2 rounded">
+                    <div class="col-span-2 flex gap-2 mt-2">
+                        <button onclick="guardarEquipo()" class="bg-green-600 text-white px-4 py-2 rounded shadow font-bold">Guardar / Actualizar</button>
+                        <button onclick="limpiarFormCatalogo()" class="bg-gray-400 text-white px-4 py-2 rounded shadow font-bold">Limpiar Formulario</button>
+                    </div>
+                </div>
+                <input type="text" id="buscador-catalogo" onkeyup="renderCatalogo()" placeholder="Buscar equipo por marca, modelo o descripción..." class="border p-2 w-full mb-4 rounded bg-blue-50 font-bold">
+                <div id="lista-catalogo" class="bg-white rounded shadow p-4 max-h-96 overflow-y-auto"></div>
+            </div>
+
+            <!-- SECCIÓN: COTIZACIONES -->
+            <div id="sec-cotizaciones" class="hidden">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h3 class="text-2xl font-bold">Generador de Cotizaciones</h3>
+                    <div class="flex gap-2 items-center">
+                        <select id="cotizacion-activa" onchange="cambiarCotizacionTab()" class="border p-2 rounded font-bold bg-blue-50 text-blue-800"></select>
+                        <button onclick="nuevaCotizacion()" class="bg-slate-700 text-white px-3 py-2 rounded text-sm font-bold">+ Nueva</button>
+                        <button onclick="eliminarCotizacionActual()" class="bg-red-500 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-bold">🗑️ Eliminar</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Datos Generales -->
+                    <div class="bg-white p-5 rounded shadow">
+                        <h4 class="font-bold mb-3 border-b">Configuración Inicial</h4>
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <select id="cot-vendedor" class="border p-2 rounded w-full border-red-300"></select>
+                            <select id="cot-moneda" class="border p-2 rounded w-full">
+                                <option value="MXN">MXN - Pesos Mexicanos</option>
+                                <option value="USD">USD - Dólares</option>
+                            </select>
+                        </div>
+
+                        <h4 class="font-bold mb-3 border-b">Estructura del Folio</h4>
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="font-bold text-gray-500">NO-</span>
+                            <input type="text" id="cot-folio-mid" placeholder="XXX" class="border p-2 w-16 text-center font-bold uppercase rounded">
+                            <span class="font-bold text-gray-500">-26-</span>
+                            <input type="text" id="cot-folio-end" placeholder="Rev" class="border p-2 w-16 text-center font-bold uppercase rounded">
+                        </div>
+
+                        <h4 class="font-bold mb-3 border-b">Datos Comerciales</h4>
+                        <input type="text" id="cot-cliente" placeholder="Cliente" class="border p-2 w-full mb-2 rounded">
+                        <input type="text" id="cot-referencia" placeholder="Referencia de cotización" class="border p-2 w-full mb-2 rounded">
+                        <input type="text" id="cot-contacto" placeholder="Datos de contacto" class="border p-2 w-full mb-2 rounded">
+                        
+                        <h4 class="font-bold mb-3 border-b mt-4">Condiciones Extra</h4>
+                        <input type="text" id="cot-lugar" placeholder="Lugar de entrega" class="border p-2 w-full mb-2 rounded">
+                        <input type="text" id="cot-pago" placeholder="Condiciones de pago" class="border p-2 w-full mb-2 rounded">
+                        <input type="text" id="cot-vigencia" placeholder="Vigencia de la propuesta" class="border p-2 w-full mb-2 rounded">
+                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega general" class="border p-2 w-full mb-2 rounded">
+                    </div>
+
+                    <!-- Constructor de Partidas -->
+                    <div class="bg-white p-5 rounded shadow relative">
+                        <h4 class="font-bold mb-3 border-b">Agregar Partida</h4>
+                        
+                        <div class="mb-2 relative">
+                            <input type="text" id="buscador-equipo-partida" onkeyup="buscarEquipoParaPartida()" placeholder="🔍 Buscar catálogo (Modelo, Marca, Descripción)..." class="border p-2 w-full rounded bg-yellow-50 font-bold">
+                            <ul id="resultados-busqueda" class="bg-white border rounded max-h-40 overflow-y-auto hidden shadow-xl absolute z-50 w-full left-0 mt-1"></ul>
+                        </div>
+                        
+                        <div class="grid grid-cols-4 gap-2 mb-2">
+                            <input type="number" id="part-pda" placeholder="Pda" class="border p-2 rounded">
+                            <input type="number" id="part-cant" placeholder="Cant." class="border p-2 rounded">
+                            <input type="text" id="part-um" placeholder="U.M." class="border p-2 rounded">
+                            <input type="number" id="part-precio" placeholder="Precio Unit." class="border p-2 rounded">
+                        </div>
+                        
+                        <input type="text" id="part-desc-corta" placeholder="Descripción Corta (Opcional)" class="border p-2 w-full mb-2 rounded font-bold text-blue-700">
+                        <textarea id="part-desc" placeholder="Descripción a imprimir" class="border p-2 w-full mb-2 rounded h-20"></textarea>
+                        
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <input type="text" id="part-modelo" placeholder="Modelo" class="border p-2 w-full rounded font-bold text-red-600">
+                            <input type="text" id="part-marca" placeholder="Marca" class="border p-2 w-full rounded font-bold text-red-600">
+                        </div>
+
+                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega (Ej: T.E. 1 SEMANA S.P.V.)" class="border p-2 w-full mb-4 rounded font-bold">
+                        <button onclick="agregarPartida()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded shadow w-full">Añadir Partida a Cotización</button>
+
+                        <h4 class="font-bold mt-6 mb-2 border-b">Partidas Agregadas</h4>
+                        <div id="lista-partidas" class="text-sm bg-gray-50 p-2 border rounded h-40 overflow-y-auto"></div>
+                        <div class="text-right font-bold text-lg mt-2 text-blue-900" id="cot-total-label">Total: $0.00</div>
+                        
+                        <button onclick="generarDocumentoWord()" class="bg-green-600 text-white text-lg font-bold px-4 py-3 rounded shadow w-full mt-4 hover:bg-green-700 transition">DESCARGAR COTIZACIÓN DOCX</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // MEMORIA LOCAL
+        let vendedores = JSON.parse(localStorage.getItem('vendedores')) || [];
+        let catalogo = JSON.parse(localStorage.getItem('catalogo')) || [];
+        let cotizaciones = JSON.parse(localStorage.getItem('cotizaciones')) || [];
+        let cotIndexActiva = 0;
+
+        if (cotizaciones.length === 0) nuevaCotizacion();
+
+        function mostrarSeccion(sec) {
+            document.getElementById('sec-vendedores').classList.add('hidden');
+            document.getElementById('sec-catalogo').classList.add('hidden');
+            document.getElementById('sec-cotizaciones').classList.add('hidden');
+            document.getElementById(`sec-${sec}`).classList.remove('hidden');
+            if (sec === 'vendedores') renderVendedores();
+            if (sec === 'catalogo') renderCatalogo();
+            if (sec === 'cotizaciones') renderSelectVendedores();
+        }
+
+        // --- VENDEDORES ---
+        function guardarVendedor() {
+            const nombre = document.getElementById('vend-nombre').value;
+            const fileInput = document.getElementById('vend-file');
+            if (!nombre || fileInput.files.length === 0) return alert('⚠️ Captura nombre y selecciona el Word.');
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64 = e.target.result.split(',')[1];
+                vendedores.push({ id: Date.now(), nombre, template: base64 });
+                localStorage.setItem('vendedores', JSON.stringify(vendedores));
+                document.getElementById('vend-nombre').value = '';
+                fileInput.value = '';
+                renderVendedores();
+                alert('✅ Vendedor guardado.');
+                renderSelectVendedores();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderVendedores() {
+            const lista = document.getElementById('lista-vendedores');
+            lista.innerHTML = vendedores.map(v => `
+                <div class="bg-white p-4 border rounded shadow flex justify-between items-center">
+                    <span class="font-bold">${v.nombre}</span>
+                    <button onclick="eliminarVendedor(${v.id})" class="text-red-500 font-bold">X</button>
+                </div>
+            `).join('');
+        }
+
+        function eliminarVendedor(id) {
+            vendedores = vendedores.filter(v => v.id !== id);
+            localStorage.setItem('vendedores', JSON.stringify(vendedores));
+            renderVendedores();
+        }
+
+        // --- CATÁLOGO ---
+        function guardarEquipo() {
+            const id = document.getElementById('cat-id').value;
+            const descCorta = document.getElementById('cat-desc-corta').value;
+            const desc = document.getElementById('cat-desc').value;
+            const um = document.getElementById('cat-um').value.toUpperCase();
+            const marca = document.getElementById('cat-marca').value;
+            const modelo = document.getElementById('cat-modelo').value;
+
+            if (!desc) return alert('⚠️ La descripción larga es obligatoria.');
+
+            const equipo = { id: id ? parseInt(id) : Date.now(), descCorta, desc, um, marca, modelo };
+
+            if (id) {
+                const index = catalogo.findIndex(c => c.id === parseInt(id));
+                catalogo[index] = equipo;
+            } else {
+                catalogo.push(equipo);
+            }
+
+            localStorage.setItem('catalogo', JSON.stringify(catalogo));
+            limpiarFormCatalogo();
+            renderCatalogo();
+        }
+
+        function limpiarFormCatalogo() {
+            document.getElementById('cat-id').value = '';
+            document.getElementById('cat-desc-corta').value = '';
+            document.getElementById('cat-desc').value = '';
+            document.getElementById('cat-um').value = '';
+            document.getElementById('cat-marca').value = '';
+            document.getElementById('cat-modelo').value = '';
+        }
+
+        function renderCatalogo() {
+            const f = document.getElementById('buscador-catalogo').value.toLowerCase();
+            const lista = document.getElementById('lista-catalogo');
+            
+            const filtrados = catalogo.filter(c => 
+                (c.desc && c.desc.toLowerCase().includes(f)) ||
+                (c.descCorta && c.descCorta.toLowerCase().includes(f)) ||
+                (c.marca && c.marca.toLowerCase().includes(f)) ||
+                (c.modelo && c.modelo.toLowerCase().includes(f))
+            );
+
+            lista.innerHTML = filtrados.map(c => `
+                <div class="border-b py-2 flex justify-between items-center hover:bg-gray-50">
+                    <div>
+                        <p class="font-bold text-blue-800">${c.descCorta || 'Sin desc. corta'}</p>
+                        <p class="text-sm">${c.desc.substring(0, 60)}...</p>
+                        <p class="text-xs text-red-600 font-bold">Mod: ${c.modelo} | Marca: ${c.marca} | U.M.: ${c.um}</p>
+                    </div>
+                    <div class="flex">
+                        <button onclick="editarEquipo(${c.id})" class="text-blue-500 font-bold mr-3">Editar</button>
+                        <button onclick="eliminarEquipo(${c.id})" class="text-red-500 font-bold">Eliminar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function editarEquipo(id) {
+            const c = catalogo.find(x => x.id === id);
+            document.getElementById('cat-id').value = c.id;
+            document.getElementById('cat-desc-corta').value = c.descCorta || '';
+            document.getElementById('cat-desc').value = c.desc;
+            document.getElementById('cat-um').value = c.um;
+            document.getElementById('cat-marca').value = c.marca;
+            document.getElementById('cat-modelo').value = c.modelo;
+        }
+
+        function eliminarEquipo(id) {
+            catalogo = catalogo.filter(c => c.id !== id);
+            localStorage.setItem('catalogo', JSON.stringify(catalogo));
+            renderCatalogo();
+        }
+
+        // --- COTIZACIONES MÚLTIPLES ---
+        function nuevaCotizacion() {
+            // CORRECCIÓN: Guardamos la cotización activa SOLO si ya existe alguna en memoria
+            if (cotizaciones.length > 0) {
+                guardarEstadoCotizaciones();
+            }
+            
+            const nueva = {
+                id: Date.now(),
+                nombreTab: `Cot. ${cotizaciones.length + 1}`,
+                // Inicia con todos los campos en blanco
+                datos: { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', moneda: 'MXN', vendedorId: '' },
+                partidas: []
+            };
+            
+            cotizaciones.push(nueva);
+            cotIndexActiva = cotizaciones.length - 1;
+            
+            localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+            renderSelectTabs();
+            cargarCotizacionUI();
+        }
+
+        function eliminarCotizacionActual() {
+            if(cotizaciones.length <= 1) return alert("No puedes eliminar la única cotización que tienes abierta.");
+            if(confirm("¿Estás seguro de que deseas eliminar esta cotización?")) {
+                cotizaciones.splice(cotIndexActiva, 1);
+                cotIndexActiva = 0;
+                localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+                renderSelectTabs();
+                cargarCotizacionUI();
+            }
+        }
+
+        function guardarEstadoCotizaciones() {
+            if(cotizaciones[cotIndexActiva]){
+                cotizaciones[cotIndexActiva].datos = {
+                    folioMid: document.getElementById('cot-folio-mid').value,
+                    folioEnd: document.getElementById('cot-folio-end').value,
+                    cliente: document.getElementById('cot-cliente').value,
+                    referencia: document.getElementById('cot-referencia').value,
+                    contacto: document.getElementById('cot-contacto').value,
+                    lugar: document.getElementById('cot-lugar').value,
+                    pago: document.getElementById('cot-pago').value,
+                    vigencia: document.getElementById('cot-vigencia').value,
+                    plazo: document.getElementById('cot-plazo').value,
+                    moneda: document.getElementById('cot-moneda').value,
+                    vendedorId: document.getElementById('cot-vendedor').value
+                };
+            }
+            localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+        }
+
+        function renderSelectTabs() {
+            const select = document.getElementById('cotizacion-activa');
+            select.innerHTML = cotizaciones.map((c, i) => `<option value="${i}">✏️ ${c.nombreTab} - ${c.datos.cliente || 'Sin cliente'}</option>`).join('');
+            select.value = cotIndexActiva;
+        }
+
+        function cambiarCotizacionTab() {
+            guardarEstadoCotizaciones();
+            cotIndexActiva = parseInt(document.getElementById('cotizacion-activa').value);
+            cargarCotizacionUI();
+        }
+
+        function cargarCotizacionUI() {
+            const cot = cotizaciones[cotIndexActiva];
+            document.getElementById('cot-folio-mid').value = cot.datos.folioMid || '';
+            document.getElementById('cot-folio-end').value = cot.datos.folioEnd || '';
+            document.getElementById('cot-cliente').value = cot.datos.cliente || '';
+            document.getElementById('cot-referencia').value = cot.datos.referencia || '';
+            document.getElementById('cot-contacto').value = cot.datos.contacto || '';
+            document.getElementById('cot-lugar').value = cot.datos.lugar || '';
+            document.getElementById('cot-pago').value = cot.datos.pago || '';
+            document.getElementById('cot-vigencia').value = cot.datos.vigencia || '';
+            document.getElementById('cot-plazo').value = cot.datos.plazo || '';
+            document.getElementById('cot-moneda').value = cot.datos.moneda || 'MXN';
+            
+            renderSelectVendedores();
+            document.getElementById('cot-vendedor').value = cot.datos.vendedorId || '';
+            
+            renderPartidas();
+        }
+
+        function renderSelectVendedores() {
+            const select = document.getElementById('cot-vendedor');
+            select.innerHTML = `<option value="">-- SELECCIONA EL VENDEDOR AQUÍ --</option>` + 
+                vendedores.map(v => `<option value="${v.id}">${v.nombre}</option>`).join('');
+        }
+
+        // --- PARTIDAS ---
+        function buscarEquipoParaPartida() {
+            const f = document.getElementById('buscador-equipo-partida').value.toLowerCase();
+            const ul = document.getElementById('resultados-busqueda');
+            if(f.length < 2) { ul.classList.add('hidden'); return; }
+            
+            const filtrados = catalogo.filter(c => 
+                (c.desc && c.desc.toLowerCase().includes(f)) ||
+                (c.descCorta && c.descCorta.toLowerCase().includes(f)) ||
+                (c.marca && c.marca.toLowerCase().includes(f)) ||
+                (c.modelo && c.modelo.toLowerCase().includes(f))
+            );
+
+            ul.innerHTML = filtrados.map(c => `
+                <li class="p-3 border-b cursor-pointer hover:bg-blue-100" onclick='seleccionarEquipo(${JSON.stringify(c).replace(/'/g, "&apos;")})'>
+                    <span class="text-red-600 font-bold">${c.modelo || ''}</span> 
+                    <span class="text-blue-800 font-bold">${c.descCorta || ''}</span> 
+                    - <span class="text-sm">${c.desc.substring(0,60)}...</span>
+                </li>
+            `).join('');
+            ul.classList.remove('hidden');
+        }
+
+        function seleccionarEquipo(c) {
+            document.getElementById('part-desc-corta').value = c.descCorta || '';
+            document.getElementById('part-desc').value = c.desc || '';
+            document.getElementById('part-um').value = c.um || '';
+            document.getElementById('part-marca').value = c.marca || '';
+            document.getElementById('part-modelo').value = c.modelo || '';
+            document.getElementById('buscador-equipo-partida').value = '';
+            document.getElementById('resultados-busqueda').classList.add('hidden');
+        }
+
+        function agregarPartida() {
+            guardarEstadoCotizaciones();
+            const cot = cotizaciones[cotIndexActiva];
+            
+            const pda = document.getElementById('part-pda').value;
+            const cant = parseFloat(document.getElementById('part-cant').value);
+            const um = document.getElementById('part-um').value;
+            const precio = parseFloat(document.getElementById('part-precio').value);
+            
+            const descCorta = document.getElementById('part-desc-corta').value.trim();
+            const desc = document.getElementById('part-desc').value.trim();
+            const marca = document.getElementById('part-marca').value.trim();
+            const modelo = document.getElementById('part-modelo').value.trim();
+            const tiempo = document.getElementById('part-tiempo').value.trim();
+
+            if(!cant || !precio || !desc) return alert("⚠ Faltan datos obligatorios (Cant, Precio, Descripcion).");
+
+            cot.partidas.push({
+                pda, descCorta, descripcion: desc, marca, modelo, tiempo, um,
+                cantidad: cant, precio: precio, total: cant * precio
+            });
+
+            document.getElementById('part-pda').value = '';
+            document.getElementById('part-cant').value = '';
+            document.getElementById('part-um').value = '';
+            document.getElementById('part-precio').value = '';
+            document.getElementById('part-desc-corta').value = '';
+            document.getElementById('part-desc').value = '';
+            document.getElementById('part-marca').value = '';
+            document.getElementById('part-modelo').value = '';
+            document.getElementById('part-tiempo').value = '';
+            
+            guardarEstadoCotizaciones();
+            renderPartidas();
+        }
+
+        function renderPartidas() {
+            const cot = cotizaciones[cotIndexActiva];
+            const lista = document.getElementById('lista-partidas');
+            let granTotal = 0;
+            
+            lista.innerHTML = cot.partidas.map((p, i) => {
+                granTotal += p.total;
+                return `
+                <div class="border-b py-2 flex justify-between">
+                    <div>
+                        <span class="font-bold mr-2">${p.pda || (i+1)}</span>
+                        <span class="text-xs font-bold text-blue-700">${p.descCorta || ''}</span>
+                        <span class="text-xs text-red-600 font-bold ml-2">${p.modelo || ''}</span><br>
+                        <span class="text-gray-500 text-xs">${p.cantidad} ${p.um} x $${p.precio.toLocaleString('en-US', {minimumFractionDigits:2})}</span>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="font-bold">$${p.total.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                        <button onclick="eliminarPartida(${i})" class="text-red-500 font-bold text-xs mt-1">Quitar</button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('cot-total-label').innerText = `Total: $${granTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        }
+
+        function eliminarPartida(index) {
+            cotizaciones[cotIndexActiva].partidas.splice(index, 1);
+            guardarEstadoCotizaciones();
+            renderPartidas();
+        }
+
+        // --- CONVERTIDOR NUMERO A LETRAS ---
+        const Unidades = num => {
+            switch(num) {
+                case 1: return "UN"; case 2: return "DOS"; case 3: return "TRES"; case 4: return "CUATRO"; case 5: return "CINCO"; case 6: return "SEIS"; case 7: return "SIETE"; case 8: return "OCHO"; case 9: return "NUEVE"; default: return "";
+            }
+        };
+        const Decenas = num => {
+            let decena = Math.floor(num/10); let unidad = num - (decena * 10);
+            switch(decena) {
+                case 1: switch(unidad) { case 0: return "DIEZ"; case 1: return "ONCE"; case 2: return "DOCE"; case 3: return "TRECE"; case 4: return "CATORCE"; case 5: return "QUINCE"; default: return "DIECI" + Unidades(unidad); }
+                case 2: switch(unidad) { case 0: return "VEINTE"; default: return "VEINTI" + Unidades(unidad); }
+                case 3: return DecenasY("TREINTA", unidad);
+                case 4: return DecenasY("CUARENTA", unidad);
+                case 5: return DecenasY("CINCUENTA", unidad);
+                case 6: return DecenasY("SESENTA", unidad);
+                case 7: return DecenasY("SETENTA", unidad);
+                case 8: return DecenasY("OCHENTA", unidad);
+                case 9: return DecenasY("NOVENTA", unidad);
+                case 0: return Unidades(unidad);
+            }
+        };
+        const DecenasY = (strSin, numUni) => numUni > 0 ? strSin + " Y " + Unidades(numUni) : strSin;
+        const Centenas = num => {
+            let centenas = Math.floor(num / 100); let decenas = num - (centenas * 100);
+            switch(centenas) {
+                case 1: return decenas > 0 ? "CIENTO " + Decenas(decenas) : "CIEN";
+                case 2: return "DOSCIENTOS " + Decenas(decenas);
+                case 3: return "TRESCIENTOS " + Decenas(decenas);
+                case 4: return "CUATROCIENTOS " + Decenas(decenas);
+                case 5: return "QUINIENTOS " + Decenas(decenas);
+                case 6: return "SEISCIENTOS " + Decenas(decenas);
+                case 7: return "SETECIENTOS " + Decenas(decenas);
+                case 8: return "OCHOCIENTOS " + Decenas(decenas);
+                case 9: return "NOVECIENTOS " + Decenas(decenas);
+                default: return Decenas(decenas);
+            }
+        };
+        const Seccion = (num, divisor, strSin, strPlu) => {
+            let cientos = Math.floor(num / divisor); let resto = num - (cientos * divisor);
+            let letras = "";
+            if (cientos > 0) { if (cientos > 1) letras = Centenas(cientos) + " " + strPlu; else letras = strSin; }
+            return letras;
+        };
+        const Miles = num => {
+            let divisor = 1000; let cientos = Math.floor(num / divisor); let resto = num - (cientos * divisor);
+            let strMiles = Seccion(num, divisor, "UN MIL", "MIL"); let strCentenas = Centenas(resto);
+            return strMiles === "" ? strCentenas : strMiles + (strCentenas ? " " + strCentenas : "");
+        };
+        const Millones = num => {
+            let divisor = 1000000; let cientos = Math.floor(num / divisor); let resto = num - (cientos * divisor);
+            let strMillones = Seccion(num, divisor, "UN MILLON", "MILLONES"); let strMiles = Miles(resto);
+            return strMillones === "" ? strMiles : strMillones + (strMiles ? " " + strMiles : "");
+        };
+        function NumeroALetras(num, moneda) {
+            let entero = Math.floor(num);
+            let centavos = Math.round((num % 1) * 100);
+            let letrasMoneda = moneda === 'MXN' ? 'PESOS MEXICANOS' : 'DÓLARES';
+            let letrasMonedaCentavo = moneda === 'MXN' ? '/100 M.N.' : '/100 USD';
+            
+            let letras = entero === 0 ? "CERO" : Millones(entero);
+            let centavosStr = centavos.toString().padStart(2, '0');
+            
+            return `${letras} ${letrasMoneda} (${centavosStr}${letrasMonedaCentavo})`;
+        }
+
+        // --- MANEJO DE DOCX ---
+        function base64ToUint8Array(base64) {
+            var binary_string = window.atob(base64);
+            var len = binary_string.length;
+            var bytes = new Uint8Array(len);
+            for (var i = 0; i < len; i++) { bytes[i] = binary_string.charCodeAt(i); }
+            return bytes;
+        }
+
+        function generarDocumentoWord() {
+            try {
+                if (typeof PizZip === 'undefined') { alert("⚠ No se cargó la librería Word. Refresca la página."); return; }
+                guardarEstadoCotizaciones();
+                const cot = cotizaciones[cotIndexActiva];
+                const d = cot.datos;
+
+                if (!d.vendedorId) return alert('⚠️ Selecciona un Vendedor en la Configuración Inicial.');
+                const vend = vendedores.find(v => v.id.toString() === d.vendedorId.toString());
+                if (!vend) return alert('⚠️ Vendedor inválido.');
+                
+                let totalSuma = cot.partidas.reduce((acc, curr) => acc + curr.total, 0);
+                const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+                const hoy = new Date();
+                const fechaString = `Coatzacoalcos, Ver. a ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+                
+                const folioFinal = `NO-${(d.folioMid||'XXX').toUpperCase()}-26${d.folioEnd ? '-' + d.folioEnd.toUpperCase() : ''}`;
+
+                // CORRECCIÓN: Nombre de descarga estructurado
+                const monedaDocName = d.moneda === 'MXN' ? 'PESOS' : 'DÓLARES';
+                const nombreArchivo = `${folioFinal} - ${monedaDocName}.docx`;
+
+                // CORRECCIÓN: Texto de Moneda en Word
+                const textoMonedaFormato = d.moneda === 'MXN' ? 'PESOS MEXICANOS (MXN)' : 'DÓLARES (USD)';
+
+                const content = base64ToUint8Array(vend.template);
+                const zip = new PizZip(content);
+                const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+
+                doc.render({
+                    FECHA: fechaString,
+                    FOLIO: folioFinal,
+                    CLIENTE: d.cliente || '',
+                    REFERENCIA: d.referencia || '',
+                    LUGAR_ENTREGA: d.lugar || '',
+                    MONEDA: textoMonedaFormato, // Aquí inyectamos el nuevo formato de moneda
+                    DATOS_CONTACTO: d.contacto || '',
+                    CONDICIONES_PAGO: d.pago || '',
+                    VIGENCIA: d.vigencia || '',
+                    PLAZO_ENTREGA: d.plazo || '',
+                    MONTO_NUMERO: "$" + totalSuma.toLocaleString('en-US', {minimumFractionDigits: 2}),
+                    MONTO_LETRA: NumeroALetras(totalSuma, d.moneda),
+                    partidas: cot.partidas.map((p, i) => {
+                        
+                        let strModMarca = "";
+                        if(p.modelo || p.marca) {
+                            let textMod = p.modelo ? `MODELO: ${p.modelo.toUpperCase()}` : "";
+                            let textMar = p.marca ? `MARCA: ${p.marca.toUpperCase()}` : "";
+                            if(textMod && textMar) strModMarca = ` ${textMod}, ${textMar}.`;
+                            else if(textMod) strModMarca = ` ${textMod}.`;
+                            else if(textMar) strModMarca = ` ${textMar}.`;
+                        }
+
+                        return {
+                            PDA: p.pda || (i+1),
+                            DESC_CORTA: p.descCorta ? "\n" + p.descCorta.toUpperCase() + " " : "\n",
+                            DESCRIPCION: p.descripcion || "",
+                            MODELO_MARCA: strModMarca,
+                            TIEMPO_ENTREGA: p.tiempo ? "\n\n" + p.tiempo + "\n" : "\n",
+                            UM: p.um || "",
+                            CANTIDAD: p.cantidad || "",
+                            PRECIO: "$" + (p.precio || 0).toLocaleString('en-US', {minimumFractionDigits: 2}),
+                            TOTAL: "$" + (p.total || 0).toLocaleString('en-US', {minimumFractionDigits: 2})
+                        }
+                    })
+                });
+
+                const out = doc.getZip().generate({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+                const url = window.URL.createObjectURL(out);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = nombreArchivo; // Aplica el nuevo nombre de archivo
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error(error);
+                alert("❌ Ocurrió un error al procesar el Word. Asegúrate de tener las etiquetas correctas en el archivo de Word.");
+            }
+        }
+
+        // Iniciar
+        mostrarSeccion('cotizaciones');
+        cargarCotizacionUI();
+    </script>
+</body>
+</html>
