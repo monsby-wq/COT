@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cotizador AlphaZero</title>
+    <title>QUOTE GENERATOR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .hidden { display: none !important; }
@@ -18,8 +18,8 @@
     <div id="login-container" class="flex h-screen bg-slate-900 items-center justify-center hidden">
         <div class="bg-white p-8 rounded shadow-2xl w-96">
             <div class="text-center mb-6">
-                <h2 class="text-3xl font-bold text-slate-800 tracking-wider">AlphaZero</h2>
-                <p class="text-gray-500 text-sm">Sistemas Contraincendios</p>
+                <h2 class="text-3xl font-bold text-slate-800 tracking-wider">INICIO DE SESIÓN</h2>
+                <p class="text-gray-500 text-sm">SI NO CUENTA CON USUARIO ACTIVO CONTACTA AL ADMINISTRADOR</p>
             </div>
             <input type="text" id="login-user" placeholder="Usuario" class="border p-3 w-full mb-3 rounded bg-gray-50">
             <input type="password" id="login-pass" placeholder="Contraseña" class="border p-3 w-full mb-6 rounded bg-gray-50">
@@ -31,11 +31,11 @@
     <div id="app-container" class="flex h-screen hidden">
         <!-- Menú Lateral -->
         <div class="w-64 bg-slate-800 text-white p-5 flex flex-col">
-            <h2 class="text-2xl font-bold mb-8 tracking-wider">COTIZADOR</h2>
+            <h2 class="text-2xl font-bold mb-8 tracking-wider">HERRAMIENTAS</h2>
             
             <button onclick="mostrarSeccion('cotizaciones')" class="text-left mb-4 hover:text-blue-400 font-bold">📄 Crear Cotización</button>
             <button onclick="mostrarSeccion('catalogo')" class="text-left mb-4 hover:text-blue-400 font-bold">📦 Catálogo de Equipos</button>
-            <button onclick="mostrarSeccion('vendedores')" class="text-left mb-4 hover:text-blue-400 font-bold">👥 Vendedores / Formatos</button>
+            <button onclick="mostrarSeccion('vendedores')" class="text-left mb-4 hover:text-blue-400 font-bold">👥 Vendedores</button>
             
             <!-- Botón exclusivo para el Master -->
             <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" class="text-left mb-4 text-yellow-400 hover:text-yellow-200 font-bold hidden border-t border-slate-600 pt-4 mt-2">⚙️ Gestión de Usuarios</button>
@@ -66,12 +66,12 @@
 
             <!-- SECCIÓN: VENDEDORES -->
             <div id="sec-vendedores" class="hidden">
-                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Administrar Vendedores y Formatos</h3>
+                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Administrador de Vendedores</h3>
                 <div class="bg-white p-6 rounded shadow mb-6">
-                    <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor (Aparecerá en el desplegable)" class="border p-2 w-full mb-3 rounded">
-                    <label class="block mb-2 text-sm font-bold">Subir formato de Word (.docx) para este vendedor:</label>
+                    <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor" class="border p-2 w-full mb-3 rounded">
+                    <label class="block mb-2 text-sm font-bold">Subir formato tipo docx para este vendedor:</label>
                     <input type="file" id="vend-file" accept=".docx" class="mb-4 block">
-                    <button onclick="guardarVendedor()" class="bg-blue-600 text-white px-4 py-2 rounded shadow font-bold">Guardar Vendedor</button>
+                    <button onclick="guardarVendedor()" class="bg-blue-600 text-white px-4 py-2 rounded shadow font-bold">Guardar Cambios</button>
                 </div>
                 <div id="lista-vendedores" class="grid grid-cols-2 gap-4"></div>
             </div>
@@ -81,9 +81,9 @@
                 <h3 class="text-2xl font-bold border-b pb-2 mb-4">Catálogo de Equipos</h3>
                 <div class="bg-white p-6 rounded shadow mb-6 grid grid-cols-2 gap-4">
                     <input type="hidden" id="cat-id">
-                    <input type="text" id="cat-desc-corta" placeholder="Descripción Corta (Color Azul)" class="border p-2 col-span-2 rounded font-bold text-blue-800">
-                    <textarea id="cat-desc" placeholder="Descripción Detallada a imprimir (Color Negro)" class="border p-2 col-span-2 rounded"></textarea>
-                    <input type="text" id="cat-um" placeholder="U.M. (ej. PZA, LOTE)" class="border p-2 rounded">
+                    <input type="text" id="cat-desc-corta" placeholder="Descripción Corta" class="border p-2 col-span-2 rounded font-bold text-blue-800">
+                    <textarea id="cat-desc" placeholder="Descripción Detallada (Omitir descripción corta)" class="border p-2 col-span-2 rounded"></textarea>
+                    <input type="text" id="cat-um" placeholder="Unidad de Medida" class="border p-2 rounded">
                     <input type="text" id="cat-marca" placeholder="Marca" class="border p-2 rounded">
                     <input type="text" id="cat-modelo" placeholder="Modelo" class="border p-2 rounded">
                     <div class="col-span-2 flex gap-2 mt-2">
@@ -91,7 +91,7 @@
                         <button onclick="limpiarFormCatalogo()" class="bg-gray-400 text-white px-4 py-2 rounded shadow font-bold">Limpiar Formulario</button>
                     </div>
                 </div>
-                <input type="text" id="buscador-catalogo" onkeyup="renderCatalogo()" placeholder="Buscar equipo por marca, modelo o descripción..." class="border p-2 w-full mb-4 rounded bg-blue-50 font-bold">
+                <input type="text" id="buscador-catalogo" onkeyup="renderCatalogo()" placeholder="Buscar Equipo" class="border p-2 w-full mb-4 rounded bg-blue-50 font-bold">
                 <div id="lista-catalogo" class="bg-white rounded shadow p-4 max-h-96 overflow-y-auto"></div>
             </div>
 
@@ -109,7 +109,7 @@
                 <div class="grid grid-cols-2 gap-6">
                     <!-- Datos Generales -->
                     <div class="bg-white p-5 rounded shadow">
-                        <h4 class="font-bold mb-3 border-b">Configuración Inicial</h4>
+                        <h4 class="font-bold mb-3 border-b">Selecciona Vendedor, Moneda y Tipo de Propuesta</h4>
                         <div class="grid grid-cols-2 gap-2 mb-4">
                             <select id="cot-vendedor" class="border p-2 rounded w-full border-red-300"></select>
                             <select id="cot-moneda" class="border p-2 rounded w-full">
@@ -118,58 +118,58 @@
                             </select>
                         </div>
 
-                        <h4 class="font-bold mb-3 border-b">Estructura del Folio</h4>
+                        <h4 class="font-bold mb-3 border-b">Folio</h4>
                         <div class="flex items-center gap-2 mb-4">
                             <span class="font-bold text-gray-500">NO-</span>
-                            <input type="text" id="cot-folio-mid" placeholder="XXX" class="border p-2 w-16 text-center font-bold uppercase rounded">
+                            <input type="text" id="cot-folio-mid" placeholder="ID" class="border p-2 w-16 text-center font-bold uppercase rounded">
                             <span class="font-bold text-gray-500">-26-</span>
                             <input type="text" id="cot-folio-end" placeholder="Rev" class="border p-2 w-16 text-center font-bold uppercase rounded">
                         </div>
 
-                        <h4 class="font-bold mb-3 border-b">Datos Comerciales</h4>
+                        <h4 class="font-bold mb-3 border-b">Datos Del Cliente</h4>
                         <input type="text" id="cot-cliente" placeholder="Cliente" class="border p-2 w-full mb-2 rounded">
-                        <input type="text" id="cot-referencia" placeholder="Referencia de cotización" class="border p-2 w-full mb-2 rounded">
+                        <input type="text" id="cot-referencia" placeholder="Referencia" class="border p-2 w-full mb-2 rounded">
                         <input type="text" id="cot-contacto" placeholder="Datos de contacto" class="border p-2 w-full mb-2 rounded">
                         
-                        <h4 class="font-bold mb-3 border-b mt-4">Condiciones Extra</h4>
+                        <h4 class="font-bold mb-3 border-b mt-4">Condiciones Generales</h4>
                         <input type="text" id="cot-lugar" placeholder="Lugar de entrega" class="border p-2 w-full mb-2 rounded">
                         <input type="text" id="cot-pago" placeholder="Condiciones de pago" class="border p-2 w-full mb-2 rounded">
                         <input type="text" id="cot-vigencia" placeholder="Vigencia de la propuesta" class="border p-2 w-full mb-2 rounded">
-                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega general" class="border p-2 w-full mb-2 rounded">
+                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega" class="border p-2 w-full mb-2 rounded">
                     </div>
 
-                    <!-- Constructor de Partidas -->
+                    <!-- Partidas -->
                     <div class="bg-white p-5 rounded shadow relative">
-                        <h4 class="font-bold mb-3 border-b">Agregar Partida</h4>
+                        <h4 class="font-bold mb-3 border-b">Partidas</h4>
                         
                         <div class="mb-2 relative">
-                            <input type="text" id="buscador-equipo-partida" onkeyup="buscarEquipoParaPartida()" placeholder="🔍 Buscar catálogo (Modelo, Marca, Descripción)..." class="border p-2 w-full rounded bg-yellow-50 font-bold">
+                            <input type="text" id="buscador-equipo-partida" onkeyup="buscarEquipoParaPartida()" placeholder="🔍 Modelo" class="border p-2 w-full rounded bg-yellow-50 font-bold">
                             <ul id="resultados-busqueda" class="bg-white border rounded max-h-40 overflow-y-auto hidden shadow-xl absolute z-50 w-full left-0 mt-1"></ul>
                         </div>
                         
                         <div class="grid grid-cols-4 gap-2 mb-2">
-                            <input type="number" id="part-pda" placeholder="Pda" class="border p-2 rounded">
-                            <input type="number" id="part-cant" placeholder="Cant." class="border p-2 rounded">
-                            <input type="text" id="part-um" placeholder="U.M." class="border p-2 rounded">
-                            <input type="number" id="part-precio" placeholder="Precio Unit." class="border p-2 rounded">
+                            <input type="number" id="part-pda" placeholder="Partida" class="border p-2 rounded">
+                            <input type="number" id="part-cant" placeholder="Cantidad" class="border p-2 rounded">
+                            <input type="text" id="part-um" placeholder="Unidad" class="border p-2 rounded">
+                            <input type="number" id="part-precio" placeholder="Precio Unitario" class="border p-2 rounded">
                         </div>
                         
-                        <input type="text" id="part-desc-corta" placeholder="Descripción Corta (Opcional)" class="border p-2 w-full mb-2 rounded font-bold text-blue-700">
-                        <textarea id="part-desc" placeholder="Descripción a imprimir" class="border p-2 w-full mb-2 rounded h-20"></textarea>
+                        <input type="text" id="part-desc-corta" placeholder="Descripción Corta" class="border p-2 w-full mb-2 rounded font-bold text-blue-700">
+                        <textarea id="part-desc" placeholder="Descripción" class="border p-2 w-full mb-2 rounded h-20"></textarea>
                         
                         <div class="grid grid-cols-2 gap-2 mb-2">
                             <input type="text" id="part-modelo" placeholder="Modelo" class="border p-2 w-full rounded font-bold text-red-600">
                             <input type="text" id="part-marca" placeholder="Marca" class="border p-2 w-full rounded font-bold text-red-600">
                         </div>
 
-                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega (Ej: T.E. 1 SEMANA S.P.V.)" class="border p-2 w-full mb-4 rounded font-bold">
-                        <button onclick="agregarPartida()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded shadow w-full">Añadir Partida a Cotización</button>
+                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega" class="border p-2 w-full mb-4 rounded font-bold">
+                        <button onclick="agregarPartida()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded shadow w-full">Añadir Partida</button>
 
-                        <h4 class="font-bold mt-6 mb-2 border-b">Partidas Agregadas</h4>
+                        <h4 class="font-bold mt-6 mb-2 border-b">Total de Partidas</h4>
                         <div id="lista-partidas" class="text-sm bg-gray-50 p-2 border rounded h-40 overflow-y-auto"></div>
                         <div class="text-right font-bold text-lg mt-2 text-blue-900" id="cot-total-label">Total: $0.00</div>
                         
-                        <button onclick="generarDocumentoWord()" class="bg-green-600 text-white text-lg font-bold px-4 py-3 rounded shadow w-full mt-4 hover:bg-green-700 transition">DESCARGAR COTIZACIÓN DOCX</button>
+                        <button onclick="generarDocumentoWord()" class="bg-green-600 text-white text-lg font-bold px-4 py-3 rounded shadow w-full mt-4 hover:bg-green-700 transition">GENERAR COTIZACIÓN</button>
                     </div>
                 </div>
             </div>
