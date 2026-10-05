@@ -13,23 +13,62 @@
     <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.37.11/build/docxtemplater.js"></script>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
-    <div class="flex h-screen">
+
+    <!-- PANTALLA DE INICIO DE SESIÓN -->
+    <div id="login-container" class="flex h-screen bg-slate-900 items-center justify-center hidden">
+        <div class="bg-white p-8 rounded shadow-2xl w-96">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-bold text-slate-800 tracking-wider">AlphaZero</h2>
+                <p class="text-gray-500 text-sm">Sistemas Contraincendios</p>
+            </div>
+            <input type="text" id="login-user" placeholder="Usuario" class="border p-3 w-full mb-3 rounded bg-gray-50">
+            <input type="password" id="login-pass" placeholder="Contraseña" class="border p-3 w-full mb-6 rounded bg-gray-50">
+            <button onclick="iniciarSesion()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-3 rounded w-full transition">Entrar al Sistema</button>
+        </div>
+    </div>
+
+    <!-- APLICACIÓN PRINCIPAL (Oculta hasta iniciar sesión) -->
+    <div id="app-container" class="flex h-screen hidden">
         <!-- Menú Lateral -->
         <div class="w-64 bg-slate-800 text-white p-5 flex flex-col">
             <h2 class="text-2xl font-bold mb-8 tracking-wider">COTIZADOR</h2>
+            
             <button onclick="mostrarSeccion('cotizaciones')" class="text-left mb-4 hover:text-blue-400 font-bold">📄 Crear Cotización</button>
             <button onclick="mostrarSeccion('catalogo')" class="text-left mb-4 hover:text-blue-400 font-bold">📦 Catálogo de Equipos</button>
             <button onclick="mostrarSeccion('vendedores')" class="text-left mb-4 hover:text-blue-400 font-bold">👥 Vendedores / Formatos</button>
+            
+            <!-- Botón exclusivo para el Master -->
+            <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" class="text-left mb-4 text-yellow-400 hover:text-yellow-200 font-bold hidden border-t border-slate-600 pt-4 mt-2">⚙️ Gestión de Usuarios</button>
+            
+            <div class="mt-auto">
+                <p class="text-xs text-gray-400 mb-2">Usuario: <span id="lbl-usuario-actual" class="font-bold text-white"></span></p>
+                <button onclick="cerrarSesion()" class="bg-red-600 hover:bg-red-700 w-full text-white px-3 py-2 rounded text-sm font-bold transition">Cerrar Sesión</button>
+            </div>
         </div>
 
         <!-- Contenido Principal -->
         <div class="flex-1 p-8 overflow-y-auto" id="main-content">
             
+            <!-- SECCIÓN: GESTIÓN DE USUARIOS (Solo Master) -->
+            <div id="sec-usuarios" class="hidden">
+                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Gestión de Usuarios de Acceso</h3>
+                <div class="bg-yellow-50 p-6 rounded shadow mb-6 border border-yellow-200">
+                    <h4 class="font-bold mb-3">Dar de alta nuevo usuario</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" id="new-user" placeholder="Nombre de usuario" class="border p-2 rounded">
+                        <input type="text" id="new-pass" placeholder="Contraseña asignada" class="border p-2 rounded">
+                        <button onclick="crearUsuario()" class="bg-green-600 text-white px-4 py-2 rounded shadow font-bold col-span-2">Crear Cuenta</button>
+                    </div>
+                </div>
+                <h4 class="font-bold mb-3">Usuarios Activos</h4>
+                <div id="lista-cuentas" class="bg-white rounded shadow p-4 grid grid-cols-2 gap-4"></div>
+            </div>
+
             <!-- SECCIÓN: VENDEDORES -->
             <div id="sec-vendedores" class="hidden">
-                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Administrar Vendedores</h3>
+                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Administrar Vendedores y Formatos</h3>
                 <div class="bg-white p-6 rounded shadow mb-6">
-                    <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor" class="border p-2 w-full mb-3 rounded">
+                    <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor (Aparecerá en el desplegable)" class="border p-2 w-full mb-3 rounded">
                     <label class="block mb-2 text-sm font-bold">Subir formato de Word (.docx) para este vendedor:</label>
                     <input type="file" id="vend-file" accept=".docx" class="mb-4 block">
                     <button onclick="guardarVendedor()" class="bg-blue-600 text-white px-4 py-2 rounded shadow font-bold">Guardar Vendedor</button>
@@ -42,8 +81,8 @@
                 <h3 class="text-2xl font-bold border-b pb-2 mb-4">Catálogo de Equipos</h3>
                 <div class="bg-white p-6 rounded shadow mb-6 grid grid-cols-2 gap-4">
                     <input type="hidden" id="cat-id">
-                    <input type="text" id="cat-desc-corta" placeholder="Descripción Corta (Azul)" class="border p-2 col-span-2 rounded font-bold text-blue-800">
-                    <textarea id="cat-desc" placeholder="Descripción Detallada a imprimir" class="border p-2 col-span-2 rounded"></textarea>
+                    <input type="text" id="cat-desc-corta" placeholder="Descripción Corta (Color Azul)" class="border p-2 col-span-2 rounded font-bold text-blue-800">
+                    <textarea id="cat-desc" placeholder="Descripción Detallada a imprimir (Color Negro)" class="border p-2 col-span-2 rounded"></textarea>
                     <input type="text" id="cat-um" placeholder="U.M. (ej. PZA, LOTE)" class="border p-2 rounded">
                     <input type="text" id="cat-marca" placeholder="Marca" class="border p-2 rounded">
                     <input type="text" id="cat-modelo" placeholder="Modelo" class="border p-2 rounded">
@@ -138,29 +177,129 @@
     </div>
 
     <script>
-        // MEMORIA LOCAL
+        // --- SISTEMA DE AUTENTICACIÓN Y MEMORIA ---
+        
+        // Base de datos de usuarios en LocalStorage
+        let dbUsuarios = JSON.parse(localStorage.getItem('alphaAuth')) || [
+            { user: 'master', pass: 'alpha2026', role: 'master' } // Cuenta principal por defecto
+        ];
+        
+        // Evitamos que se pierda el master si el caché falla
+        if(dbUsuarios.length === 0) dbUsuarios.push({ user: 'master', pass: 'alpha2026', role: 'master' });
+        localStorage.setItem('alphaAuth', JSON.stringify(dbUsuarios));
+
+        let currentUser = sessionStorage.getItem('loggedUser');
+        let currentRole = sessionStorage.getItem('loggedRole');
+
+        function verificarSeguridad() {
+            if (currentUser) {
+                document.getElementById('login-container').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                document.getElementById('lbl-usuario-actual').innerText = currentUser.toUpperCase();
+                
+                // Privilegios de Master
+                if (currentRole === 'master') {
+                    document.getElementById('btn-admin-usuarios').classList.remove('hidden');
+                } else {
+                    document.getElementById('btn-admin-usuarios').classList.add('hidden');
+                }
+                
+                mostrarSeccion('cotizaciones');
+                renderSelectTabs();
+                cargarCotizacionUI();
+            } else {
+                document.getElementById('login-container').classList.remove('hidden');
+                document.getElementById('app-container').classList.add('hidden');
+            }
+        }
+
+        function iniciarSesion() {
+            const u = document.getElementById('login-user').value.trim();
+            const p = document.getElementById('login-pass').value.trim();
+            
+            const valid = dbUsuarios.find(x => x.user.toLowerCase() === u.toLowerCase() && x.pass === p);
+            
+            if (valid) {
+                sessionStorage.setItem('loggedUser', valid.user);
+                sessionStorage.setItem('loggedRole', valid.role);
+                currentUser = valid.user;
+                currentRole = valid.role;
+                document.getElementById('login-pass').value = '';
+                verificarSeguridad();
+            } else {
+                alert('Credenciales incorrectas. Inténtalo de nuevo.');
+            }
+        }
+
+        function cerrarSesion() {
+            sessionStorage.removeItem('loggedUser');
+            sessionStorage.removeItem('loggedRole');
+            currentUser = null;
+            currentRole = null;
+            verificarSeguridad();
+        }
+
+        // --- GESTIÓN DE USUARIOS (SOLO MASTER) ---
+        function renderUsuarios() {
+            const lista = document.getElementById('lista-cuentas');
+            lista.innerHTML = dbUsuarios.map((u, i) => `
+                <div class="bg-gray-100 p-3 border rounded shadow flex justify-between items-center">
+                    <div>
+                        <span class="font-bold">${u.user}</span> <span class="text-xs bg-slate-200 px-1 rounded">${u.role}</span><br>
+                        <span class="text-xs text-gray-500">Pass: ${u.pass}</span>
+                    </div>
+                    ${u.role !== 'master' ? `<button onclick="eliminarUsuario(${i})" class="text-red-500 font-bold">X</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function crearUsuario() {
+            const u = document.getElementById('new-user').value.trim();
+            const p = document.getElementById('new-pass').value.trim();
+            if(!u || !p) return alert("Ingresa usuario y contraseña");
+            if(dbUsuarios.find(x => x.user.toLowerCase() === u.toLowerCase())) return alert("El usuario ya existe");
+
+            dbUsuarios.push({ user: u, pass: p, role: 'vendedor' });
+            localStorage.setItem('alphaAuth', JSON.stringify(dbUsuarios));
+            document.getElementById('new-user').value = '';
+            document.getElementById('new-pass').value = '';
+            renderUsuarios();
+        }
+
+        function eliminarUsuario(index) {
+            if(dbUsuarios[index].role === 'master') return alert("No puedes eliminar la cuenta Master.");
+            dbUsuarios.splice(index, 1);
+            localStorage.setItem('alphaAuth', JSON.stringify(dbUsuarios));
+            renderUsuarios();
+        }
+
+
+        // MEMORIA LOCAL DE LA APLICACIÓN
         let vendedores = JSON.parse(localStorage.getItem('vendedores')) || [];
         let catalogo = JSON.parse(localStorage.getItem('catalogo')) || [];
         let cotizaciones = JSON.parse(localStorage.getItem('cotizaciones')) || [];
         let cotIndexActiva = 0;
 
-        if (cotizaciones.length === 0) nuevaCotizacion();
+        if (cotizaciones.length === 0) generarPlantillaVacia();
 
         function mostrarSeccion(sec) {
             document.getElementById('sec-vendedores').classList.add('hidden');
             document.getElementById('sec-catalogo').classList.add('hidden');
             document.getElementById('sec-cotizaciones').classList.add('hidden');
+            document.getElementById('sec-usuarios').classList.add('hidden');
             document.getElementById(`sec-${sec}`).classList.remove('hidden');
+            
             if (sec === 'vendedores') renderVendedores();
             if (sec === 'catalogo') renderCatalogo();
             if (sec === 'cotizaciones') renderSelectVendedores();
+            if (sec === 'usuarios') renderUsuarios();
         }
 
         // --- VENDEDORES ---
         function guardarVendedor() {
             const nombre = document.getElementById('vend-nombre').value;
             const fileInput = document.getElementById('vend-file');
-            if (!nombre || fileInput.files.length === 0) return alert('⚠️ Captura nombre y selecciona el Word.');
+            if (!nombre || fileInput.files.length === 0) return alert('⚠️️ Captura nombre y selecciona el Word.');
             
             const file = fileInput.files[0];
             const reader = new FileReader();
@@ -270,21 +409,18 @@
         }
 
         // --- COTIZACIONES MÚLTIPLES ---
-        function nuevaCotizacion() {
-            // CORRECCIÓN: Guardamos la cotización activa SOLO si ya existe alguna en memoria
-            if (cotizaciones.length > 0) {
-                guardarEstadoCotizaciones();
-            }
-            
-            const nueva = {
+        function generarPlantillaVacia() {
+            return {
                 id: Date.now(),
                 nombreTab: `Cot. ${cotizaciones.length + 1}`,
-                // Inicia con todos los campos en blanco
                 datos: { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', moneda: 'MXN', vendedorId: '' },
                 partidas: []
             };
-            
-            cotizaciones.push(nueva);
+        }
+
+        function nuevaCotizacion() {
+            if (cotizaciones.length > 0) guardarEstadoCotizaciones();
+            cotizaciones.push(generarPlantillaVacia());
             cotIndexActiva = cotizaciones.length - 1;
             
             localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
@@ -324,7 +460,7 @@
 
         function renderSelectTabs() {
             const select = document.getElementById('cotizacion-activa');
-            select.innerHTML = cotizaciones.map((c, i) => `<option value="${i}">✏️ ${c.nombreTab} - ${c.datos.cliente || 'Sin cliente'}</option>`).join('');
+            select.innerHTML = cotizaciones.map((c, i) => `<option value="${i}">✏️ ${c.nombreTab} - ${c.datos.cliente || 'Nueva'}</option>`).join('');
             select.value = cotIndexActiva;
         }
 
@@ -551,11 +687,9 @@
                 
                 const folioFinal = `NO-${(d.folioMid||'XXX').toUpperCase()}-26${d.folioEnd ? '-' + d.folioEnd.toUpperCase() : ''}`;
 
-                // CORRECCIÓN: Nombre de descarga estructurado
                 const monedaDocName = d.moneda === 'MXN' ? 'PESOS' : 'DÓLARES';
                 const nombreArchivo = `${folioFinal} - ${monedaDocName}.docx`;
 
-                // CORRECCIÓN: Texto de Moneda en Word
                 const textoMonedaFormato = d.moneda === 'MXN' ? 'PESOS MEXICANOS (MXN)' : 'DÓLARES (USD)';
 
                 const content = base64ToUint8Array(vend.template);
@@ -568,7 +702,7 @@
                     CLIENTE: d.cliente || '',
                     REFERENCIA: d.referencia || '',
                     LUGAR_ENTREGA: d.lugar || '',
-                    MONEDA: textoMonedaFormato, // Aquí inyectamos el nuevo formato de moneda
+                    MONEDA: textoMonedaFormato,
                     DATOS_CONTACTO: d.contacto || '',
                     CONDICIONES_PAGO: d.pago || '',
                     VIGENCIA: d.vigencia || '',
@@ -604,7 +738,7 @@
                 const url = window.URL.createObjectURL(out);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = nombreArchivo; // Aplica el nuevo nombre de archivo
+                a.download = nombreArchivo;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -616,9 +750,8 @@
             }
         }
 
-        // Iniciar
-        mostrarSeccion('cotizaciones');
-        cargarCotizacionUI();
+        // --- ARRANQUE ---
+        verificarSeguridad();
     </script>
 </body>
 </html>
