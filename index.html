@@ -31,7 +31,7 @@
             </div>
             <!-- Se cambia a tipo correo -->
             <input type="email" id="login-user" placeholder="Correo electrónico (Ej. master@alphazero.com)" class="border p-3 w-full mb-3 rounded bg-gray-50">
-            <input type="password" id="login-pass" placeholder="Contraseña" class="border p-3 w-full mb-6 rounded bg-gray-50">
+            <input type="password" id="login-pass" placeholder="Contraseña (Mínimo 6 caracteres)" class="border p-3 w-full mb-6 rounded bg-gray-50">
             <button onclick="iniciarSesion()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-3 rounded w-full transition shadow-lg">Entrar al Sistema</button>
         </div>
     </div>
@@ -182,13 +182,11 @@
         </div>
     </div>
 
-    <!-- SCRIPT TIPO MÓDULO PARA FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-        // TUS LLAVES DE FIREBASE (Tal cual me las mandaste)
         const firebaseConfig = {
             apiKey: "AIzaSyCx5JgD1CHWVlbswhiBF3PbgM-OMGgSMZ4",
             authDomain: "cotizador-24fc0.firebaseapp.com",
@@ -198,16 +196,12 @@
             appId: "1:699798492471:web:a422bd0b4a4246263cf6b2"
         };
 
-        // Iniciar Firebase Principal
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
-        // App secundaria para que el Master cree cuentas sin cerrar su propia sesión
         const secondaryApp = initializeApp(firebaseConfig, "Secondary");
         const secondaryAuth = getAuth(secondaryApp);
 
-        // Variables de Nube
         let currentUser = null;
         let currentRole = null;
         let dbUsuarios = [];
@@ -216,7 +210,7 @@
         let cotizaciones = [];
         let cotIndexActiva = 0;
 
-        // --- SISTEMA DE AUTENTICACIÓN ---
+        // --- SISTEMA DE AUTENTICACIÓN MEJORADO CON ALERTAS ESPECÍFICAS ---
         window.iniciarSesion = async function() {
             const email = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
@@ -229,16 +223,27 @@
                     try {
                         await signInWithEmailAndPassword(auth, email, pass);
                     } catch(e) {
-                        if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+                        try {
+                            // Si falla el login, intentamos crearla
                             await createUserWithEmailAndPassword(auth, email, pass);
-                            alert("¡Cuenta MASTER habilitada por primera vez de forma exitosa en la nube!");
-                        } else throw e;
+                            alert("¡Cuenta MASTER creada y habilitada exitosamente en la nube!");
+                        } catch(createError) {
+                            if (createError.code === 'auth/email-already-in-use') {
+                                throw new Error("La contraseña ingresada es incorrecta.");
+                            } else if (createError.code === 'auth/weak-password') {
+                                throw new Error("La contraseña debe tener al menos 6 caracteres.");
+                            } else if (createError.code === 'auth/operation-not-allowed') {
+                                throw new Error("No habilitaste 'Correo electrónico/Contraseña' en Firebase. Regresa al Paso 2 de las instrucciones.");
+                            } else {
+                                throw createError;
+                            }
+                        }
                     }
                 } else {
                     await signInWithEmailAndPassword(auth, email, pass);
                 }
             } catch(error) {
-                alert('Credenciales incorrectas o usuario no existe.');
+                alert('Error de acceso: ' + (error.message || 'Credenciales incorrectas.'));
                 document.getElementById('loading-screen').classList.add('hidden');
             }
         };
@@ -283,24 +288,20 @@
 
         // --- CARGA DE DATOS DESDE FIRESTORE ---
         async function cargarDatosDesdeNube() {
-            // Usuarios (Solo Master)
             if(currentRole === 'master'){
                 const usSnap = await getDocs(collection(db, 'usuarios'));
                 dbUsuarios = usSnap.docs.map(d => d.data());
                 window.renderUsuarios();
             }
 
-            // Catálogo
             const catSnap = await getDocs(collection(db, 'catalogo'));
             catalogo = catSnap.docs.map(d => d.data());
             window.renderCatalogo();
 
-            // Vendedores
             const vendSnap = await getDocs(collection(db, 'vendedores'));
             vendedores = vendSnap.docs.map(d => d.data());
             window.renderSelectVendedores();
 
-            // Cotizaciones
             const cotSnap = await getDocs(collection(db, 'cotizaciones'));
             cotizaciones = cotSnap.docs.map(d => d.data());
             
@@ -701,7 +702,6 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        // --- CONVERTIDOR LETRAS Y EXPORTAR A WORD (SIN CAMBIOS) ---
         const Unidades=num=>{switch(num){case 1:return"UN";case 2:return"DOS";case 3:return"TRES";case 4:return"CUATRO";case 5:return"CINCO";case 6:return"SEIS";case 7:return"SIETE";case 8:return"OCHO";case 9:return"NUEVE";default:return"";}};
         const Decenas=num=>{let decena=Math.floor(num/10);let unidad=num-(decena*10);switch(decena){case 1:switch(unidad){case 0:return"DIEZ";case 1:return"ONCE";case 2:return"DOCE";case 3:return"TRECE";case 4:return"CATORCE";case 5:return"QUINCE";default:return"DIECI"+Unidades(unidad);}case 2:switch(unidad){case 0:return"VEINTE";default:return"VEINTI"+Unidades(unidad);}case 3:return DecenasY("TREINTA",unidad);case 4:return DecenasY("CUARENTA",unidad);case 5:return DecenasY("CINCUENTA",unidad);case 6:return DecenasY("SESENTA",unidad);case 7:return DecenasY("SETENTA",unidad);case 8:return DecenasY("OCHENTA",unidad);case 9:return DecenasY("NOVENTA",unidad);case 0:return Unidades(unidad);}};
         const DecenasY=(strSin,numUni)=>numUni>0?strSin+" Y "+Unidades(numUni):strSin;
