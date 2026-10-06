@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cotizador AlphaZero Nube</title>
+    <title>GENERADOR DE COTIZACIONES</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .hidden { display: none !important; }
@@ -19,20 +19,20 @@
 
     <!-- PANTALLA DE CARGA GLOBAL -->
     <div id="loading-screen" class="fixed inset-0 flex items-center justify-center hidden">
-        <div class="text-white text-xl font-bold animate-pulse">☁️ Sincronizando con AlphaZero Cloud...</div>
+        <div class="text-white text-xl font-bold animate-pulse">☁️ Sincronizando...</div>
     </div>
 
     <!-- PANTALLA DE INICIO DE SESIÓN -->
     <div id="login-container" class="flex h-screen bg-slate-900 items-center justify-center hidden">
         <div class="bg-white p-8 rounded shadow-2xl w-96">
             <div class="text-center mb-6">
-                <h2 class="text-3xl font-bold text-slate-800 tracking-wider">AlphaZero</h2>
-                <p class="text-gray-500 text-sm">Sistemas Contraincendios (Cloud)</p>
+                <h2 class="text-3xl font-bold text-slate-800 tracking-wider">LOGIN</h2>
+                <p class="text-gray-500 text-sm">CONTACTA A UN ADMINISTRADOR PARA SER DADO DE ALTA</p>
             </div>
             <!-- Se cambia a tipo correo -->
-            <input type="email" id="login-user" placeholder="Correo electrónico (Ej. master@alphazero.com)" class="border p-3 w-full mb-3 rounded bg-gray-50">
+            <input type="email" id="login-user" placeholder="Correo electrónico" class="border p-3 w-full mb-3 rounded bg-gray-50">
             <input type="password" id="login-pass" placeholder="Contraseña (Mínimo 6 caracteres)" class="border p-3 w-full mb-6 rounded bg-gray-50">
-            <button onclick="iniciarSesion()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-3 rounded w-full transition shadow-lg">Entrar al Sistema</button>
+            <button onclick="iniciarSesion()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-3 rounded w-full transition shadow-lg">INICIAR SESIÓN</button>
         </div>
     </div>
 
@@ -40,11 +40,11 @@
     <div id="app-container" class="flex h-screen hidden">
         <!-- Menú Lateral -->
         <div class="w-64 bg-slate-800 text-white p-5 flex flex-col">
-            <h2 class="text-2xl font-bold mb-8 tracking-wider text-blue-400">COTIZADOR<br><span class="text-xs text-gray-400">Cloud Sync 🟢</span></h2>
+            <h2 class="text-2xl font-bold mb-8 tracking-wider text-blue-400">HERRAMIENTAS<br><span class="text-xs text-gray-400">Cloud Sync 🟢</span></h2>
             
             <button onclick="mostrarSeccion('cotizaciones')" class="text-left mb-4 hover:text-blue-400 font-bold">📄 Crear Cotización</button>
-            <button onclick="mostrarSeccion('catalogo')" class="text-left mb-4 hover:text-blue-400 font-bold">📦 Catálogo Nube</button>
-            <button onclick="mostrarSeccion('vendedores')" class="text-left mb-4 hover:text-blue-400 font-bold">👥 Vendedores / Formatos</button>
+            <button onclick="mostrarSeccion('catalogo')" class="text-left mb-4 hover:text-blue-400 font-bold">📦 Catálogo</button>
+            <button onclick="mostrarSeccion('vendedores')" class="text-left mb-4 hover:text-blue-400 font-bold">👥 Vendedores</button>
             
             <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" class="text-left mb-4 text-yellow-400 hover:text-yellow-200 font-bold hidden border-t border-slate-600 pt-4 mt-2">⚙️ Gestión de Usuarios</button>
             
@@ -59,13 +59,13 @@
             
             <!-- SECCIÓN: GESTIÓN DE USUARIOS (Solo Master) -->
             <div id="sec-usuarios" class="hidden">
-                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Gestión de Accesos en Nube</h3>
+                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Gestión de Accesos</h3>
                 <div class="bg-yellow-50 p-6 rounded shadow mb-6 border border-yellow-200">
                     <h4 class="font-bold mb-3">Dar de alta nuevo vendedor</h4>
                     <div class="grid grid-cols-2 gap-4">
-                        <input type="email" id="new-user" placeholder="Correo (Ej. ventas1@alphazero.com)" class="border p-2 rounded">
+                        <input type="email" id="new-user" placeholder="Correo Eléctronico" class="border p-2 rounded">
                         <input type="text" id="new-pass" placeholder="Contraseña de acceso" class="border p-2 rounded">
-                        <button onclick="crearUsuario()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-bold col-span-2 transition">Crear Cuenta en Firebase</button>
+                        <button onclick="crearUsuario()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-bold col-span-2 transition">Crear Cuenta</button>
                     </div>
                 </div>
                 <h4 class="font-bold mb-3">Vendedores Activos</h4>
@@ -74,39 +74,39 @@
 
             <!-- SECCIÓN: VENDEDORES -->
             <div id="sec-vendedores" class="hidden">
-                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Administrar Formatos de Word</h3>
+                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Administrar Vendedores</h3>
                 <div class="bg-white p-6 rounded shadow mb-6">
-                    <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor (Aparecerá en el desplegable)" class="border p-2 w-full mb-3 rounded">
-                    <label class="block mb-2 text-sm font-bold">Subir formato de Word (.docx):</label>
+                    <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor" class="border p-2 w-full mb-3 rounded">
+                    <label class="block mb-2 text-sm font-bold">Subir formato (.docx):</label>
                     <input type="file" id="vend-file" accept=".docx" class="mb-4 block">
-                    <button onclick="guardarVendedor()" class="bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded shadow font-bold transition">Subir Formato a la Nube</button>
+                    <button onclick="guardarVendedor()" class="bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded shadow font-bold transition">Guardar Cambios</button>
                 </div>
                 <div id="lista-vendedores" class="grid grid-cols-2 gap-4"></div>
             </div>
 
             <!-- SECCIÓN: CATÁLOGO -->
             <div id="sec-catalogo" class="hidden">
-                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Catálogo Centralizado</h3>
+                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Catálogo</h3>
                 <div class="bg-white p-6 rounded shadow mb-6 grid grid-cols-2 gap-4">
                     <input type="hidden" id="cat-id">
-                    <input type="text" id="cat-desc-corta" placeholder="Descripción Corta (Azul)" class="border p-2 col-span-2 rounded font-bold text-blue-800">
-                    <textarea id="cat-desc" placeholder="Descripción Detallada a imprimir" class="border p-2 col-span-2 rounded"></textarea>
-                    <input type="text" id="cat-um" placeholder="U.M. (ej. PZA, LOTE)" class="border p-2 rounded uppercase">
+                    <input type="text" id="cat-desc-corta" placeholder="DESCRIPCIÓN CORTA" class="border p-2 col-span-2 rounded font-bold text-blue-800">
+                    <textarea id="cat-desc" placeholder="DESCRIPCIÓN DETALLADA" class="border p-2 col-span-2 rounded"></textarea>
+                    <input type="text" id="cat-um" placeholder="UNIDAD DE MEDIDA" class="border p-2 rounded uppercase">
                     <input type="text" id="cat-marca" placeholder="Marca" class="border p-2 rounded uppercase">
                     <input type="text" id="cat-modelo" placeholder="Modelo" class="border p-2 rounded uppercase">
                     <div class="col-span-2 flex gap-2 mt-2">
-                        <button onclick="guardarEquipo()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-bold transition">Guardar en Nube</button>
-                        <button onclick="limpiarFormCatalogo()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow font-bold transition">Limpiar</button>
+                        <button onclick="guardarEquipo()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-bold transition">GUARDAR</button>
+                        <button onclick="limpiarFormCatalogo()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow font-bold transition">LIMPIAR</button>
                     </div>
                 </div>
-                <input type="text" id="buscador-catalogo" onkeyup="renderCatalogo()" placeholder="Buscar equipo..." class="border p-2 w-full mb-4 rounded bg-blue-50 font-bold">
+                <input type="text" id="buscador-catalogo" onkeyup="renderCatalogo()" placeholder="BUSCAR EQUIPO..." class="border p-2 w-full mb-4 rounded bg-blue-50 font-bold">
                 <div id="lista-catalogo" class="bg-white rounded shadow p-4 max-h-96 overflow-y-auto"></div>
             </div>
 
             <!-- SECCIÓN: COTIZACIONES -->
             <div id="sec-cotizaciones" class="hidden">
                 <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h3 class="text-2xl font-bold">Cotizaciones Activas</h3>
+                    <h3 class="text-2xl font-bold">Cotizaciones</h3>
                     <div class="flex gap-2 items-center">
                         <select id="cotizacion-activa" onchange="cambiarCotizacionTab()" class="border p-2 rounded font-bold bg-blue-50 text-blue-800"></select>
                         <button onclick="nuevaCotizacion()" class="bg-slate-700 hover:bg-slate-900 text-white px-3 py-2 rounded text-sm font-bold transition">+ Nueva</button>
@@ -138,44 +138,44 @@
                         <input type="text" id="cot-referencia" placeholder="Referencia de cotización" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
                         <input type="text" id="cot-contacto" placeholder="Datos de contacto" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
                         
-                        <h4 class="font-bold mb-3 border-b mt-4">Condiciones Extra</h4>
+                        <h4 class="font-bold mb-3 border-b mt-4">Condiciones</h4>
                         <input type="text" id="cot-lugar" placeholder="Lugar de entrega" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
                         <input type="text" id="cot-pago" placeholder="Condiciones de pago" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
                         <input type="text" id="cot-vigencia" placeholder="Vigencia de la propuesta" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega general" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
                     </div>
 
                     <div class="bg-white p-5 rounded shadow relative">
-                        <h4 class="font-bold mb-3 border-b">Agregar Partida</h4>
+                        <h4 class="font-bold mb-3 border-b">Partidas</h4>
                         
                         <div class="mb-2 relative">
-                            <input type="text" id="buscador-equipo-partida" onkeyup="buscarEquipoParaPartida()" placeholder="🔍 Buscar catálogo (Modelo, Marca, Descripción)..." class="border p-2 w-full rounded bg-yellow-50 font-bold">
+                            <input type="text" id="buscador-equipo-partida" onkeyup="buscarEquipoParaPartida()" placeholder="🔍 Buscar" class="border p-2 w-full rounded bg-yellow-50 font-bold">
                             <ul id="resultados-busqueda" class="bg-white border rounded max-h-40 overflow-y-auto hidden shadow-xl absolute z-50 w-full left-0 mt-1"></ul>
                         </div>
                         
                         <div class="grid grid-cols-4 gap-2 mb-2">
-                            <input type="number" id="part-pda" placeholder="Pda" class="border p-2 rounded">
-                            <input type="number" id="part-cant" placeholder="Cant." class="border p-2 rounded">
-                            <input type="text" id="part-um" placeholder="U.M." class="border p-2 rounded uppercase">
-                            <input type="number" id="part-precio" placeholder="Precio Unit." class="border p-2 rounded">
+                            <input type="number" id="part-pda" placeholder="Partida" class="border p-2 rounded">
+                            <input type="number" id="part-cant" placeholder="Cantidad" class="border p-2 rounded">
+                            <input type="text" id="part-um" placeholder="Unidad de Medida" class="border p-2 rounded uppercase">
+                            <input type="number" id="part-precio" placeholder="Precio Unitario" class="border p-2 rounded">
                         </div>
                         
-                        <input type="text" id="part-desc-corta" placeholder="Descripción Corta (Opcional)" class="border p-2 w-full mb-2 rounded font-bold text-blue-700">
-                        <textarea id="part-desc" placeholder="Descripción a imprimir" class="border p-2 w-full mb-2 rounded h-20"></textarea>
+                        <input type="text" id="part-desc-corta" placeholder="Descripción Corta" class="border p-2 w-full mb-2 rounded font-bold text-blue-700">
+                        <textarea id="part-desc" placeholder="Descripción" class="border p-2 w-full mb-2 rounded h-20"></textarea>
                         
                         <div class="grid grid-cols-2 gap-2 mb-2">
                             <input type="text" id="part-modelo" placeholder="Modelo" class="border p-2 w-full rounded font-bold text-red-600 uppercase">
                             <input type="text" id="part-marca" placeholder="Marca" class="border p-2 w-full rounded font-bold text-red-600 uppercase">
                         </div>
 
-                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega (Ej: T.E. 1 SEMANA S.P.V.)" class="border p-2 w-full mb-4 rounded font-bold">
-                        <button onclick="agregarPartida()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded shadow w-full transition">Añadir Partida a Cotización</button>
+                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega" class="border p-2 w-full mb-4 rounded font-bold">
+                        <button onclick="agregarPartida()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded shadow w-full transition">Añadir Partida</button>
 
                         <h4 class="font-bold mt-6 mb-2 border-b">Partidas Agregadas</h4>
                         <div id="lista-partidas" class="text-sm bg-gray-50 p-2 border rounded h-40 overflow-y-auto"></div>
                         <div class="text-right font-bold text-lg mt-2 text-blue-900" id="cot-total-label">Total: $0.00</div>
                         
-                        <button onclick="generarDocumentoWord()" class="bg-green-600 hover:bg-green-700 text-white text-lg font-bold px-4 py-3 rounded shadow w-full mt-4 transition">DESCARGAR COTIZACIÓN DOCX</button>
+                        <button onclick="generarDocumentoWord()" class="bg-green-600 hover:bg-green-700 text-white text-lg font-bold px-4 py-3 rounded shadow w-full mt-4 transition">DESCARGAR COTIZACIÓN</button>
                     </div>
                 </div>
             </div>
