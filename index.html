@@ -142,14 +142,17 @@
                         <input type="text" id="cot-lugar" placeholder="Lugar de entrega" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
                         <input type="text" id="cot-pago" placeholder="Condiciones de pago" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
                         <input type="text" id="cot-vigencia" placeholder="Vigencia de la propuesta" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega general" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
+                        <textarea id="cot-notas" placeholder="Notas Generales (Aparecerá junto al subtotal)" class="border p-2 w-full mb-2 rounded h-20" onchange="guardarEstadoCotizaciones()"></textarea>
                     </div>
 
                     <div class="bg-white p-5 rounded shadow relative">
                         <h4 class="font-bold mb-3 border-b">Partidas</h4>
                         
+                        <input type="text" id="part-nota-arriba" placeholder="Nota Superior (Ej: *****OPCIÓN 1*****)" class="border p-2 w-full mb-2 rounded font-bold text-center text-gray-700 bg-gray-50">
+                        
                         <div class="mb-2 relative">
-                            <input type="text" id="buscador-equipo-partida" onkeyup="buscarEquipoParaPartida()" placeholder="🔍 Buscar" class="border p-2 w-full rounded bg-yellow-50 font-bold">
+                            <input type="text" id="buscador-equipo-partida" onkeyup="buscarEquipoParaPartida()" placeholder="🔍 Buscar equipo del catálogo..." class="border p-2 w-full rounded bg-yellow-50 font-bold">
                             <ul id="resultados-busqueda" class="bg-white border rounded max-h-40 overflow-y-auto hidden shadow-xl absolute z-50 w-full left-0 mt-1"></ul>
                         </div>
                         
@@ -210,7 +213,6 @@
         let cotizaciones = [];
         let cotIndexActiva = 0;
 
-        // --- SISTEMA DE AUTENTICACIÓN MEJORADO CON ALERTAS ESPECÍFICAS ---
         window.iniciarSesion = async function() {
             const email = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
@@ -224,7 +226,6 @@
                         await signInWithEmailAndPassword(auth, email, pass);
                     } catch(e) {
                         try {
-                            // Si falla el login, intentamos crearla
                             await createUserWithEmailAndPassword(auth, email, pass);
                             alert("¡Cuenta MASTER creada y habilitada exitosamente en la nube!");
                         } catch(createError) {
@@ -286,7 +287,6 @@
             }
         });
 
-        // --- CARGA DE DATOS DESDE FIRESTORE ---
         async function cargarDatosDesdeNube() {
             if(currentRole === 'master'){
                 const usSnap = await getDocs(collection(db, 'usuarios'));
@@ -316,7 +316,6 @@
             window.mostrarSeccion('cotizaciones');
         }
 
-        // --- NAVEGACIÓN ---
         window.mostrarSeccion = function(sec) {
             ['vendedores', 'catalogo', 'cotizaciones', 'usuarios'].forEach(s => {
                 document.getElementById(`sec-${s}`).classList.add('hidden');
@@ -327,7 +326,6 @@
             if (sec === 'cotizaciones') window.renderSelectVendedores();
         };
 
-        // --- MASTER: CREAR USUARIOS ---
         window.renderUsuarios = function() {
             const lista = document.getElementById('lista-cuentas');
             lista.innerHTML = dbUsuarios.map((u, i) => `
@@ -372,7 +370,6 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        // --- VENDEDORES Y FORMATOS WORD ---
         window.guardarVendedor = function() {
             const nombre = document.getElementById('vend-nombre').value;
             const fileInput = document.getElementById('vend-file');
@@ -418,7 +415,6 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        // --- CATÁLOGO ---
         window.guardarEquipo = async function() {
             const idForm = document.getElementById('cat-id').value;
             const descCorta = document.getElementById('cat-desc-corta').value;
@@ -427,7 +423,7 @@
             const marca = document.getElementById('cat-marca').value.toUpperCase();
             const modelo = document.getElementById('cat-modelo').value.toUpperCase();
 
-            if (!desc) return alert('⚠️ Descripción obligatoria.');
+            if (!desc && !descCorta) return alert('⚠️ Captura al menos una descripción.');
             
             document.getElementById('loading-screen').classList.remove('hidden');
             const id = idForm || Date.now().toString();
@@ -471,7 +467,7 @@
                 <div class="border-b py-2 flex justify-between items-center hover:bg-gray-50">
                     <div>
                         <p class="font-bold text-blue-800">${c.descCorta || 'Sin desc. corta'}</p>
-                        <p class="text-sm">${c.desc.substring(0, 60)}...</p>
+                        <p class="text-sm">${(c.desc || '').substring(0, 60)}...</p>
                         <p class="text-xs text-red-600 font-bold">Mod: ${c.modelo} | Marca: ${c.marca} | U.M.: ${c.um}</p>
                     </div>
                     <div class="flex">
@@ -486,10 +482,10 @@
             const c = catalogo.find(x => x.id === id);
             document.getElementById('cat-id').value = c.id;
             document.getElementById('cat-desc-corta').value = c.descCorta || '';
-            document.getElementById('cat-desc').value = c.desc;
-            document.getElementById('cat-um').value = c.um;
-            document.getElementById('cat-marca').value = c.marca;
-            document.getElementById('cat-modelo').value = c.modelo;
+            document.getElementById('cat-desc').value = c.desc || '';
+            document.getElementById('cat-um').value = c.um || '';
+            document.getElementById('cat-marca').value = c.marca || '';
+            document.getElementById('cat-modelo').value = c.modelo || '';
         };
 
         window.eliminarEquipo = async function(id) {
@@ -501,12 +497,11 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        // --- COTIZACIONES ---
         function generarPlantillaVacia() {
             return {
                 id: Date.now().toString(),
                 nombreTab: `Cot. ${cotizaciones.length + 1}`,
-                datos: { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', moneda: 'MXN', vendedorId: '' },
+                datos: { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', moneda: 'MXN', vendedorId: '', notas: '' },
                 partidas: []
             };
         }
@@ -553,6 +548,7 @@
                     pago: document.getElementById('cot-pago').value,
                     vigencia: document.getElementById('cot-vigencia').value,
                     plazo: document.getElementById('cot-plazo').value,
+                    notas: document.getElementById('cot-notas').value,
                     moneda: document.getElementById('cot-moneda').value,
                     vendedorId: document.getElementById('cot-vendedor').value
                 };
@@ -585,6 +581,7 @@
             document.getElementById('cot-pago').value = cot.datos.pago || '';
             document.getElementById('cot-vigencia').value = cot.datos.vigencia || '';
             document.getElementById('cot-plazo').value = cot.datos.plazo || '';
+            document.getElementById('cot-notas').value = cot.datos.notas || '';
             document.getElementById('cot-moneda').value = cot.datos.moneda || 'MXN';
             
             window.renderSelectVendedores();
@@ -599,7 +596,6 @@
                 vendedores.map(v => `<option value="${v.id}">${v.nombre}</option>`).join('');
         };
 
-        // --- PARTIDAS ---
         window.buscarEquipoParaPartida = function() {
             const f = document.getElementById('buscador-equipo-partida').value.toLowerCase();
             const ul = document.getElementById('resultados-busqueda');
@@ -616,7 +612,7 @@
                 <li class="p-3 border-b cursor-pointer hover:bg-blue-100" onclick='seleccionarEquipo(${JSON.stringify(c).replace(/'/g, "&apos;")})'>
                     <span class="text-red-600 font-bold">${c.modelo || ''}</span> 
                     <span class="text-blue-800 font-bold">${c.descCorta || ''}</span> 
-                    - <span class="text-sm">${c.desc.substring(0,60)}...</span>
+                    - <span class="text-sm">${(c.desc || '').substring(0,60)}...</span>
                 </li>
             `).join('');
             ul.classList.remove('hidden');
@@ -638,22 +634,27 @@
             const pda = document.getElementById('part-pda').value;
             const cant = parseFloat(document.getElementById('part-cant').value);
             const um = document.getElementById('part-um').value;
-            const precio = parseFloat(document.getElementById('part-precio').value);
             
+            // Permite cotizaciones técnicas dejando el precio en blanco
+            let precio = parseFloat(document.getElementById('part-precio').value);
+            if(isNaN(precio)) precio = 0; 
+            
+            const notaArriba = document.getElementById('part-nota-arriba').value.trim();
             const descCorta = document.getElementById('part-desc-corta').value.trim();
             const desc = document.getElementById('part-desc').value.trim();
             const marca = document.getElementById('part-marca').value.trim();
             const modelo = document.getElementById('part-modelo').value.trim();
             const tiempo = document.getElementById('part-tiempo').value.trim();
 
-            if(!cant || !precio || !desc) return alert("⚠ Faltan datos obligatorios (Cant, Precio, Descripcion).");
+            if(!cant || (!desc && !descCorta)) return alert("⚠ Faltan datos obligatorios: Ingresa la Cantidad y al menos una Descripción (Corta o Detallada).");
 
             cot.partidas.push({
-                pda, descCorta, descripcion: desc, marca, modelo, tiempo, um,
+                pda, notaArriba, descCorta, descripcion: desc, marca, modelo, tiempo, um,
                 cantidad: cant, precio: precio, total: cant * precio
             });
 
             document.getElementById('part-pda').value = '';
+            document.getElementById('part-nota-arriba').value = '';
             document.getElementById('part-cant').value = '';
             document.getElementById('part-um').value = '';
             document.getElementById('part-precio').value = '';
@@ -680,6 +681,7 @@
                 <div class="border-b py-2 flex justify-between">
                     <div>
                         <span class="font-bold mr-2">${p.pda || (i+1)}</span>
+                        <span class="text-xs text-gray-500 font-bold block">${p.notaArriba || ''}</span>
                         <span class="text-xs font-bold text-blue-700">${p.descCorta || ''}</span>
                         <span class="text-xs text-red-600 font-bold ml-2">${p.modelo || ''}</span><br>
                         <span class="text-gray-500 text-xs">${p.cantidad} ${p.um} x $${p.precio.toLocaleString('en-US', {minimumFractionDigits:2})}</span>
@@ -744,9 +746,11 @@
                     FECHA: fechaString, FOLIO: folioFinal, CLIENTE: d.cliente || '', REFERENCIA: d.referencia || '',
                     LUGAR_ENTREGA: d.lugar || '', MONEDA: textoMonedaFormato, DATOS_CONTACTO: d.contacto || '',
                     CONDICIONES_PAGO: d.pago || '', VIGENCIA: d.vigencia || '', PLAZO_ENTREGA: d.plazo || '',
+                    NOTAS: d.notas || '',
                     MONTO_NUMERO: "$" + totalSuma.toLocaleString('en-US', {minimumFractionDigits: 2}),
                     MONTO_LETRA: NumeroALetras(totalSuma, d.moneda),
                     partidas: cot.partidas.map((p, i) => {
+                        
                         let strModMarca = "";
                         if(p.modelo || p.marca) {
                             let textMod = p.modelo ? `MODELO: ${p.modelo.toUpperCase()}` : "";
@@ -754,13 +758,31 @@
                             if(textMod && textMar) strModMarca = ` ${textMod}, ${textMar}.`;
                             else if(textMod) strModMarca = ` ${textMod}.`;
                             else if(textMar) strModMarca = ` ${textMar}.`;
+                            
+                            // El tabulador oculto (\t) evita que el texto se estire al estar justificado en Word
+                            strModMarca += "\t";
                         }
+
+                        let notaArribaFinal = "";
+                        let descCortaFinal = "";
+
+                        if (p.notaArriba) {
+                            notaArribaFinal = "\n" + p.notaArriba.toUpperCase() + "\n";
+                            descCortaFinal = p.descCorta ? p.descCorta.toUpperCase() + " " : "";
+                        } else {
+                            notaArribaFinal = "";
+                            descCortaFinal = p.descCorta ? "\n" + p.descCorta.toUpperCase() + " " : "\n";
+                        }
+
                         return {
                             PDA: p.pda || (i+1),
-                            DESC_CORTA: p.descCorta ? "\n" + p.descCorta.toUpperCase() + " " : "\n",
-                            DESCRIPCION: p.descripcion || "", MODELO_MARCA: strModMarca,
+                            NOTA_ARRIBA: notaArribaFinal,
+                            DESC_CORTA: descCortaFinal,
+                            DESCRIPCION: p.descripcion || "", 
+                            MODELO_MARCA: strModMarca,
                             TIEMPO_ENTREGA: p.tiempo ? "\n\n" + p.tiempo + "\n" : "\n",
-                            UM: p.um || "", CANTIDAD: p.cantidad || "",
+                            UM: p.um || "", 
+                            CANTIDAD: p.cantidad || "",
                             PRECIO: "$" + (p.precio || 0).toLocaleString('en-US', {minimumFractionDigits: 2}),
                             TOTAL: "$" + (p.total || 0).toLocaleString('en-US', {minimumFractionDigits: 2})
                         }
@@ -781,7 +803,5 @@
             }
         };
     </script>
-</body>
-</html>
 </body>
 </html>
