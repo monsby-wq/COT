@@ -94,6 +94,7 @@
                     <input type="text" id="cat-um" placeholder="UNIDAD DE MEDIDA" class="border p-2 rounded uppercase">
                     <input type="text" id="cat-marca" placeholder="Marca" class="border p-2 rounded uppercase">
                     <input type="text" id="cat-modelo" placeholder="Modelo" class="border p-2 rounded uppercase">
+                    <input type="url" id="cat-pdf" placeholder="🔗 Enlace de Ficha Técnica (Drive / Web)" class="border p-2 rounded text-blue-700 bg-blue-50">
                     <div class="col-span-2 flex gap-2 mt-2">
                         <button onclick="guardarEquipo()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-bold transition">GUARDAR</button>
                         <button onclick="limpiarFormCatalogo()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow font-bold transition">LIMPIAR</button>
@@ -171,6 +172,7 @@
                             <input type="text" id="part-marca" placeholder="Marca" class="border p-2 w-full rounded font-bold text-red-600 uppercase">
                         </div>
 
+                        <input type="url" id="part-pdf" placeholder="🔗 Enlace de Ficha Técnica (Se llena automático del catálogo)" class="border p-2 w-full mb-2 rounded text-blue-700 bg-blue-50 text-sm">
                         <input type="text" id="part-tiempo" placeholder="Tiempo de entrega" class="border p-2 w-full mb-4 rounded font-bold">
                         <button onclick="agregarPartida()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded shadow w-full transition">Añadir Partida</button>
 
@@ -415,6 +417,15 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
+        // --- CATÁLOGO CON SOPORTE PARA ENLACES PDF ---
+        function normalizarEnlace(url) {
+            if (!url) return '';
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                return 'https://' + url;
+            }
+            return url;
+        }
+
         window.guardarEquipo = async function() {
             const idForm = document.getElementById('cat-id').value;
             const descCorta = document.getElementById('cat-desc-corta').value;
@@ -422,12 +433,13 @@
             const um = document.getElementById('cat-um').value.toUpperCase();
             const marca = document.getElementById('cat-marca').value.toUpperCase();
             const modelo = document.getElementById('cat-modelo').value.toUpperCase();
+            const pdf = normalizarEnlace(document.getElementById('cat-pdf').value.trim());
 
             if (!desc && !descCorta) return alert('⚠️ Captura al menos una descripción.');
             
             document.getElementById('loading-screen').classList.remove('hidden');
             const id = idForm || Date.now().toString();
-            const equipo = { id, descCorta, desc, um, marca, modelo };
+            const equipo = { id, descCorta, desc, um, marca, modelo, pdf };
 
             await setDoc(doc(db, 'catalogo', id), equipo);
             
@@ -450,6 +462,7 @@
             document.getElementById('cat-um').value = '';
             document.getElementById('cat-marca').value = '';
             document.getElementById('cat-modelo').value = '';
+            document.getElementById('cat-pdf').value = '';
         };
 
         window.renderCatalogo = function() {
@@ -470,7 +483,8 @@
                         <p class="text-sm">${(c.desc || '').substring(0, 60)}...</p>
                         <p class="text-xs text-red-600 font-bold">Mod: ${c.modelo} | Marca: ${c.marca} | U.M.: ${c.um}</p>
                     </div>
-                    <div class="flex">
+                    <div class="flex items-center">
+                        ${c.pdf ? `<a href="${c.pdf}" target="_blank" class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded text-xs font-bold mr-4 transition shadow-sm">📄 Ver Ficha</a>` : ''}
                         <button onclick="editarEquipo('${c.id}')" class="text-blue-500 font-bold mr-3">Editar</button>
                         <button onclick="eliminarEquipo('${c.id}')" class="text-red-500 font-bold">Eliminar</button>
                     </div>
@@ -486,6 +500,7 @@
             document.getElementById('cat-um').value = c.um || '';
             document.getElementById('cat-marca').value = c.marca || '';
             document.getElementById('cat-modelo').value = c.modelo || '';
+            document.getElementById('cat-pdf').value = c.pdf || '';
         };
 
         window.eliminarEquipo = async function(id) {
@@ -609,10 +624,13 @@
             );
 
             ul.innerHTML = filtrados.map(c => `
-                <li class="p-3 border-b cursor-pointer hover:bg-blue-100" onclick='seleccionarEquipo(${JSON.stringify(c).replace(/'/g, "&apos;")})'>
-                    <span class="text-red-600 font-bold">${c.modelo || ''}</span> 
-                    <span class="text-blue-800 font-bold">${c.descCorta || ''}</span> 
-                    - <span class="text-sm">${(c.desc || '').substring(0,60)}...</span>
+                <li class="p-3 border-b cursor-pointer hover:bg-blue-100 flex justify-between items-center" onclick='seleccionarEquipo(${JSON.stringify(c).replace(/'/g, "&apos;")})'>
+                    <div>
+                        <span class="text-red-600 font-bold">${c.modelo || ''}</span> 
+                        <span class="text-blue-800 font-bold">${c.descCorta || ''}</span> 
+                        - <span class="text-sm">${(c.desc || '').substring(0,50)}...</span>
+                    </div>
+                    ${c.pdf ? '<span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold ml-2 shrink-0">📄 PDF</span>' : ''}
                 </li>
             `).join('');
             ul.classList.remove('hidden');
@@ -624,6 +642,7 @@
             document.getElementById('part-um').value = c.um || '';
             document.getElementById('part-marca').value = c.marca || '';
             document.getElementById('part-modelo').value = c.modelo || '';
+            document.getElementById('part-pdf').value = c.pdf || '';
             document.getElementById('buscador-equipo-partida').value = '';
             document.getElementById('resultados-busqueda').classList.add('hidden');
         };
@@ -644,12 +663,13 @@
             const desc = document.getElementById('part-desc').value.trim();
             const marca = document.getElementById('part-marca').value.trim();
             const modelo = document.getElementById('part-modelo').value.trim();
+            const pdf = normalizarEnlace(document.getElementById('part-pdf').value.trim());
             const tiempo = document.getElementById('part-tiempo').value.trim();
 
             if(!cant || (!desc && !descCorta)) return alert("⚠ Faltan datos obligatorios: Ingresa la Cantidad y al menos una Descripción (Corta o Detallada).");
 
             cot.partidas.push({
-                pda, notaArriba, descCorta, descripcion: desc, marca, modelo, tiempo, um,
+                pda, notaArriba, descCorta, descripcion: desc, marca, modelo, pdf, tiempo, um,
                 cantidad: cant, precio: precio, total: cant * precio
             });
 
@@ -662,6 +682,7 @@
             document.getElementById('part-desc').value = '';
             document.getElementById('part-marca').value = '';
             document.getElementById('part-modelo').value = '';
+            document.getElementById('part-pdf').value = '';
             document.getElementById('part-tiempo').value = '';
             
             document.getElementById('loading-screen').classList.remove('hidden');
@@ -678,13 +699,14 @@
             lista.innerHTML = cot.partidas.map((p, i) => {
                 granTotal += p.total;
                 return `
-                <div class="border-b py-2 flex justify-between">
+                <div class="border-b py-2 flex justify-between items-center">
                     <div>
                         <span class="font-bold mr-2">${p.pda || (i+1)}</span>
                         <span class="text-xs text-gray-500 font-bold block">${p.notaArriba || ''}</span>
                         <span class="text-xs font-bold text-blue-700">${p.descCorta || ''}</span>
                         <span class="text-xs text-red-600 font-bold ml-2">${p.modelo || ''}</span><br>
                         <span class="text-gray-500 text-xs">${p.cantidad} ${p.um} x $${p.precio.toLocaleString('en-US', {minimumFractionDigits:2})}</span>
+                        ${p.pdf ? `<a href="${p.pdf}" target="_blank" class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold hover:bg-red-200 inline-block transition">📄 Ficha Técnica</a>` : ''}
                     </div>
                     <div class="flex flex-col items-end">
                         <span class="font-bold">$${p.total.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
