@@ -10,6 +10,10 @@
         body { font-family: ui-sans-serif, system-ui, sans-serif; }
         /* Pantalla de carga mientras sincroniza con la nube */
         #loading-screen { background: rgba(15, 23, 42, 0.9); z-index: 9999; }
+        /* Estilos para contraer la barra lateral */
+        .sidebar-collapsed { width: 4.5rem !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; align-items: center; }
+        .sidebar-collapsed .sidebar-text { display: none !important; }
+        .sidebar-collapsed .sidebar-header { justify-content: center !important; }
     </style>
     <!-- Librerías de Word -->
     <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.4/dist/pizzip.min.js"></script>
@@ -29,7 +33,6 @@
                 <h2 class="text-3xl font-bold text-slate-800 tracking-wider">LOGIN</h2>
                 <p class="text-gray-500 text-sm">CONTACTA A UN ADMINISTRADOR PARA SER DADO DE ALTA</p>
             </div>
-            <!-- Se cambia a tipo correo -->
             <input type="email" id="login-user" placeholder="Correo electrónico" class="border p-3 w-full mb-3 rounded bg-gray-50">
             <input type="password" id="login-pass" placeholder="Contraseña (Mínimo 6 caracteres)" class="border p-3 w-full mb-6 rounded bg-gray-50">
             <button onclick="iniciarSesion()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-3 rounded w-full transition shadow-lg">INICIAR SESIÓN</button>
@@ -38,24 +41,39 @@
 
     <!-- APLICACIÓN PRINCIPAL -->
     <div id="app-container" class="flex h-screen hidden">
-        <!-- Menú Lateral -->
-        <div class="w-64 bg-slate-800 text-white p-5 flex flex-col">
-            <h2 class="text-2xl font-bold mb-8 tracking-wider text-blue-400">HERRAMIENTAS<br><span class="text-xs text-gray-400">EN LINEA 🟢</span></h2>
+        <!-- Menú Lateral Contraíble -->
+        <div id="sidebar" class="w-60 bg-slate-800 text-white p-4 flex flex-col transition-all duration-300 shrink-0">
+            <div class="flex items-center justify-between mb-8 sidebar-header w-full">
+                <h2 class="text-xl font-bold tracking-wider text-blue-400 sidebar-text leading-tight">HERRAMIENTAS<br><span class="text-xs text-gray-400">EN LINEA 🟢</span></h2>
+                <button onclick="toggleSidebar()" title="Contraer / Expandir barra lateral" class="bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1.5 rounded text-lg font-bold transition shadow">
+                    ☰
+                </button>
+            </div>
             
-            <button onclick="mostrarSeccion('cotizaciones')" class="text-left mb-4 hover:text-blue-400 font-bold">📄 Crear Cotización</button>
-            <button onclick="mostrarSeccion('catalogo')" class="text-left mb-4 hover:text-blue-400 font-bold">📦 Catálogo</button>
-            <button onclick="mostrarSeccion('vendedores')" class="text-left mb-4 hover:text-blue-400 font-bold">👥 Vendedores</button>
+            <button onclick="mostrarSeccion('cotizaciones')" title="Crear Cotización" class="text-left mb-4 hover:text-blue-400 font-bold flex items-center gap-3 w-full justify-center md:justify-start">
+                <span class="text-xl">📄</span> <span class="sidebar-text">Crear Cotización</span>
+            </button>
+            <button onclick="mostrarSeccion('catalogo')" title="Catálogo" class="text-left mb-4 hover:text-blue-400 font-bold flex items-center gap-3 w-full justify-center md:justify-start">
+                <span class="text-xl">📦</span> <span class="sidebar-text">Catálogo</span>
+            </button>
+            <button onclick="mostrarSeccion('vendedores')" title="Vendedores" class="text-left mb-4 hover:text-blue-400 font-bold flex items-center gap-3 w-full justify-center md:justify-start">
+                <span class="text-xl">👥</span> <span class="sidebar-text">Vendedores</span>
+            </button>
             
-            <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" class="text-left mb-4 text-yellow-400 hover:text-yellow-200 font-bold hidden border-t border-slate-600 pt-4 mt-2">⚙️ Gestión de Usuarios</button>
+            <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" title="Gestión de Usuarios" class="text-left mb-4 text-yellow-400 hover:text-yellow-200 font-bold hidden border-t border-slate-600 pt-4 mt-2 flex items-center gap-3 w-full justify-center md:justify-start">
+                <span class="text-xl">⚙️</span> <span class="sidebar-text">Gestión de Usuarios</span>
+            </button>
             
-            <div class="mt-auto border-t border-slate-600 pt-4">
-                <p class="text-xs text-gray-400 mb-2">Conectado como:<br><span id="lbl-usuario-actual" class="font-bold text-white text-sm break-words"></span></p>
-                <button onclick="cerrarSesion()" class="bg-red-600 hover:bg-red-700 w-full text-white px-3 py-2 rounded text-sm font-bold transition shadow">Cerrar Sesión</button>
+            <div class="mt-auto border-t border-slate-600 pt-4 w-full">
+                <p class="text-xs text-gray-400 mb-2 sidebar-text">Conectado como:<br><span id="lbl-usuario-actual" class="font-bold text-white text-sm break-words"></span></p>
+                <button onclick="cerrarSesion()" title="Cerrar Sesión" class="bg-red-600 hover:bg-red-700 w-full text-white px-3 py-2 rounded text-sm font-bold transition shadow flex items-center justify-center gap-2">
+                    <span>🚪</span> <span class="sidebar-text">Cerrar Sesión</span>
+                </button>
             </div>
         </div>
 
-        <!-- Contenido Principal -->
-        <div class="flex-1 p-8 overflow-y-auto" id="main-content">
+        <!-- Contenido Principal (Márgenes optimizados para pantalla dividida) -->
+        <div class="flex-1 p-4 overflow-y-auto" id="main-content">
             
             <!-- SECCIÓN: GESTIÓN DE USUARIOS (Solo Master) -->
             <div id="sec-usuarios" class="hidden">
@@ -106,21 +124,22 @@
 
             <!-- SECCIÓN: COTIZACIONES -->
             <div id="sec-cotizaciones" class="hidden">
-                <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h3 class="text-2xl font-bold">Cotizaciones</h3>
-                    <div class="flex gap-2 items-center">
-                        <select id="cotizacion-activa" onchange="cambiarCotizacionTab()" class="border p-2 rounded font-bold bg-blue-50 text-blue-800"></select>
-                        <button onclick="nuevaCotizacion()" class="bg-slate-700 hover:bg-slate-900 text-white px-3 py-2 rounded text-sm font-bold transition">+ Nueva</button>
-                        <button onclick="eliminarCotizacionActual()" class="bg-red-500 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-bold transition">🗑️ Eliminar</button>
+                <div class="flex flex-wrap justify-between items-center mb-3 border-b pb-2 gap-2">
+                    <h3 class="text-xl font-bold">Cotizaciones</h3>
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <button onclick="toggleColumnasCotizacion()" title="Cambiar entre 1 y 2 columnas para pantalla dividida" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2.5 py-1.5 rounded text-xs font-bold transition">📐 1 Col / 2 Col</button>
+                        <select id="cotizacion-activa" onchange="cambiarCotizacionTab()" class="border p-1.5 rounded font-bold bg-blue-50 text-blue-800 text-sm max-w-xs"></select>
+                        <button onclick="nuevaCotizacion()" class="bg-slate-700 hover:bg-slate-900 text-white px-3 py-1.5 rounded text-sm font-bold transition">+ Nueva</button>
+                        <button onclick="eliminarCotizacionActual()" class="bg-red-500 hover:bg-red-700 text-white px-3 py-1.5 rounded text-sm font-bold transition">🗑️ Eliminar</button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="bg-white p-5 rounded shadow">
+                <div id="grid-cotizaciones" class="grid grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded shadow">
                         <h4 class="font-bold mb-3 border-b">Configuración Inicial</h4>
                         <div class="grid grid-cols-2 gap-2 mb-4">
-                            <select id="cot-vendedor" class="border p-2 rounded w-full border-red-300" onchange="guardarEstadoCotizaciones()"></select>
-                            <select id="cot-moneda" class="border p-2 rounded w-full" onchange="guardarEstadoCotizaciones()">
+                            <select id="cot-vendedor" class="border p-2 rounded w-full border-red-300 text-sm" onchange="guardarEstadoCotizaciones()"></select>
+                            <select id="cot-moneda" class="border p-2 rounded w-full text-sm" onchange="guardarEstadoCotizaciones()">
                                 <option value="MXN">MXN - Pesos Mexicanos</option>
                                 <option value="USD">USD - Dólares</option>
                             </select>
@@ -135,52 +154,52 @@
                         </div>
 
                         <h4 class="font-bold mb-3 border-b">Datos Comerciales</h4>
-                        <input type="text" id="cot-cliente" placeholder="Cliente" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-referencia" placeholder="Referencia de cotización" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-contacto" placeholder="Datos de contacto" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-cliente" placeholder="Cliente" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-referencia" placeholder="Referencia de cotización" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-contacto" placeholder="Datos de contacto" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
                         
                         <h4 class="font-bold mb-3 border-b mt-4">Condiciones</h4>
-                        <input type="text" id="cot-lugar" placeholder="Lugar de entrega" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-pago" placeholder="Condiciones de pago" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-vigencia" placeholder="Vigencia de la propuesta" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega general" class="border p-2 w-full mb-2 rounded" onchange="guardarEstadoCotizaciones()">
-                        <textarea id="cot-notas" placeholder="Notas Generales (Aparecerá junto al subtotal)" class="border p-2 w-full mb-2 rounded h-20" onchange="guardarEstadoCotizaciones()"></textarea>
+                        <input type="text" id="cot-lugar" placeholder="Lugar de entrega" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-pago" placeholder="Condiciones de pago" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-vigencia" placeholder="Vigencia de la propuesta" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega general" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
+                        <textarea id="cot-notas" placeholder="Notas Generales (Aparecerá junto al subtotal)" class="border p-2 w-full mb-2 rounded h-20 text-sm" onchange="guardarEstadoCotizaciones()"></textarea>
                     </div>
 
-                    <div class="bg-white p-5 rounded shadow relative">
+                    <div class="bg-white p-4 rounded shadow relative">
                         <h4 class="font-bold mb-3 border-b">Partidas</h4>
                         
-                        <input type="text" id="part-nota-arriba" placeholder="Nota Superior (Ej: *****OPCIÓN 1*****)" class="border p-2 w-full mb-2 rounded font-bold text-center text-gray-700 bg-gray-50">
+                        <input type="text" id="part-nota-arriba" placeholder="Nota Superior (Ej: *****OPCIÓN 1*****)" class="border p-2 w-full mb-2 rounded font-bold text-center text-gray-700 bg-gray-50 text-sm">
                         
                         <div class="mb-2 relative">
-                            <input type="text" id="buscador-equipo-partida" onkeyup="buscarEquipoParaPartida()" placeholder="🔍 Buscar equipo del catálogo..." class="border p-2 w-full rounded bg-yellow-50 font-bold">
+                            <input type="text" id="buscador-equipo-partida" onkeyup="buscarEquipoParaPartida()" placeholder="🔍 Buscar equipo del catálogo..." class="border p-2 w-full rounded bg-yellow-50 font-bold text-sm">
                             <ul id="resultados-busqueda" class="bg-white border rounded max-h-40 overflow-y-auto hidden shadow-xl absolute z-50 w-full left-0 mt-1"></ul>
                         </div>
                         
-                        <div class="grid grid-cols-4 gap-2 mb-2">
-                            <input type="number" id="part-pda" placeholder="Partida" class="border p-2 rounded">
-                            <input type="number" id="part-cant" placeholder="Cantidad" class="border p-2 rounded">
-                            <input type="text" id="part-um" placeholder="Unidad de Medida" class="border p-2 rounded uppercase">
-                            <input type="number" id="part-precio" placeholder="Precio Unitario" class="border p-2 rounded">
+                        <div class="grid grid-cols-4 gap-1.5 mb-2">
+                            <input type="number" id="part-pda" placeholder="Pda." class="border p-2 rounded text-sm">
+                            <input type="number" id="part-cant" placeholder="Cant." class="border p-2 rounded text-sm">
+                            <input type="text" id="part-um" placeholder="U.M." class="border p-2 rounded uppercase text-sm">
+                            <input type="number" id="part-precio" placeholder="Precio" class="border p-2 rounded text-sm">
                         </div>
                         
-                        <input type="text" id="part-desc-corta" placeholder="Descripción Corta" class="border p-2 w-full mb-2 rounded font-bold text-blue-700">
-                        <textarea id="part-desc" placeholder="Descripción" class="border p-2 w-full mb-2 rounded h-20"></textarea>
+                        <input type="text" id="part-desc-corta" placeholder="Descripción Corta" class="border p-2 w-full mb-2 rounded font-bold text-blue-700 text-sm">
+                        <textarea id="part-desc" placeholder="Descripción" class="border p-2 w-full mb-2 rounded h-20 text-sm"></textarea>
                         
                         <div class="grid grid-cols-2 gap-2 mb-2">
-                            <input type="text" id="part-modelo" placeholder="Modelo" class="border p-2 w-full rounded font-bold text-red-600 uppercase">
-                            <input type="text" id="part-marca" placeholder="Marca" class="border p-2 w-full rounded font-bold text-red-600 uppercase">
+                            <input type="text" id="part-modelo" placeholder="Modelo" class="border p-2 w-full rounded font-bold text-red-600 uppercase text-sm">
+                            <input type="text" id="part-marca" placeholder="Marca" class="border p-2 w-full rounded font-bold text-red-600 uppercase text-sm">
                         </div>
 
-                        <input type="url" id="part-pdf" placeholder="🔗 Enlace de Ficha Técnica (Se llena automático del catálogo)" class="border p-2 w-full mb-2 rounded text-blue-700 bg-blue-50 text-sm">
-                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega" class="border p-2 w-full mb-4 rounded font-bold">
-                        <button onclick="agregarPartida()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded shadow w-full transition">Añadir Partida</button>
+                        <input type="url" id="part-pdf" placeholder="🔗 Enlace de Ficha Técnica (Automático)" class="border p-2 w-full mb-2 rounded text-blue-700 bg-blue-50 text-xs">
+                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega" class="border p-2 w-full mb-3 rounded font-bold text-sm">
+                        <button onclick="agregarPartida()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded shadow w-full transition text-sm">Añadir Partida</button>
 
-                        <h4 class="font-bold mt-6 mb-2 border-b">Partidas Agregadas</h4>
+                        <h4 class="font-bold mt-5 mb-2 border-b">Partidas Agregadas</h4>
                         <div id="lista-partidas" class="text-sm bg-gray-50 p-2 border rounded h-40 overflow-y-auto"></div>
                         <div class="text-right font-bold text-lg mt-2 text-blue-900" id="cot-total-label">Total: $0.00</div>
                         
-                        <button onclick="generarDocumentoWord()" class="bg-green-600 hover:bg-green-700 text-white text-lg font-bold px-4 py-3 rounded shadow w-full mt-4 transition">DESCARGAR COTIZACIÓN</button>
+                        <button onclick="generarDocumentoWord()" class="bg-green-600 hover:bg-green-700 text-white text-base font-bold px-4 py-3 rounded shadow w-full mt-3 transition">DESCARGAR COTIZACIÓN</button>
                     </div>
                 </div>
             </div>
@@ -214,6 +233,23 @@
         let catalogo = [];
         let cotizaciones = [];
         let cotIndexActiva = 0;
+
+        // --- FUNCIONES DE INTERFAZ Y PANTALLA DIVIDIDA ---
+        window.toggleSidebar = function() {
+            const sb = document.getElementById('sidebar');
+            sb.classList.toggle('sidebar-collapsed');
+        };
+
+        window.toggleColumnasCotizacion = function() {
+            const grid = document.getElementById('grid-cotizaciones');
+            if (grid.classList.contains('grid-cols-2')) {
+                grid.classList.remove('grid-cols-2');
+                grid.classList.add('grid-cols-1');
+            } else {
+                grid.classList.remove('grid-cols-1');
+                grid.classList.add('grid-cols-2');
+            }
+        };
 
         window.iniciarSesion = async function() {
             const email = document.getElementById('login-user').value.trim();
@@ -307,7 +343,6 @@
             const cotSnap = await getDocs(collection(db, 'cotizaciones'));
             cotizaciones = cotSnap.docs.map(d => d.data());
             
-            // Ordenar cronológicamente para que no cambien de lugar al recargar
             cotizaciones.sort((a, b) => parseInt(a.id) - parseInt(b.id));
             
             if (cotizaciones.length === 0) {
@@ -601,15 +636,12 @@
             select.value = cotIndexActiva;
         };
 
-        // --- FUNCIÓN CORREGIDA PARA CAMBIAR ENTRE COTIZACIONES ANTIGUAS ---
         window.cambiarCotizacionTab = async function() {
             const nuevoIndex = parseInt(document.getElementById('cotizacion-activa').value);
             document.getElementById('loading-screen').classList.remove('hidden');
             
-            // 1. Guarda los cambios de la cotización en la que estabas
             await window.guardarEstadoCotizaciones();
             
-            // 2. Cambia el índice a la cotización que seleccionaste y carga sus datos
             cotIndexActiva = nuevoIndex;
             window.renderSelectTabs();
             window.cargarCotizacionUI();
