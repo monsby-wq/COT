@@ -119,8 +119,8 @@
                     <div class="bg-white p-5 rounded shadow">
                         <h4 class="font-bold mb-3 border-b">Configuración Inicial</h4>
                         <div class="grid grid-cols-2 gap-2 mb-4">
-                            <select id="cot-vendedor" class="border p-2 rounded w-full border-red-300"></select>
-                            <select id="cot-moneda" class="border p-2 rounded w-full">
+                            <select id="cot-vendedor" class="border p-2 rounded w-full border-red-300" onchange="guardarEstadoCotizaciones()"></select>
+                            <select id="cot-moneda" class="border p-2 rounded w-full" onchange="guardarEstadoCotizaciones()">
                                 <option value="MXN">MXN - Pesos Mexicanos</option>
                                 <option value="USD">USD - Dólares</option>
                             </select>
@@ -307,6 +307,9 @@
             const cotSnap = await getDocs(collection(db, 'cotizaciones'));
             cotizaciones = cotSnap.docs.map(d => d.data());
             
+            // Ordenar cronológicamente para que no cambien de lugar al recargar
+            cotizaciones.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+            
             if (cotizaciones.length === 0) {
                 cotizaciones.push(generarPlantillaVacia());
                 await setDoc(doc(db, "cotizaciones", cotizaciones[0].id.toString()), cotizaciones[0]);
@@ -325,7 +328,12 @@
             document.getElementById(`sec-${sec}`).classList.remove('hidden');
             
             if (sec === 'vendedores') window.renderVendedores();
-            if (sec === 'cotizaciones') window.renderSelectVendedores();
+            if (sec === 'cotizaciones') {
+                window.renderSelectVendedores();
+                if(cotizaciones[cotIndexActiva]) {
+                    document.getElementById('cot-vendedor').value = cotizaciones[cotIndexActiva].datos.vendedorId || '';
+                }
+            }
         };
 
         window.renderUsuarios = function() {
@@ -417,7 +425,6 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        // --- FUNCIONES PARA ENLACES Y DESCARGA DIRECTA DE DRIVE ---
         function normalizarEnlace(url) {
             if (!url) return '';
             if (!url.startsWith('http://') && !url.startsWith('https://')) {
@@ -428,7 +435,6 @@
 
         function obtenerEnlaceDescarga(url) {
             if (!url) return '';
-            // Detecta si es un enlace de Google Drive y extrae el ID del documento
             const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
                 return `https://drive.google.com/uc?export=download&id=${match[1]}`;
@@ -588,18 +594,32 @@
 
         window.renderSelectTabs = function() {
             const select = document.getElementById('cotizacion-activa');
-            select.innerHTML = cotizaciones.map((c, i) => `<option value="${i}">✏️ ${c.nombreTab} - ${c.datos.cliente || 'Nueva'}</option>`).join('');
+            select.innerHTML = cotizaciones.map((c, i) => {
+                const folioStr = c.datos && c.datos.folioMid ? ` [NO-${c.datos.folioMid.toUpperCase()}-26]` : '';
+                return `<option value="${i}">✏️ Cot. ${i + 1}${folioStr} - ${c.datos.cliente || 'Nueva'}</option>`;
+            }).join('');
             select.value = cotIndexActiva;
         };
 
+        // --- FUNCIÓN CORREGIDA PARA CAMBIAR ENTRE COTIZACIONES ANTIGUAS ---
         window.cambiarCotizacionTab = async function() {
+            const nuevoIndex = parseInt(document.getElementById('cotizacion-activa').value);
+            document.getElementById('loading-screen').classList.remove('hidden');
+            
+            // 1. Guarda los cambios de la cotización en la que estabas
             await window.guardarEstadoCotizaciones();
-            cotIndexActiva = parseInt(document.getElementById('cotizacion-activa').value);
+            
+            // 2. Cambia el índice a la cotización que seleccionaste y carga sus datos
+            cotIndexActiva = nuevoIndex;
+            window.renderSelectTabs();
             window.cargarCotizacionUI();
+            
+            document.getElementById('loading-screen').classList.add('hidden');
         };
 
         window.cargarCotizacionUI = function() {
             const cot = cotizaciones[cotIndexActiva];
+            if (!cot) return;
             document.getElementById('cot-folio-mid').value = cot.datos.folioMid || '';
             document.getElementById('cot-folio-end').value = cot.datos.folioEnd || '';
             document.getElementById('cot-cliente').value = cot.datos.cliente || '';
@@ -667,7 +687,6 @@
             const cant = parseFloat(document.getElementById('part-cant').value);
             const um = document.getElementById('part-um').value;
             
-            // Permite cotizaciones técnicas dejando el precio en blanco
             let precio = parseFloat(document.getElementById('part-precio').value);
             if(isNaN(precio)) precio = 0; 
             
@@ -709,6 +728,12 @@
             const lista = document.getElementById('lista-partidas');
             let granTotal = 0;
             
+            if (!cot || !cot.partidas) {
+                lista.innerHTML = '';
+                document.getElementById('cot-total-label').innerText = 'Total: $0.00';
+                return;
+            }
+
             lista.innerHTML = cot.partidas.map((p, i) => {
                 granTotal += p.total;
                 return `
@@ -797,7 +822,6 @@
                             else if(textMod) strModMarca = ` ${textMod}.`;
                             else if(textMar) strModMarca = ` ${textMar}.`;
                             
-                            // El tabulador oculto (\t) evita que el texto se estire al estar justificado en Word
                             strModMarca += "\t";
                         }
 
