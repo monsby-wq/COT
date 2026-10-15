@@ -72,7 +72,7 @@
             </div>
         </div>
 
-        <!-- Contenido Principal (Márgenes optimizados para pantalla dividida) -->
+        <!-- Contenido Principal -->
         <div class="flex-1 p-4 overflow-y-auto" id="main-content">
             
             <!-- SECCIÓN: GESTIÓN DE USUARIOS (Solo Master) -->
@@ -193,7 +193,12 @@
 
                         <input type="url" id="part-pdf" placeholder="🔗 Enlace de Ficha Técnica (Automático)" class="border p-2 w-full mb-2 rounded text-blue-700 bg-blue-50 text-xs">
                         <input type="text" id="part-tiempo" placeholder="Tiempo de entrega" class="border p-2 w-full mb-3 rounded font-bold text-sm">
-                        <button onclick="agregarPartida()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded shadow w-full transition text-sm">Añadir Partida</button>
+                        
+                        <!-- Botones de Añadir / Actualizar Partida -->
+                        <div class="flex gap-2">
+                            <button id="btn-guardar-partida" onclick="agregarPartida()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded shadow w-full transition text-sm">Añadir Partida</button>
+                            <button id="btn-cancelar-edicion" onclick="cancelarEdicionPartida()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold px-3 py-2 rounded shadow transition text-sm hidden">Cancelar</button>
+                        </div>
 
                         <h4 class="font-bold mt-5 mb-2 border-b">Partidas Agregadas</h4>
                         <div id="lista-partidas" class="text-sm bg-gray-50 p-2 border rounded h-40 overflow-y-auto"></div>
@@ -233,6 +238,7 @@
         let catalogo = [];
         let cotizaciones = [];
         let cotIndexActiva = 0;
+        let partidaEditandoIndex = null;
 
         // --- FUNCIONES DE INTERFAZ Y PANTALLA DIVIDIDA ---
         window.toggleSidebar = function() {
@@ -576,6 +582,7 @@
         }
 
         window.nuevaCotizacion = async function() {
+            window.cancelarEdicionPartida();
             document.getElementById('loading-screen').classList.remove('hidden');
             if (cotizaciones.length > 0) await window.guardarEstadoCotizaciones();
             
@@ -593,6 +600,7 @@
         window.eliminarCotizacionActual = async function() {
             if(cotizaciones.length <= 1) return alert("No puedes eliminar la única cotización.");
             if(confirm("¿Eliminar esta cotización de la nube?")) {
+                window.cancelarEdicionPartida();
                 document.getElementById('loading-screen').classList.remove('hidden');
                 const idToDelete = cotizaciones[cotIndexActiva].id;
                 await deleteDoc(doc(db, "cotizaciones", idToDelete));
@@ -637,6 +645,7 @@
         };
 
         window.cambiarCotizacionTab = async function() {
+            window.cancelarEdicionPartida();
             const nuevoIndex = parseInt(document.getElementById('cotizacion-activa').value);
             document.getElementById('loading-screen').classList.remove('hidden');
             
@@ -712,6 +721,59 @@
             document.getElementById('resultados-busqueda').classList.add('hidden');
         };
 
+        // --- FUNCIONES DE AÑADIR Y EDITAR PARTIDA ---
+        window.editarPartida = function(index) {
+            const cot = cotizaciones[cotIndexActiva];
+            const p = cot.partidas[index];
+            if (!p) return;
+
+            partidaEditandoIndex = index;
+
+            document.getElementById('part-pda').value = p.pda || '';
+            document.getElementById('part-nota-arriba').value = p.notaArriba || '';
+            document.getElementById('part-cant').value = p.cantidad || '';
+            document.getElementById('part-um').value = p.um || '';
+            document.getElementById('part-precio').value = p.precio || '';
+            document.getElementById('part-desc-corta').value = p.descCorta || '';
+            document.getElementById('part-desc').value = p.descripcion || '';
+            document.getElementById('part-marca').value = p.marca || '';
+            document.getElementById('part-modelo').value = p.modelo || '';
+            document.getElementById('part-pdf').value = p.pdf || '';
+            document.getElementById('part-tiempo').value = p.tiempo || '';
+
+            const btnGuardar = document.getElementById('btn-guardar-partida');
+            btnGuardar.innerText = '💾 Actualizar Partida';
+            btnGuardar.classList.remove('bg-blue-600', 'hover:bg-blue-800');
+            btnGuardar.classList.add('bg-amber-600', 'hover:bg-amber-700');
+
+            document.getElementById('btn-cancelar-edicion').classList.remove('hidden');
+        };
+
+        window.cancelarEdicionPartida = function() {
+            partidaEditandoIndex = null;
+            document.getElementById('part-pda').value = '';
+            document.getElementById('part-nota-arriba').value = '';
+            document.getElementById('part-cant').value = '';
+            document.getElementById('part-um').value = '';
+            document.getElementById('part-precio').value = '';
+            document.getElementById('part-desc-corta').value = '';
+            document.getElementById('part-desc').value = '';
+            document.getElementById('part-marca').value = '';
+            document.getElementById('part-modelo').value = '';
+            document.getElementById('part-pdf').value = '';
+            document.getElementById('part-tiempo').value = '';
+
+            const btnGuardar = document.getElementById('btn-guardar-partida');
+            if (btnGuardar) {
+                btnGuardar.innerText = 'Añadir Partida';
+                btnGuardar.classList.remove('bg-amber-600', 'hover:bg-amber-700');
+                btnGuardar.classList.add('bg-blue-600', 'hover:bg-blue-800');
+            }
+
+            const btnCancelar = document.getElementById('btn-cancelar-edicion');
+            if (btnCancelar) btnCancelar.classList.add('hidden');
+        };
+
         window.agregarPartida = async function() {
             const cot = cotizaciones[cotIndexActiva];
             
@@ -732,22 +794,18 @@
 
             if(!cant || (!desc && !descCorta)) return alert("⚠ Faltan datos obligatorios: Ingresa la Cantidad y al menos una Descripción (Corta o Detallada).");
 
-            cot.partidas.push({
+            const partidaObj = {
                 pda, notaArriba, descCorta, descripcion: desc, marca, modelo, pdf, tiempo, um,
                 cantidad: cant, precio: precio, total: cant * precio
-            });
+            };
 
-            document.getElementById('part-pda').value = '';
-            document.getElementById('part-nota-arriba').value = '';
-            document.getElementById('part-cant').value = '';
-            document.getElementById('part-um').value = '';
-            document.getElementById('part-precio').value = '';
-            document.getElementById('part-desc-corta').value = '';
-            document.getElementById('part-desc').value = '';
-            document.getElementById('part-marca').value = '';
-            document.getElementById('part-modelo').value = '';
-            document.getElementById('part-pdf').value = '';
-            document.getElementById('part-tiempo').value = '';
+            if (partidaEditandoIndex !== null) {
+                cot.partidas[partidaEditandoIndex] = partidaObj;
+            } else {
+                cot.partidas.push(partidaObj);
+            }
+
+            window.cancelarEdicionPartida();
             
             document.getElementById('loading-screen').classList.remove('hidden');
             await window.guardarEstadoCotizaciones();
@@ -769,7 +827,7 @@
             lista.innerHTML = cot.partidas.map((p, i) => {
                 granTotal += p.total;
                 return `
-                <div class="border-b py-2 flex justify-between items-center">
+                <div class="border-b py-2 flex justify-between items-center ${partidaEditandoIndex === i ? 'bg-amber-50' : ''}">
                     <div>
                         <span class="font-bold mr-2">${p.pda || (i+1)}</span>
                         <span class="text-xs text-gray-500 font-bold block">${p.notaArriba || ''}</span>
@@ -781,9 +839,12 @@
                             <a href="${obtenerEnlaceDescarga(p.pdf)}" target="_blank" download class="ml-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold hover:bg-green-200 inline-block transition">⬇️ Descargar</a>
                         ` : ''}
                     </div>
-                    <div class="flex flex-col items-end">
+                    <div class="flex flex-col items-end shrink-0 ml-2">
                         <span class="font-bold">$${p.total.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
-                        <button onclick="eliminarPartida(${i})" class="text-red-500 font-bold text-xs mt-1">Quitar</button>
+                        <div class="flex gap-2 mt-1">
+                            <button onclick="editarPartida(${i})" class="text-blue-600 hover:text-blue-800 font-bold text-xs">✏️ Editar</button>
+                            <button onclick="eliminarPartida(${i})" class="text-red-500 hover:text-red-700 font-bold text-xs">Quitar</button>
+                        </div>
                     </div>
                 </div>`;
             }).join('');
@@ -792,6 +853,9 @@
         };
 
         window.eliminarPartida = async function(index) {
+            if (partidaEditandoIndex === index) window.cancelarEdicionPartida();
+            else if (partidaEditandoIndex !== null && index < partidaEditandoIndex) partidaEditandoIndex--;
+            
             cotizaciones[cotIndexActiva].partidas.splice(index, 1);
             document.getElementById('loading-screen').classList.remove('hidden');
             await window.guardarEstadoCotizaciones();
@@ -853,15 +917,15 @@
                             if(textMod && textMar) strModMarca = ` ${textMod}, ${textMar}.`;
                             else if(textMod) strModMarca = ` ${textMod}.`;
                             else if(textMar) strModMarca = ` ${textMar}.`;
-                            
-                            strModMarca += "\t";
                         }
+                        // Siempre agrega tabulador oculto al final del bloque de descripción/marca para evitar estiramiento
+                        strModMarca += "\t";
 
                         let notaArribaFinal = "";
                         let descCortaFinal = "";
 
                         if (p.notaArriba) {
-                            notaArribaFinal = "\n" + p.notaArriba.toUpperCase() + "\n";
+                            notaArribaFinal = "\n" + p.notaArriba.toUpperCase() + "\t\n";
                             descCortaFinal = p.descCorta ? p.descCorta.toUpperCase() + " " : "";
                         } else {
                             notaArribaFinal = "";
@@ -874,7 +938,8 @@
                             DESC_CORTA: descCortaFinal,
                             DESCRIPCION: p.descripcion || "", 
                             MODELO_MARCA: strModMarca,
-                            TIEMPO_ENTREGA: p.tiempo ? "\n\n" + p.tiempo + "\n" : "\n",
+                            // Incluye \t antes del salto final para que el Tiempo de Entrega no se estire en Word
+                            TIEMPO_ENTREGA: p.tiempo ? "\n\n" + p.tiempo + "\t\n" : "\n",
                             UM: p.um || "", 
                             CANTIDAD: p.cantidad || "",
                             PRECIO: "$" + (p.precio || 0).toLocaleString('en-US', {minimumFractionDigits: 2}),
