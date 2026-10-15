@@ -8,9 +8,7 @@
     <style>
         .hidden { display: none !important; }
         body { font-family: ui-sans-serif, system-ui, sans-serif; }
-        /* Pantalla de carga mientras sincroniza con la nube */
         #loading-screen { background: rgba(15, 23, 42, 0.9); z-index: 9999; }
-        /* Estilos para contraer la barra lateral */
         .sidebar-collapsed { width: 4.5rem !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; align-items: center; }
         .sidebar-collapsed .sidebar-text { display: none !important; }
         .sidebar-collapsed .sidebar-header { justify-content: center !important; }
@@ -193,6 +191,75 @@
 
                         <input type="url" id="part-pdf" placeholder="🔗 Enlace de Ficha Técnica (Automático)" class="border p-2 w-full mb-2 rounded text-blue-700 bg-blue-50 text-xs">
                         <input type="text" id="part-tiempo" placeholder="Tiempo de entrega" class="border p-2 w-full mb-3 rounded font-bold text-sm">
+
+                        <!-- BOTONES DESPLEGABLES PARA INCLUYE Y NOTAS DE PARTIDA -->
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <button type="button" onclick="togglePanelExtra('panel-incluye')" id="btn-toggle-incluye" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold py-1.5 px-2 rounded text-xs transition">
+                                ➕ INCLUYE (0)
+                            </button>
+                            <button type="button" onclick="togglePanelExtra('panel-notas-partida')" id="btn-toggle-notas" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold py-1.5 px-2 rounded text-xs transition">
+                                📝 NOTAS DE PARTIDA (0)
+                            </button>
+                        </div>
+
+                        <!-- PANEL 1: SECCIÓN INCLUYE -->
+                        <div id="panel-incluye" class="hidden bg-indigo-50/60 border border-indigo-200 p-3 rounded mb-3">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-indigo-900">Agregar sub-partida a "INCLUYE:"</span>
+                                <span class="text-[10px] text-gray-500">Se imprimirá debajo del equipo</span>
+                            </div>
+                            <!-- Buscador de catálogo para Incluye -->
+                            <div class="mb-2 relative">
+                                <input type="text" id="buscador-incluye" onkeyup="buscarEquipoParaIncluye()" placeholder="🔍 Buscar accesorio en catálogo (opcional)..." class="border p-1.5 w-full rounded bg-white text-xs">
+                                <ul id="resultados-busqueda-incluye" class="bg-white border rounded max-h-32 overflow-y-auto hidden shadow-lg absolute z-50 w-full left-0 mt-1"></ul>
+                            </div>
+                            <div class="grid grid-cols-3 gap-1.5 mb-1.5">
+                                <input type="text" id="inc-prefijo" placeholder="Ej: • o (1 PZA)." value="•" class="border p-1.5 rounded text-xs font-bold">
+                                <input type="text" id="inc-desc-corta" placeholder="Descripción Azul (Ej: BASE PARA DETECTOR)" class="border p-1.5 rounded text-xs font-bold text-blue-700 col-span-2">
+                            </div>
+                            <input type="text" id="inc-desc-normal" placeholder="Descripción adicional en negro (Opcional)" class="border p-1.5 w-full rounded text-xs mb-1.5">
+                            <div class="grid grid-cols-3 gap-1.5 mb-2">
+                                <input type="text" id="inc-modelo" placeholder="Modelo o NP: 123" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase">
+                                <input type="text" id="inc-marca" placeholder="Marca" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase">
+                                <input type="text" id="inc-tiempo" placeholder="T.E. (Opcional)" class="border p-1.5 rounded text-xs font-bold">
+                            </div>
+                            <button type="button" onclick="agregarItemIncluye()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded text-xs w-full transition mb-2">
+                                + Añadir a INCLUYE
+                            </button>
+                            <div id="lista-incluye-temp" class="text-xs space-y-1 max-h-28 overflow-y-auto"></div>
+                        </div>
+
+                        <!-- PANEL 2: NOTAS DE LA PARTIDA (NOTA 1, NOTA 2 y Viñetas) -->
+                        <div id="panel-notas-partida" class="hidden bg-amber-50/60 border border-amber-200 p-3 rounded mb-3">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-amber-900">Agregar Notas o Viñetas a la Partida</span>
+                                <select id="nota-tipo" onchange="cambiarTipoNotaUI()" class="border rounded p-1 text-xs font-bold bg-white">
+                                    <option value="nota">Nota de Texto (NOTA 1, NOTA 2...)</option>
+                                    <option value="vineta">Viñeta de Opción (• Azul + Rojo)</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Formulario para Nota Normal -->
+                            <div id="form-nota-texto">
+                                <div class="grid grid-cols-3 gap-1.5 mb-1.5">
+                                    <input type="text" id="nota-titulo" placeholder="Ej: NOTA 1:" value="NOTA 1:" class="border p-1.5 rounded text-xs font-bold">
+                                    <input type="text" id="nota-cuerpo" placeholder="Texto de la nota..." class="border p-1.5 rounded text-xs col-span-2">
+                                </div>
+                            </div>
+
+                            <!-- Formulario para Viñeta Azul + Rojo dentro de una Nota -->
+                            <div id="form-nota-vineta" class="hidden">
+                                <div class="grid grid-cols-2 gap-1.5 mb-1.5">
+                                    <input type="text" id="nota-vineta-azul" placeholder="Texto en Azul (Ej: PLACA DE ORIFICIO...)" class="border p-1.5 rounded text-xs font-bold text-blue-700">
+                                    <input type="text" id="nota-vineta-rojo" placeholder="Marca/Mod en Rojo (Ej: MCA CHEMGUARD)" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase">
+                                </div>
+                            </div>
+
+                            <button type="button" onclick="agregarNotaPartida()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-1 px-3 rounded text-xs w-full transition mb-2">
+                                + Añadir Nota / Viñeta a la Partida
+                            </button>
+                            <div id="lista-notas-temp" class="text-xs space-y-1 max-h-28 overflow-y-auto"></div>
+                        </div>
                         
                         <!-- Botones de Añadir / Actualizar Partida -->
                         <div class="flex gap-2">
@@ -240,6 +307,10 @@
         let cotIndexActiva = 0;
         let partidaEditandoIndex = null;
 
+        // Listas temporales para la partida que se está armando
+        let tempIncluye = [];
+        let tempNotasPartida = [];
+
         // --- FUNCIONES DE INTERFAZ Y PANTALLA DIVIDIDA ---
         window.toggleSidebar = function() {
             const sb = document.getElementById('sidebar');
@@ -257,6 +328,144 @@
             }
         };
 
+        window.togglePanelExtra = function(idPanel) {
+            document.getElementById(idPanel).classList.toggle('hidden');
+        };
+
+        // --- MANEJO DE SUB-PARTIDAS (INCLUYE) ---
+        window.buscarEquipoParaIncluye = function() {
+            const f = document.getElementById('buscador-incluye').value.toLowerCase();
+            const ul = document.getElementById('resultados-busqueda-incluye');
+            if(f.length < 2) { ul.classList.add('hidden'); return; }
+            
+            const filtrados = catalogo.filter(c => 
+                (c.desc && c.desc.toLowerCase().includes(f)) ||
+                (c.descCorta && c.descCorta.toLowerCase().includes(f)) ||
+                (c.marca && c.marca.toLowerCase().includes(f)) ||
+                (c.modelo && c.modelo.toLowerCase().includes(f))
+            );
+
+            ul.innerHTML = filtrados.map(c => `
+                <li class="p-2 border-b cursor-pointer hover:bg-indigo-100 text-xs" onclick='seleccionarEquipoIncluye(${JSON.stringify(c).replace(/'/g, "&apos;")})'>
+                    <span class="text-red-600 font-bold">${c.modelo || ''}</span> 
+                    <span class="text-blue-800 font-bold">${c.descCorta || ''}</span>
+                </li>
+            `).join('');
+            ul.classList.remove('hidden');
+        };
+
+        window.seleccionarEquipoIncluye = function(c) {
+            document.getElementById('inc-desc-corta').value = c.descCorta || '';
+            document.getElementById('inc-desc-normal').value = c.desc || '';
+            document.getElementById('inc-marca').value = c.marca || '';
+            document.getElementById('inc-modelo').value = c.modelo || '';
+            document.getElementById('buscador-incluye').value = '';
+            document.getElementById('resultados-busqueda-incluye').classList.add('hidden');
+        };
+
+        window.agregarItemIncluye = function() {
+            const prefijo = document.getElementById('inc-prefijo').value.trim() || '•';
+            const descCorta = document.getElementById('inc-desc-corta').value.trim();
+            const descNormal = document.getElementById('inc-desc-normal').value.trim();
+            const modelo = document.getElementById('inc-modelo').value.trim();
+            const marca = document.getElementById('inc-marca').value.trim();
+            const tiempo = document.getElementById('inc-tiempo').value.trim();
+
+            if (!descCorta && !descNormal) return alert("⚠️ Ingresa al menos la descripción del accesorio a incluir.");
+
+            tempIncluye.push({ prefijo, descCorta, descNormal, modelo, marca, tiempo });
+
+            document.getElementById('inc-prefijo').value = '•';
+            document.getElementById('inc-desc-corta').value = '';
+            document.getElementById('inc-desc-normal').value = '';
+            document.getElementById('inc-modelo').value = '';
+            document.getElementById('inc-marca').value = '';
+            document.getElementById('inc-tiempo').value = '';
+
+            window.renderTempIncluye();
+        };
+
+        window.eliminarItemIncluye = function(i) {
+            tempIncluye.splice(i, 1);
+            window.renderTempIncluye();
+        };
+
+        window.renderTempIncluye = function() {
+            document.getElementById('btn-toggle-incluye').innerText = `➕ INCLUYE (${tempIncluye.length})`;
+            const cont = document.getElementById('lista-incluye-temp');
+            cont.innerHTML = tempIncluye.map((inc, i) => `
+                <div class="bg-white p-1.5 rounded border flex justify-between items-center">
+                    <div class="truncate pr-2">
+                        <b>${inc.prefijo}</b> <span class="text-blue-700 font-bold">${inc.descCorta}</span> 
+                        <span class="text-gray-600">${inc.descNormal ? inc.descNormal.substring(0,25) + '...' : ''}</span>
+                        <span class="text-red-600 font-bold">${inc.modelo} ${inc.marca}</span>
+                        <b>${inc.tiempo}</b>
+                    </div>
+                    <button type="button" onclick="eliminarItemIncluye(${i})" class="text-red-500 font-bold px-1">X</button>
+                </div>
+            `).join('');
+        };
+
+        // --- MANEJO DE NOTAS DE LA PARTIDA ---
+        window.cambiarTipoNotaUI = function() {
+            const tipo = document.getElementById('nota-tipo').value;
+            if (tipo === 'nota') {
+                document.getElementById('form-nota-texto').classList.remove('hidden');
+                document.getElementById('form-nota-vineta').classList.add('hidden');
+                sugerirNumeroNota();
+            } else {
+                document.getElementById('form-nota-texto').classList.add('hidden');
+                document.getElementById('form-nota-vineta').classList.remove('hidden');
+            }
+        };
+
+        function sugerirNumeroNota() {
+            const numNotas = tempNotasPartida.filter(n => n.tipo === 'nota').length + 1;
+            document.getElementById('nota-titulo').value = `NOTA ${numNotas}:`;
+        }
+
+        window.agregarNotaPartida = function() {
+            const tipo = document.getElementById('nota-tipo').value;
+            if (tipo === 'nota') {
+                const titulo = document.getElementById('nota-titulo').value.trim() || 'NOTA:';
+                const texto = document.getElementById('nota-cuerpo').value.trim();
+                if (!texto) return alert("⚠️ Escribe el texto de la nota.");
+                tempNotasPartida.push({ tipo: 'nota', titulo, texto });
+                document.getElementById('nota-cuerpo').value = '';
+                sugerirNumeroNota();
+            } else {
+                const azul = document.getElementById('nota-vineta-azul').value.trim();
+                const rojo = document.getElementById('nota-vineta-rojo').value.trim();
+                if (!azul && !rojo) return alert("⚠️ Ingresa el texto de la viñeta.");
+                tempNotasPartida.push({ tipo: 'vineta', azul, rojo });
+                document.getElementById('nota-vineta-azul').value = '';
+                document.getElementById('nota-vineta-rojo').value = '';
+            }
+            window.renderTempNotasPartida();
+        };
+
+        window.eliminarNotaPartida = function(i) {
+            tempNotasPartida.splice(i, 1);
+            sugerirNumeroNota();
+            window.renderTempNotasPartida();
+        };
+
+        window.renderTempNotasPartida = function() {
+            document.getElementById('btn-toggle-notas').innerText = `📝 NOTAS DE PARTIDA (${tempNotasPartida.length})`;
+            const cont = document.getElementById('lista-notas-temp');
+            cont.innerHTML = tempNotasPartida.map((n, i) => `
+                <div class="bg-white p-1.5 rounded border flex justify-between items-center">
+                    <div class="truncate pr-2">
+                        ${n.tipo === 'nota' 
+                            ? `<b>${n.titulo}</b> <span>${n.texto}</span>` 
+                            : `<b>•</b> <span class="text-blue-700 font-bold">${n.azul}</span> <span class="text-red-600 font-bold">${n.rojo}</span>`}
+                    </div>
+                    <button type="button" onclick="eliminarNotaPartida(${i})" class="text-red-500 font-bold px-1">X</button>
+                </div>
+            `).join('');
+        };
+
+        // --- AUTENTICACIÓN ---
         window.iniciarSesion = async function() {
             const email = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
@@ -278,7 +487,7 @@
                             } else if (createError.code === 'auth/weak-password') {
                                 throw new Error("La contraseña debe tener al menos 6 caracteres.");
                             } else if (createError.code === 'auth/operation-not-allowed') {
-                                throw new Error("No habilitaste 'Correo electrónico/Contraseña' en Firebase. Regresa al Paso 2 de las instrucciones.");
+                                throw new Error("No habilitaste 'Correo electrónico/Contraseña' en Firebase.");
                             } else {
                                 throw createError;
                             }
@@ -741,12 +950,19 @@
             document.getElementById('part-pdf').value = p.pdf || '';
             document.getElementById('part-tiempo').value = p.tiempo || '';
 
+            tempIncluye = p.incluyeList ? JSON.parse(JSON.stringify(p.incluyeList)) : [];
+            tempNotasPartida = p.notasList ? JSON.parse(JSON.stringify(p.notasList)) : [];
+            window.renderTempIncluye();
+            window.renderTempNotasPartida();
+            sugerirNumeroNota();
+
             const btnGuardar = document.getElementById('btn-guardar-partida');
             btnGuardar.innerText = '💾 Actualizar Partida';
             btnGuardar.classList.remove('bg-blue-600', 'hover:bg-blue-800');
             btnGuardar.classList.add('bg-amber-600', 'hover:bg-amber-700');
 
             document.getElementById('btn-cancelar-edicion').classList.remove('hidden');
+            window.renderPartidas();
         };
 
         window.cancelarEdicionPartida = function() {
@@ -763,6 +979,12 @@
             document.getElementById('part-pdf').value = '';
             document.getElementById('part-tiempo').value = '';
 
+            tempIncluye = [];
+            tempNotasPartida = [];
+            window.renderTempIncluye();
+            window.renderTempNotasPartida();
+            sugerirNumeroNota();
+
             const btnGuardar = document.getElementById('btn-guardar-partida');
             if (btnGuardar) {
                 btnGuardar.innerText = 'Añadir Partida';
@@ -772,6 +994,7 @@
 
             const btnCancelar = document.getElementById('btn-cancelar-edicion');
             if (btnCancelar) btnCancelar.classList.add('hidden');
+            window.renderPartidas();
         };
 
         window.agregarPartida = async function() {
@@ -796,7 +1019,9 @@
 
             const partidaObj = {
                 pda, notaArriba, descCorta, descripcion: desc, marca, modelo, pdf, tiempo, um,
-                cantidad: cant, precio: precio, total: cant * precio
+                cantidad: cant, precio: precio, total: cant * precio,
+                incluyeList: [...tempIncluye],
+                notasList: [...tempNotasPartida]
             };
 
             if (partidaEditandoIndex !== null) {
@@ -826,6 +1051,8 @@
 
             lista.innerHTML = cot.partidas.map((p, i) => {
                 granTotal += p.total;
+                const numInc = p.incluyeList ? p.incluyeList.length : 0;
+                const numNot = p.notasList ? p.notasList.length : 0;
                 return `
                 <div class="border-b py-2 flex justify-between items-center ${partidaEditandoIndex === i ? 'bg-amber-50' : ''}">
                     <div>
@@ -834,6 +1061,8 @@
                         <span class="text-xs font-bold text-blue-700">${p.descCorta || ''}</span>
                         <span class="text-xs text-red-600 font-bold ml-2">${p.modelo || ''}</span><br>
                         <span class="text-gray-500 text-xs">${p.cantidad} ${p.um} x $${p.precio.toLocaleString('en-US', {minimumFractionDigits:2})}</span>
+                        ${numInc > 0 ? `<span class="ml-1 text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded font-bold">+${numInc} Incluye</span>` : ''}
+                        ${numNot > 0 ? `<span class="ml-1 text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">+${numNot} Notas</span>` : ''}
                         ${p.pdf ? `
                             <a href="${p.pdf}" target="_blank" class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold hover:bg-red-200 inline-block transition">📄 Ver Ficha</a>
                             <a href="${obtenerEnlaceDescarga(p.pdf)}" target="_blank" download class="ml-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold hover:bg-green-200 inline-block transition">⬇️ Descargar</a>
@@ -873,6 +1102,17 @@
         function NumeroALetras(num,moneda){let entero=Math.floor(num);let centavos=Math.round((num%1)*100);let letrasMoneda=moneda==='MXN'?'PESOS MEXICANOS':'DÓLARES';let letrasMonedaCentavo=moneda==='MXN'?'/100 M.N.':'/100 USD';let letras=entero===0?"CERO":Millones(entero);let centavosStr=centavos.toString().padStart(2,'0');return`${letras} ${letrasMoneda} (${centavosStr}${letrasMonedaCentavo})`;}
         function base64ToUint8Array(base64){var binary_string=window.atob(base64);var len=binary_string.length;var bytes=new Uint8Array(len);for(var i=0;i<len;i++){bytes[i]=binary_string.charCodeAt(i);}return bytes;}
 
+        function formatearModeloMarca(mod, mar) {
+            if (!mod && !mar) return "";
+            let m = mod ? mod.toUpperCase().trim() : "";
+            let mk = mar ? mar.toUpperCase().trim() : "";
+            let textMod = m ? (/^(MODELO|NP|N\/P|MOD)/.test(m) ? m : `MODELO: ${m}`) : "";
+            let textMar = mk ? (/^(MARCA|MCA)/.test(mk) ? mk : `MARCA: ${mk}`) : "";
+            if (textMod && textMar) return `${textMod}, ${textMar}.`;
+            if (textMod) return `${textMod}.`;
+            return `${textMar}.`;
+        }
+
         window.generarDocumentoWord = async function() {
             try {
                 if (typeof PizZip === 'undefined') return alert("⚠ No se cargó la librería Word. Refresca la página.");
@@ -911,14 +1151,8 @@
                     partidas: cot.partidas.map((p, i) => {
                         
                         let strModMarca = "";
-                        if(p.modelo || p.marca) {
-                            let textMod = p.modelo ? `MODELO: ${p.modelo.toUpperCase()}` : "";
-                            let textMar = p.marca ? `MARCA: ${p.marca.toUpperCase()}` : "";
-                            if(textMod && textMar) strModMarca = ` ${textMod}, ${textMar}.`;
-                            else if(textMod) strModMarca = ` ${textMod}.`;
-                            else if(textMar) strModMarca = ` ${textMar}.`;
-                        }
-                        // Siempre agrega tabulador oculto al final del bloque de descripción/marca para evitar estiramiento
+                        const modMarcaBase = formatearModeloMarca(p.modelo, p.marca);
+                        if (modMarcaBase) strModMarca = " " + modMarcaBase;
                         strModMarca += "\t";
 
                         let notaArribaFinal = "";
@@ -932,14 +1166,73 @@
                             descCortaFinal = p.descCorta ? "\n" + p.descCorta.toUpperCase() + " " : "\n";
                         }
 
+                        // CONSTRUCCIÓN DE EXTRAS (INCLUYE + NOTAS DE PARTIDA)
+                        let extras = [];
+
+                        if (p.incluyeList && p.incluyeList.length > 0) {
+                            extras.push({
+                                EX_NEGRITA: "\nINCLUYE:\t\n\n",
+                                EX_NORMAL: "",
+                                EX_AZUL: "",
+                                EX_ROJO: "",
+                                EX_TE: ""
+                            });
+
+                            p.incluyeList.forEach(inc => {
+                                const pref = inc.prefijo ? inc.prefijo.trim() + " " : "• ";
+                                const dAzul = inc.descCorta ? inc.descCorta.toUpperCase().trim() + " " : "";
+                                const dNorm = inc.descNormal ? inc.descNormal.trim() + " " : "";
+                                let dRojo = formatearModeloMarca(inc.modelo, inc.marca);
+                                if (dRojo && inc.tiempo) dRojo += " ";
+                                const dTe = inc.tiempo ? inc.tiempo.toUpperCase().trim() + "\t\n" : "\t\n";
+
+                                extras.push({
+                                    EX_NEGRITA: pref,
+                                    EX_NORMAL: dNorm,
+                                    EX_AZUL: dAzul,
+                                    EX_ROJO: dRojo,
+                                    EX_TE: dTe
+                                });
+                            });
+                        }
+
+                        if (p.notasList && p.notasList.length > 0) {
+                            p.notasList.forEach((n, idx) => {
+                                if (n.tipo === 'nota') {
+                                    const tit = n.titulo ? n.titulo.toUpperCase().trim() + " " : "NOTA: ";
+                                    extras.push({
+                                        EX_NEGRITA: "\n" + tit,
+                                        EX_NORMAL: (n.texto || "").trim() + "\t\n",
+                                        EX_AZUL: "",
+                                        EX_ROJO: "",
+                                        EX_TE: ""
+                                    });
+                                } else {
+                                    // Viñeta de opción azul + rojo (ej. placas de orificio)
+                                    const prevIsNota = idx > 0 && p.notasList[idx - 1].tipo === 'nota';
+                                    const prefVineta = prevIsNota ? "\n•" : "•";
+                                    const vAzul = (n.azul || "").toUpperCase().trim() + (n.rojo ? " " : "");
+                                    const vRojo = (n.rojo || "").toUpperCase().trim();
+
+                                    extras.push({
+                                        EX_NEGRITA: prefVineta,
+                                        EX_NORMAL: "",
+                                        EX_AZUL: vAzul,
+                                        EX_ROJO: vRojo,
+                                        EX_TE: "\t\n"
+                                    });
+                                }
+                            });
+                        }
+
                         return {
                             PDA: p.pda || (i+1),
                             NOTA_ARRIBA: notaArribaFinal,
                             DESC_CORTA: descCortaFinal,
                             DESCRIPCION: p.descripcion || "", 
                             MODELO_MARCA: strModMarca,
-                            // Incluye \t antes del salto final para que el Tiempo de Entrega no se estire en Word
                             TIEMPO_ENTREGA: p.tiempo ? "\n\n" + p.tiempo + "\t\n" : "\n",
+                            extras: extras,
                             UM: p.um || "", 
                             CANTIDAD: p.cantidad || "",
                             PRECIO: "$" + (p.precio || 0).toLocaleString('en-US', {minimumFractionDigits: 2}),
