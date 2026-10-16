@@ -190,7 +190,7 @@
                         </div>
 
                         <input type="url" id="part-pdf" placeholder="🔗 Enlace de Ficha Técnica (Automático)" class="border p-2 w-full mb-2 rounded text-blue-700 bg-blue-50 text-xs">
-                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega" class="border p-2 w-full mb-3 rounded font-bold text-sm">
+                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega (Se colocará al final de la partida)" class="border p-2 w-full mb-3 rounded font-bold text-sm">
 
                         <!-- BOTONES DESPLEGABLES PARA INCLUYE Y NOTAS DE PARTIDA -->
                         <div class="grid grid-cols-2 gap-2 mb-3">
@@ -1166,7 +1166,7 @@
                             descCortaFinal = p.descCorta ? "\n" + p.descCorta.toUpperCase() + " " : "\n";
                         }
 
-                        // CONSTRUCCIÓN DE EXTRAS (INCLUYE + NOTAS DE PARTIDA)
+                        const tieneExtras = (p.incluyeList && p.incluyeList.length > 0) || (p.notasList && p.notasList.length > 0);
                         let extras = [];
 
                         if (p.incluyeList && p.incluyeList.length > 0) {
@@ -1186,10 +1186,20 @@
                                 if (dRojo && inc.tiempo) dRojo += " ";
                                 const dTe = inc.tiempo ? inc.tiempo.toUpperCase().trim() + "\t\n" : "\t\n";
 
+                                // Paso 1: Imprime Prefijo en Negrita + Descripción Corta en Azul
                                 extras.push({
                                     EX_NEGRITA: pref,
-                                    EX_NORMAL: dNorm,
+                                    EX_NORMAL: "",
                                     EX_AZUL: dAzul,
+                                    EX_ROJO: "",
+                                    EX_TE: ""
+                                });
+
+                                // Paso 2: En la misma línea, imprime Descripción Detallada en Negro + Modelo/Marca en Rojo + T.E.
+                                extras.push({
+                                    EX_NEGRITA: "",
+                                    EX_NORMAL: dNorm,
+                                    EX_AZUL: "",
                                     EX_ROJO: dRojo,
                                     EX_TE: dTe
                                 });
@@ -1208,7 +1218,6 @@
                                         EX_TE: ""
                                     });
                                 } else {
-                                    // Viñeta de opción azul + rojo (ej. placas de orificio)
                                     const prevIsNota = idx > 0 && p.notasList[idx - 1].tipo === 'nota';
                                     const prefVineta = prevIsNota ? "\n•" : "•";
                                     const vAzul = (n.azul || "").toUpperCase().trim() + (n.rojo ? " " : "");
@@ -1225,13 +1234,30 @@
                             });
                         }
 
+                        // Si hay INCLUYE o NOTAS y la partida tiene Tiempo de Entrega general, se agrega hasta abajo de todo
+                        let tiempoPrincipalTag = "";
+                        if (tieneExtras) {
+                            tiempoPrincipalTag = "\n";
+                            if (p.tiempo) {
+                                extras.push({
+                                    EX_NEGRITA: "",
+                                    EX_NORMAL: "",
+                                    EX_AZUL: "",
+                                    EX_ROJO: "",
+                                    EX_TE: "\n" + p.tiempo.toUpperCase().trim() + "\t\n"
+                                });
+                            }
+                        } else {
+                            tiempoPrincipalTag = p.tiempo ? "\n\n" + p.tiempo + "\t\n" : "\n";
+                        }
+
                         return {
                             PDA: p.pda || (i+1),
                             NOTA_ARRIBA: notaArribaFinal,
                             DESC_CORTA: descCortaFinal,
                             DESCRIPCION: p.descripcion || "", 
                             MODELO_MARCA: strModMarca,
-                            TIEMPO_ENTREGA: p.tiempo ? "\n\n" + p.tiempo + "\t\n" : "\n",
+                            TIEMPO_ENTREGA: tiempoPrincipalTag,
                             extras: extras,
                             UM: p.um || "", 
                             CANTIDAD: p.cantidad || "",
