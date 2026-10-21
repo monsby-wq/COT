@@ -26,7 +26,7 @@
 
     <!-- PANTALLA DE INICIO DE SESIÓN -->
     <div id="login-container" class="flex h-screen bg-slate-900 items-center justify-center hidden">
-        <div class="bg-white p-8 rounded shadow-2xl w-96">
+        <div class="bg-white p-8 rounded shadow-2xl w-96 max-w-[92vw]">
             <div class="text-center mb-6">
                 <h2 class="text-3xl font-bold text-slate-800 tracking-wider">LOGIN</h2>
                 <p class="text-gray-500 text-sm">CONTACTA A UN ADMINISTRADOR PARA SER DADO DE ALTA</p>
@@ -78,14 +78,14 @@
                 <h3 class="text-2xl font-bold border-b pb-2 mb-4">Gestión de Accesos</h3>
                 <div class="bg-yellow-50 p-6 rounded shadow mb-6 border border-yellow-200">
                     <h4 class="font-bold mb-3">Dar de alta nuevo vendedor</h4>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input type="email" id="new-user" placeholder="Correo Eléctronico" class="border p-2 rounded">
                         <input type="text" id="new-pass" placeholder="Contraseña de acceso" class="border p-2 rounded">
-                        <button onclick="crearUsuario()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-bold col-span-2 transition">Crear Cuenta</button>
+                        <button onclick="crearUsuario()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-bold md:col-span-2 transition">Crear Cuenta</button>
                     </div>
                 </div>
                 <h4 class="font-bold mb-3">Vendedores Activos</h4>
-                <div id="lista-cuentas" class="bg-white rounded shadow p-4 grid grid-cols-2 gap-4"></div>
+                <div id="lista-cuentas" class="bg-white rounded shadow p-4 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
             <!-- SECCIÓN: VENDEDORES -->
@@ -97,26 +97,26 @@
                     <input type="file" id="vend-file" accept=".docx" class="mb-4 block">
                     <button onclick="guardarVendedor()" class="bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded shadow font-bold transition">Guardar Cambios</button>
                 </div>
-                <div id="lista-vendedores" class="grid grid-cols-2 gap-4"></div>
+                <div id="lista-vendedores" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
             <!-- SECCIÓN: CATÁLOGO -->
             <div id="sec-catalogo" class="hidden">
                 <h3 class="text-2xl font-bold border-b pb-2 mb-4">Catálogo</h3>
-                <div class="bg-white p-6 rounded shadow mb-6 grid grid-cols-2 gap-4">
+                <div class="bg-white p-6 rounded shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input type="hidden" id="cat-id">
-                    <input type="text" id="cat-desc-corta" placeholder="DESCRIPCIÓN CORTA" class="border p-2 col-span-2 rounded font-bold text-blue-800">
-                    <textarea id="cat-desc" placeholder="DESCRIPCIÓN DETALLADA" class="border p-2 col-span-2 rounded"></textarea>
+                    <input type="text" id="cat-desc-corta" placeholder="DESCRIPCIÓN CORTA" class="border p-2 md:col-span-2 rounded font-bold text-blue-800">
+                    <textarea id="cat-desc" placeholder="DESCRIPCIÓN DETALLADA" class="border p-2 md:col-span-2 rounded"></textarea>
                     <input type="text" id="cat-um" placeholder="UNIDAD DE MEDIDA" class="border p-2 rounded uppercase">
                     <input type="text" id="cat-marca" placeholder="Marca" class="border p-2 rounded uppercase">
                     <input type="text" id="cat-modelo" placeholder="Modelo" class="border p-2 rounded uppercase">
                     <input type="url" id="cat-pdf" placeholder="🔗 Enlace de Ficha Técnica (Drive / Web)" class="border p-2 rounded text-blue-700 bg-blue-50">
-                    <div class="col-span-2 flex gap-2 mt-2">
+                    <div class="md:col-span-2 flex gap-2 mt-2">
                         <button onclick="guardarEquipo()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-bold transition">GUARDAR</button>
                         <button onclick="limpiarFormCatalogo()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow font-bold transition">LIMPIAR</button>
                     </div>
                 </div>
-                <input type="text" id="buscador-catalogo" onkeyup="renderCatalogo()" placeholder="BUSCAR EQUIPO..." class="border p-2 w-full mb-4 rounded bg-blue-50 font-bold">
+                <input type="text" id="buscador-catalogo" oninput="renderCatalogo()" placeholder="BUSCAR EQUIPO..." class="border p-2 w-full mb-4 rounded bg-blue-50 font-bold">
                 <div id="lista-catalogo" class="bg-white rounded shadow p-4 max-h-96 overflow-y-auto"></div>
             </div>
 
@@ -128,11 +128,12 @@
                         <button onclick="toggleColumnasCotizacion()" title="Cambiar entre 1 y 2 columnas para pantalla dividida" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2.5 py-1.5 rounded text-xs font-bold transition">📐 1 Col / 2 Col</button>
                         <select id="cotizacion-activa" onchange="cambiarCotizacionTab()" class="border p-1.5 rounded font-bold bg-blue-50 text-blue-800 text-sm max-w-xs"></select>
                         <button onclick="nuevaCotizacion()" class="bg-slate-700 hover:bg-slate-900 text-white px-3 py-1.5 rounded text-sm font-bold transition">+ Nueva</button>
+                        <button onclick="duplicarCotizacion()" title="Crear una copia de esta cotización con todas sus partidas" class="bg-indigo-600 hover:bg-indigo-800 text-white px-3 py-1.5 rounded text-sm font-bold transition">📋 Duplicar</button>
                         <button onclick="eliminarCotizacionActual()" class="bg-red-500 hover:bg-red-700 text-white px-3 py-1.5 rounded text-sm font-bold transition">🗑️ Eliminar</button>
                     </div>
                 </div>
 
-                <div id="grid-cotizaciones" class="grid grid-cols-2 gap-4">
+                <div id="grid-cotizaciones" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-white p-4 rounded shadow">
                         <h4 class="font-bold mb-3 border-b">Configuración Inicial</h4>
                         <div class="grid grid-cols-2 gap-2 mb-4">
@@ -147,7 +148,7 @@
                         <div class="flex items-center gap-2 mb-4">
                             <span class="font-bold text-gray-500">NO-</span>
                             <input type="text" id="cot-folio-mid" placeholder="XXX" class="border p-2 w-16 text-center font-bold uppercase rounded" onchange="guardarEstadoCotizaciones()">
-                            <span class="font-bold text-gray-500">-26-</span>
+                            <span class="font-bold text-gray-500" id="lbl-anio"></span>
                             <input type="text" id="cot-folio-end" placeholder="Rev" class="border p-2 w-16 text-center font-bold uppercase rounded" onchange="guardarEstadoCotizaciones()">
                         </div>
 
@@ -170,7 +171,7 @@
                         <input type="text" id="part-nota-arriba" placeholder="Nota Superior (Ej: *****OPCIÓN 1*****)" class="border p-2 w-full mb-2 rounded font-bold text-center text-gray-700 bg-gray-50 text-sm">
                         
                         <div class="mb-2 relative">
-                            <input type="text" id="buscador-equipo-partida" onkeyup="buscarEquipoParaPartida()" placeholder="🔍 Buscar equipo del catálogo..." class="border p-2 w-full rounded bg-yellow-50 font-bold text-sm">
+                            <input type="text" id="buscador-equipo-partida" oninput="buscarEquipoParaPartida()" placeholder="🔍 Buscar equipo del catálogo..." class="border p-2 w-full rounded bg-yellow-50 font-bold text-sm">
                             <ul id="resultados-busqueda" class="bg-white border rounded max-h-40 overflow-y-auto hidden shadow-xl absolute z-50 w-full left-0 mt-1"></ul>
                         </div>
                         
@@ -210,7 +211,7 @@
                             </div>
                             <!-- Buscador de catálogo para Incluye -->
                             <div class="mb-2 relative">
-                                <input type="text" id="buscador-incluye" onkeyup="buscarEquipoParaIncluye()" placeholder="🔍 Buscar accesorio en catálogo (opcional)..." class="border p-1.5 w-full rounded bg-white text-xs">
+                                <input type="text" id="buscador-incluye" oninput="buscarEquipoParaIncluye()" placeholder="🔍 Buscar accesorio en catálogo (opcional)..." class="border p-1.5 w-full rounded bg-white text-xs">
                                 <ul id="resultados-busqueda-incluye" class="bg-white border rounded max-h-32 overflow-y-auto hidden shadow-lg absolute z-50 w-full left-0 mt-1"></ul>
                             </div>
                             <div class="grid grid-cols-3 gap-1.5 mb-1.5">
@@ -297,6 +298,9 @@
         const db = getFirestore(app);
         const secondaryApp = initializeApp(firebaseConfig, "Secondary");
         const secondaryAuth = getAuth(secondaryApp);
+        const ANIO = String(new Date().getFullYear()).slice(-2);
+        document.getElementById('lbl-anio').innerText = `-${ANIO}-`;
+        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
         let currentUser = null;
         let currentRole = null;
@@ -318,14 +322,7 @@
         };
 
         window.toggleColumnasCotizacion = function() {
-            const grid = document.getElementById('grid-cotizaciones');
-            if (grid.classList.contains('grid-cols-2')) {
-                grid.classList.remove('grid-cols-2');
-                grid.classList.add('grid-cols-1');
-            } else {
-                grid.classList.remove('grid-cols-1');
-                grid.classList.add('grid-cols-2');
-            }
+            document.getElementById('grid-cotizaciones').classList.toggle('md:grid-cols-2');
         };
 
         window.togglePanelExtra = function(idPanel) {
@@ -346,9 +343,9 @@
             );
 
             ul.innerHTML = filtrados.map(c => `
-                <li class="p-2 border-b cursor-pointer hover:bg-indigo-100 text-xs" onclick='seleccionarEquipoIncluye(${JSON.stringify(c).replace(/'/g, "&apos;")})'>
-                    <span class="text-red-600 font-bold">${c.modelo || ''}</span> 
-                    <span class="text-blue-800 font-bold">${c.descCorta || ''}</span>
+                <li class="p-2 border-b cursor-pointer hover:bg-indigo-100 text-xs" onclick="seleccionarIncluyePorId('${c.id}')">
+                    <span class="text-red-600 font-bold">${esc(c.modelo)}</span> 
+                    <span class="text-blue-800 font-bold">${esc(c.descCorta)}</span>
                 </li>
             `).join('');
             ul.classList.remove('hidden');
@@ -396,10 +393,10 @@
             cont.innerHTML = tempIncluye.map((inc, i) => `
                 <div class="bg-white p-1.5 rounded border flex justify-between items-center">
                     <div class="truncate pr-2">
-                        <b>${inc.prefijo}</b> <span class="text-blue-700 font-bold">${inc.descCorta}</span> 
-                        <span class="text-gray-600">${inc.descNormal ? inc.descNormal.substring(0,25) + '...' : ''}</span>
-                        <span class="text-red-600 font-bold">${inc.modelo} ${inc.marca}</span>
-                        <b>${inc.tiempo}</b>
+                        <b>${esc(inc.prefijo)}</b> <span class="text-blue-700 font-bold">${esc(inc.descCorta)}</span> 
+                        <span class="text-gray-600">${inc.descNormal ? esc(inc.descNormal.substring(0,25)) + '...' : ''}</span>
+                        <span class="text-red-600 font-bold">${esc(inc.modelo)} ${esc(inc.marca)}</span>
+                        <b>${esc(inc.tiempo)}</b>
                     </div>
                     <button type="button" onclick="eliminarItemIncluye(${i})" class="text-red-500 font-bold px-1">X</button>
                 </div>
@@ -457,8 +454,8 @@
                 <div class="bg-white p-1.5 rounded border flex justify-between items-center">
                     <div class="truncate pr-2">
                         ${n.tipo === 'nota' 
-                            ? `<b>${n.titulo}</b> <span>${n.texto}</span>` 
-                            : `<b>•</b> <span class="text-blue-700 font-bold">${n.azul}</span> <span class="text-red-600 font-bold">${n.rojo}</span>`}
+                            ? `<b>${esc(n.titulo)}</b> <span>${esc(n.texto)}</span>` 
+                            : `<b>•</b> <span class="text-blue-700 font-bold">${esc(n.azul)}</span> <span class="text-red-600 font-bold">${esc(n.rojo)}</span>`}
                     </div>
                     <button type="button" onclick="eliminarNotaPartida(${i})" class="text-red-500 font-bold px-1">X</button>
                 </div>
@@ -512,7 +509,7 @@
                 if (user.email === 'master@alphazero.com') {
                     currentRole = 'master';
                 } else {
-                    const userDoc = await getDoc(doc(db, 'usuarios', user.email));
+                    const userDoc = await getDoc(doc(db, 'usuarios', user.email.toLowerCase()));
                     if (userDoc.exists()) {
                         currentRole = userDoc.data().role;
                     } else {
@@ -529,7 +526,7 @@
                 if (currentRole === 'master') document.getElementById('btn-admin-usuarios').classList.remove('hidden');
                 else document.getElementById('btn-admin-usuarios').classList.add('hidden');
 
-                await cargarDatosDesdeNube();
+                try { await cargarDatosDesdeNube(); } catch (e) { console.error(e); alert('❌ No se pudieron cargar los datos: ' + e.message); }
                 document.getElementById('loading-screen').classList.add('hidden');
                 
             } else {
@@ -591,8 +588,7 @@
             lista.innerHTML = dbUsuarios.map((u, i) => `
                 <div class="bg-gray-100 p-3 border rounded shadow flex justify-between items-center">
                     <div>
-                        <span class="font-bold">${u.email}</span> <span class="text-xs bg-slate-200 px-1 rounded">${u.role}</span><br>
-                        <span class="text-xs text-gray-500">Pass: ${u.pass}</span>
+                        <span class="font-bold">${esc(u.email)}</span> <span class="text-xs bg-slate-200 px-1 rounded">${esc(u.role)}</span>
                     </div>
                     <button onclick="eliminarUsuario('${u.email}')" class="text-red-500 font-bold">X</button>
                 </div>
@@ -609,8 +605,9 @@
                 await createUserWithEmailAndPassword(secondaryAuth, email, pass);
                 await secondaryAuth.signOut();
                 
-                const newUser = { email, pass, role: 'vendedor' };
-                await setDoc(doc(db, 'usuarios', email), newUser);
+                const emailKey = email.toLowerCase();
+                const newUser = { email: emailKey, role: 'vendedor' };
+                await setDoc(doc(db, 'usuarios', emailKey), newUser);
                 dbUsuarios.push(newUser);
                 
                 document.getElementById('new-user').value = '';
@@ -660,7 +657,7 @@
             const lista = document.getElementById('lista-vendedores');
             lista.innerHTML = vendedores.map(v => `
                 <div class="bg-white p-4 border rounded shadow flex justify-between items-center">
-                    <span class="font-bold">${v.nombre}</span>
+                    <span class="font-bold">${esc(v.nombre)}</span>
                     <button onclick="eliminarVendedor('${v.id}')" class="text-red-500 font-bold">X</button>
                 </div>
             `).join('');
@@ -745,14 +742,14 @@
             lista.innerHTML = filtrados.map(c => `
                 <div class="border-b py-2 flex justify-between items-center hover:bg-gray-50">
                     <div>
-                        <p class="font-bold text-blue-800">${c.descCorta || 'Sin desc. corta'}</p>
-                        <p class="text-sm">${(c.desc || '').substring(0, 60)}...</p>
-                        <p class="text-xs text-red-600 font-bold">Mod: ${c.modelo} | Marca: ${c.marca} | U.M.: ${c.um}</p>
+                        <p class="font-bold text-blue-800">${esc(c.descCorta) || 'Sin desc. corta'}</p>
+                        <p class="text-sm">${esc((c.desc || '').substring(0, 60))}...</p>
+                        <p class="text-xs text-red-600 font-bold">Mod: ${esc(c.modelo)} | Marca: ${esc(c.marca)} | U.M.: ${esc(c.um)}</p>
                     </div>
                     <div class="flex items-center">
                         ${c.pdf ? `
-                            <a href="${c.pdf}" target="_blank" class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded text-xs font-bold mr-1 transition shadow-sm">📄 Ver Ficha</a>
-                            <a href="${obtenerEnlaceDescarga(c.pdf)}" target="_blank" download class="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded text-xs font-bold mr-4 transition shadow-sm">⬇️ Descargar</a>
+                            <a href="${esc(c.pdf)}" target="_blank" class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded text-xs font-bold mr-1 transition shadow-sm">📄 Ver Ficha</a>
+                            <a href="${esc(obtenerEnlaceDescarga(c.pdf))}" target="_blank" download class="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded text-xs font-bold mr-4 transition shadow-sm">⬇️ Descargar</a>
                         ` : ''}
                         <button onclick="editarEquipo('${c.id}')" class="text-blue-500 font-bold mr-3">Editar</button>
                         <button onclick="eliminarEquipo('${c.id}')" class="text-red-500 font-bold">Eliminar</button>
@@ -847,8 +844,8 @@
         window.renderSelectTabs = function() {
             const select = document.getElementById('cotizacion-activa');
             select.innerHTML = cotizaciones.map((c, i) => {
-                const folioStr = c.datos && c.datos.folioMid ? ` [NO-${c.datos.folioMid.toUpperCase()}-26]` : '';
-                return `<option value="${i}">✏️ Cot. ${i + 1}${folioStr} - ${c.datos.cliente || 'Nueva'}</option>`;
+                const folioStr = c.datos && c.datos.folioMid ? ` [NO-${c.datos.folioMid.toUpperCase()}-${ANIO}]` : '';
+                return `<option value="${i}">✏️ Cot. ${i + 1}${folioStr} - ${esc(c.datos.cliente) || 'Nueva'}</option>`;
             }).join('');
             select.value = cotIndexActiva;
         };
@@ -891,7 +888,7 @@
         window.renderSelectVendedores = function() {
             const select = document.getElementById('cot-vendedor');
             select.innerHTML = `<option value="">-- SELECCIONA EL VENDEDOR AQUÍ --</option>` + 
-                vendedores.map(v => `<option value="${v.id}">${v.nombre}</option>`).join('');
+                vendedores.map(v => `<option value="${v.id}">${esc(v.nombre)}</option>`).join('');
         };
 
         window.buscarEquipoParaPartida = function() {
@@ -907,11 +904,11 @@
             );
 
             ul.innerHTML = filtrados.map(c => `
-                <li class="p-3 border-b cursor-pointer hover:bg-blue-100 flex justify-between items-center" onclick='seleccionarEquipo(${JSON.stringify(c).replace(/'/g, "&apos;")})'>
+                <li class="p-3 border-b cursor-pointer hover:bg-blue-100 flex justify-between items-center" onclick="seleccionarEquipoPorId('${c.id}')">
                     <div>
-                        <span class="text-red-600 font-bold">${c.modelo || ''}</span> 
-                        <span class="text-blue-800 font-bold">${c.descCorta || ''}</span> 
-                        - <span class="text-sm">${(c.desc || '').substring(0,50)}...</span>
+                        <span class="text-red-600 font-bold">${esc(c.modelo)}</span> 
+                        <span class="text-blue-800 font-bold">${esc(c.descCorta)}</span> 
+                        - <span class="text-sm">${esc((c.desc || '').substring(0,50))}...</span>
                     </div>
                     ${c.pdf ? '<span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold ml-2 shrink-0">📄 PDF</span>' : ''}
                 </li>
@@ -1019,7 +1016,7 @@
 
             const partidaObj = {
                 pda, notaArriba, descCorta, descripcion: desc, marca, modelo, pdf, tiempo, um,
-                cantidad: cant, precio: precio, total: cant * precio,
+                cantidad: cant, precio: precio, total: Math.round(cant * precio * 100) / 100,
                 incluyeList: [...tempIncluye],
                 notasList: [...tempNotasPartida]
             };
@@ -1056,16 +1053,16 @@
                 return `
                 <div class="border-b py-2 flex justify-between items-center ${partidaEditandoIndex === i ? 'bg-amber-50' : ''}">
                     <div>
-                        <span class="font-bold mr-2">${p.pda || (i+1)}</span>
-                        <span class="text-xs text-gray-500 font-bold block">${p.notaArriba || ''}</span>
-                        <span class="text-xs font-bold text-blue-700">${p.descCorta || ''}</span>
-                        <span class="text-xs text-red-600 font-bold ml-2">${p.modelo || ''}</span><br>
-                        <span class="text-gray-500 text-xs">${p.cantidad} ${p.um} x $${p.precio.toLocaleString('en-US', {minimumFractionDigits:2})}</span>
+                        <span class="font-bold mr-2">${esc(p.pda || (i+1))}</span>
+                        <span class="text-xs text-gray-500 font-bold block">${esc(p.notaArriba)}</span>
+                        <span class="text-xs font-bold text-blue-700">${esc(p.descCorta)}</span>
+                        <span class="text-xs text-red-600 font-bold ml-2">${esc(p.modelo)}</span><br>
+                        <span class="text-gray-500 text-xs">${p.cantidad} ${esc(p.um)} x $${p.precio.toLocaleString('en-US', {minimumFractionDigits:2})}</span>
                         ${numInc > 0 ? `<span class="ml-1 text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded font-bold">+${numInc} Incluye</span>` : ''}
                         ${numNot > 0 ? `<span class="ml-1 text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">+${numNot} Notas</span>` : ''}
                         ${p.pdf ? `
-                            <a href="${p.pdf}" target="_blank" class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold hover:bg-red-200 inline-block transition">📄 Ver Ficha</a>
-                            <a href="${obtenerEnlaceDescarga(p.pdf)}" target="_blank" download class="ml-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold hover:bg-green-200 inline-block transition">⬇️ Descargar</a>
+                            <a href="${esc(p.pdf)}" target="_blank" class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold hover:bg-red-200 inline-block transition">📄 Ver Ficha</a>
+                            <a href="${esc(obtenerEnlaceDescarga(p.pdf))}" target="_blank" download class="ml-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold hover:bg-green-200 inline-block transition">⬇️ Descargar</a>
                         ` : ''}
                     </div>
                     <div class="flex flex-col items-end shrink-0 ml-2">
@@ -1098,8 +1095,8 @@
         const Centenas=num=>{let centenas=Math.floor(num/100);let decenas=num-(centenas*100);switch(centenas){case 1:return decenas>0?"CIENTO "+Decenas(decenas):"CIEN";case 2:return"DOSCIENTOS "+Decenas(decenas);case 3:return"TRESCIENTOS "+Decenas(decenas);case 4:return"CUATROCIENTOS "+Decenas(decenas);case 5:return"QUINIENTOS "+Decenas(decenas);case 6:return"SEISCIENTOS "+Decenas(decenas);case 7:return"SETECIENTOS "+Decenas(decenas);case 8:return"OCHOCIENTOS "+Decenas(decenas);case 9:return"NOVECIENTOS "+Decenas(decenas);default:return Decenas(decenas);}};
         const Seccion=(num,divisor,strSin,strPlu)=>{let cientos=Math.floor(num/divisor);let resto=num-(cientos*divisor);let letras="";if(cientos>0){if(cientos>1)letras=Centenas(cientos)+" "+strPlu;else letras=strSin;}return letras;};
         const Miles=num=>{let divisor=1000;let cientos=Math.floor(num/divisor);let resto=num-(cientos*divisor);let strMiles=Seccion(num,divisor,"UN MIL","MIL");let strCentenas=Centenas(resto);return strMiles===""?strCentenas:strMiles+(strCentenas?" "+strCentenas:"");};
-        const Millones=num=>{let divisor=1000000;let cientos=Math.floor(num/divisor);let resto=num-(cientos*divisor);let strMillones=Seccion(num,divisor,"UN MILLON","MILLONES");let strMiles=Miles(resto);return strMillones===""?strMiles:strMillones+(strMiles?" "+strMiles:"");};
-        function NumeroALetras(num,moneda){let entero=Math.floor(num);let centavos=Math.round((num%1)*100);let letrasMoneda=moneda==='MXN'?'PESOS MEXICANOS':'DÓLARES';let letrasMonedaCentavo=moneda==='MXN'?'/100 M.N.':'/100 USD';let letras=entero===0?"CERO":Millones(entero);let centavosStr=centavos.toString().padStart(2,'0');return`${letras} ${letrasMoneda} (${centavosStr}${letrasMonedaCentavo})`;}
+        const Millones=num=>{let divisor=1000000;let cientos=Math.floor(num/divisor);let resto=num-(cientos*divisor);let strMillones=Seccion(num,divisor,"UN MILLÓN","MILLONES");let strMiles=Miles(resto);return strMillones===""?strMiles:strMillones+(strMiles?" "+strMiles:"");};
+        function NumeroALetras(num,moneda){const t=Math.round(num*100);const entero=Math.floor(t/100);const cent=t%100;const mx=moneda==='MXN';let letras=entero===0?"CERO":Millones(entero);if(entero>0&&entero%1000000===0)letras+=" DE";const un=mx?(entero===1?'PESO MEXICANO':'PESOS MEXICANOS'):(entero===1?'DÓLAR':'DÓLARES');return`${letras} ${un} (${String(cent).padStart(2,'0')}${mx?'/100 M.N.':'/100 USD'})`.replace(/\s+/g,' ').trim();}
         function base64ToUint8Array(base64){var binary_string=window.atob(base64);var len=binary_string.length;var bytes=new Uint8Array(len);for(var i=0;i<len;i++){bytes[i]=binary_string.charCodeAt(i);}return bytes;}
 
         function formatearModeloMarca(mod, mar) {
@@ -1132,7 +1129,7 @@
                 const hoy = new Date();
                 const fechaString = `Coatzacoalcos, Ver. a ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
                 
-                const folioFinal = `NO-${(d.folioMid||'XXX').toUpperCase()}-26${d.folioEnd ? '-' + d.folioEnd.toUpperCase() : ''}`;
+                const folioFinal = `NO-${(d.folioMid||'XXX').toUpperCase()}-${ANIO}${d.folioEnd ? '-' + d.folioEnd.toUpperCase() : ''}`;
                 const monedaDocName = d.moneda === 'MXN' ? 'PESOS' : 'DÓLARES';
                 const nombreArchivo = `${folioFinal} - ${monedaDocName}.docx`;
                 const textoMonedaFormato = d.moneda === 'MXN' ? 'PESOS MEXICANOS (MXN)' : 'DÓLARES (USD)';
@@ -1280,6 +1277,42 @@
                 alert("❌ Ocurrió un error al procesar el Word. Asegúrate de tener las etiquetas correctas en el archivo de Word.");
             }
         };
+    
+        window.duplicarCotizacion = async function() {
+            window.cancelarEdicionPartida();
+            document.getElementById('loading-screen').classList.remove('hidden');
+            await window.guardarEstadoCotizaciones();
+            const copia = JSON.parse(JSON.stringify(cotizaciones[cotIndexActiva]));
+            copia.id = Date.now().toString();
+            cotizaciones.push(copia);
+            cotIndexActiva = cotizaciones.length - 1;
+            copia.nombreTab = `Cot. ${cotIndexActiva + 1}`;
+            await setDoc(doc(db, "cotizaciones", copia.id), copia);
+            window.renderSelectTabs();
+            window.cargarCotizacionUI();
+            document.getElementById('loading-screen').classList.add('hidden');
+        };
+
+        if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('sidebar-collapsed');
+        // --- Mejoras: errores, selección por id, cierre de búsquedas, Enter ---
+        window.seleccionarEquipoPorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipo(c); };
+        window.seleccionarIncluyePorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipoIncluye(c); };
+        ['guardarEquipo','eliminarEquipo','eliminarVendedor','eliminarUsuario','nuevaCotizacion','duplicarCotizacion',
+         'eliminarCotizacionActual','cambiarCotizacionTab','agregarPartida','eliminarPartida'].forEach(n => {
+            const f = window[n];
+            window[n] = async (...a) => {
+                try { return await f(...a); }
+                catch (e) { console.error(e); alert('❌ Error: ' + (e.message || e)); }
+                finally { document.getElementById('loading-screen').classList.add('hidden'); }
+            };
+        });
+        document.addEventListener('click', e => {
+            [['resultados-busqueda','buscador-equipo-partida'],['resultados-busqueda-incluye','buscador-incluye']].forEach(([ul, inp]) => {
+                const l = document.getElementById(ul);
+                if (l && !l.contains(e.target) && e.target.id !== inp) l.classList.add('hidden');
+            });
+        });
+        document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') window.iniciarSesion(); });
     </script>
 </body>
 </html>
