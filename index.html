@@ -471,30 +471,10 @@
             document.getElementById('loading-screen').classList.remove('hidden');
 
             try {
-                if (email.toLowerCase() === 'master@alphazero.com') {
-                    try {
-                        await signInWithEmailAndPassword(auth, email, pass);
-                    } catch(e) {
-                        try {
-                            await createUserWithEmailAndPassword(auth, email, pass);
-                            alert("¡Cuenta MASTER creada y habilitada exitosamente en la nube!");
-                        } catch(createError) {
-                            if (createError.code === 'auth/email-already-in-use') {
-                                throw new Error("La contraseña ingresada es incorrecta.");
-                            } else if (createError.code === 'auth/weak-password') {
-                                throw new Error("La contraseña debe tener al menos 6 caracteres.");
-                            } else if (createError.code === 'auth/operation-not-allowed') {
-                                throw new Error("No habilitaste 'Correo electrónico/Contraseña' en Firebase.");
-                            } else {
-                                throw createError;
-                            }
-                        }
-                    }
-                } else {
-                    await signInWithEmailAndPassword(auth, email, pass);
-                }
+                await signInWithEmailAndPassword(auth, email, pass);
             } catch(error) {
-                alert('Error de acceso: ' + (error.message || 'Credenciales incorrectas.'));
+                const credMal = ['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email'].includes(error.code);
+                alert('Error de acceso: ' + (credMal ? 'Correo o contraseña incorrectos.' : (error.message || 'Credenciales incorrectas.')));
                 document.getElementById('loading-screen').classList.add('hidden');
             }
         };
@@ -1316,3 +1296,4 @@
     </script>
 </body>
 </html>
+
