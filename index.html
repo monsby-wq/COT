@@ -138,9 +138,9 @@
                         <h4 class="font-bold mb-3 border-b">Configuración Inicial</h4>
                         <div class="grid grid-cols-2 gap-2 mb-4">
                             <select id="cot-vendedor" class="border p-2 rounded w-full border-red-300 text-sm" onchange="guardarEstadoCotizaciones()"></select>
-                            <select id="cot-moneda" class="border p-2 rounded w-full text-sm" onchange="guardarEstadoCotizaciones()">
-                                <option value="MXN">MXN - Pesos Mexicanos</option>
-                                <option value="USD">USD - Dólares</option>
+                            <select id="cot-moneda" class="border p-2 rounded w-full text-sm font-bold bg-emerald-50 text-emerald-900 border-emerald-300" onchange="cambiarMonedaCotizacion()">
+                                <option id="opt-moneda-mxn" value="MXN">MXN - Pesos Mexicanos</option>
+                                <option id="opt-moneda-usd" value="USD">USD - Dólares</option>
                             </select>
                         </div>
 
@@ -166,7 +166,15 @@
                     </div>
 
                     <div class="bg-white p-4 rounded shadow relative">
-                        <h4 class="font-bold mb-3 border-b">Partidas</h4>
+                        <div class="flex flex-wrap justify-between items-center mb-3 border-b pb-1.5 gap-2">
+                            <h4 class="font-bold flex items-center gap-2">
+                                <span>Partidas</span>
+                                <span id="badge-moneda-partidas" class="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">MXN</span>
+                            </h4>
+                            <button type="button" id="btn-copiar-moneda" onclick="copiarPartidasOtraMoneda()" class="bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 px-2.5 py-1 rounded text-xs font-bold transition shadow-sm">
+                                🔄 Copiar de USD
+                            </button>
+                        </div>
                         
                         <input type="text" id="part-nota-arriba" placeholder="Nota Superior (Ej: *****OPCIÓN 1*****)" class="border p-2 w-full mb-2 rounded font-bold text-center text-gray-700 bg-gray-50 text-sm">
                         
@@ -314,6 +322,153 @@
         // Listas temporales para la partida que se está armando
         let tempIncluye = [];
         let tempNotasPartida = [];
+
+        // --- NORMALIZADOR PARA MANTENER PARTIDAS EN PESOS (MXN) Y DÓLARES (USD) ---
+        function normalizarCotizacion(cot) {
+            if (!cot) return cot;
+            if (!cot.datos) {
+                cot.datos = { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', moneda: 'MXN', vendedorId: '', vendedorIdMXN: '', vendedorIdUSD: '', notas: '' };
+            }
+            const mon = cot.datos.moneda || 'MXN';
+            if (!Array.isArray(cot.partidasMXN) && !Array.isArray(cot.partidasUSD)) {
+                const existentes = Array.isArray(cot.partidas) ? cot.partidas : [];
+                cot.partidasMXN = mon === 'MXN' ? JSON.parse(JSON.stringify(existentes)) : [];
+                cot.partidasUSD = mon === 'USD' ? JSON.parse(JSON.stringify(existentes)) : [];
+            } else {
+                if (!Array.isArray(cot.partidasMXN)) cot.partidasMXN = [];
+                if (!Array.isArray(cot.partidasUSD)) cot.partidasUSD = [];
+            }
+            if (cot.datos.vendedorIdMXN === undefined) cot.datos.vendedorIdMXN = mon === 'MXN' ? (cot.datos.vendedorId || '') : '';
+            if (cot.datos.vendedorIdUSD === undefined) cot.datos.vendedorIdUSD = mon === 'USD' ? (cot.datos.vendedorId || '') : '';
+            cot.partidas = mon === 'USD' ? cot.partidasUSD : cot.partidasMXN;
+            return cot;
+        }
+
+        function actualizarIndicadoresMoneda() {
+            const cot = cotizaciones[cotIndexActiva];
+            if (!cot) return;
+            normalizarCotizacion(cot);
+            const mon = cot.datos.moneda || 'MXN';
+            const cantMXN = cot.partidasMXN.length;
+            const cantUSD = cot.partidasUSD.length;
+
+            const optMXN = document.getElementById('opt-moneda-mxn');
+            const optUSD = document.getElementById('opt-moneda-usd');
+            if (optMXN) optMXN.textContent = `MXN - Pesos (${cantMXN} pda${cantMXN === 1 ? '' : 's'})`;
+            if (optUSD) optUSD.textContent = `USD - Dólares (${cantUSD} pda${cantUSD === 1 ? '' : 's'})`;
+
+            const badge = document.getElementById('badge-moneda-partidas');
+            if (badge) {
+                badge.textContent = mon === 'MXN' ? '🇲🇽 Editando en MXN' : '🇺🇸 Editando en USD';
+                badge.className = mon === 'MXN'
+                    ? 'text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold'
+                    : 'text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold';
+            }
+
+            const btnCopiar = document.getElementById('btn-copiar-moneda');
+            if (btnCopiar) {
+                const otraMon = mon === 'MXN' ? 'USD' : 'MXN';
+                const cantOtra = mon === 'MXN' ? cantUSD : cantMXN;
+                btnCopiar.textContent = `🔄 Copiar de ${otraMon} (${cantOtra})`;
+            }
+        }
+
+        // --- CAMBIO DE MONEDA CONSERVANDO INFORMACIÓN DE AMBAS ---
+        window.cambiarMonedaCotizacion = async function() {
+            const cot = cotizaciones[cotIndexActiva];
+            if (!cot) return;
+            normalizarCotizacion(cot);
+
+            const monedaAnterior = cot.datos.moneda || 'MXN';
+            const nuevaMoneda = document.getElementById('cot-moneda').value;
+            if (monedaAnterior === nuevaMoneda) return;
+
+            window.cancelarEdicionPartida();
+
+            // Guarda el vendedor y las partidas de la moneda que se estaba visualizando
+            const vendActual = document.getElementById('cot-vendedor').value;
+            if (monedaAnterior === 'USD') {
+                cot.datos.vendedorIdUSD = vendActual;
+                cot.partidasUSD = cot.partidas;
+            } else {
+                cot.datos.vendedorIdMXN = vendActual;
+                cot.partidasMXN = cot.partidas;
+            }
+
+            // Cambia a la nueva moneda y restaura sus partidas y su vendedor (o mantiene el actual si aún no tenía)
+            cot.datos.moneda = nuevaMoneda;
+            cot.partidas = nuevaMoneda === 'USD' ? cot.partidasUSD : cot.partidasMXN;
+
+            const vendNuevaMoneda = nuevaMoneda === 'USD' ? cot.datos.vendedorIdUSD : cot.datos.vendedorIdMXN;
+            if (vendNuevaMoneda) {
+                document.getElementById('cot-vendedor').value = vendNuevaMoneda;
+                cot.datos.vendedorId = vendNuevaMoneda;
+            }
+
+            document.getElementById('loading-screen').classList.remove('hidden');
+            await window.guardarEstadoCotizaciones();
+            window.renderPartidas();
+            document.getElementById('loading-screen').classList.add('hidden');
+        };
+
+        // --- COPIAR PARTIDAS ENTRE MXN Y USD ---
+        window.copiarPartidasOtraMoneda = async function() {
+            const cot = cotizaciones[cotIndexActiva];
+            if (!cot) return;
+            normalizarCotizacion(cot);
+
+            const monActual = cot.datos.moneda || 'MXN';
+            const monOrigen = monActual === 'MXN' ? 'USD' : 'MXN';
+            const listaOrigen = monActual === 'MXN' ? cot.partidasUSD : cot.partidasMXN;
+
+            if (!listaOrigen || listaOrigen.length === 0) {
+                return alert(`⚠️ No hay partidas guardadas en ${monOrigen} dentro de esta cotización para copiar.`);
+            }
+
+            if (cot.partidas.length > 0) {
+                if (!confirm(`Ya tienes ${cot.partidas.length} partida(s) en ${monActual}. ¿Deseas reemplazarlas con las ${listaOrigen.length} partida(s) de ${monOrigen}?`)) {
+                    return;
+                }
+            }
+
+            const msgTc = monActual === 'USD'
+                ? 'Opcional: Si deseas dividir los precios de MXN a USD con un Tipo de Cambio, escríbelo aquí (ej. 20.00).\n\nDeja "1" para copiar los precios tal cual y editarlos manualmente:'
+                : 'Opcional: Si deseas multiplicar los precios de USD a MXN con un Tipo de Cambio, escríbelo aquí (ej. 20.00).\n\nDeja "1" para copiar los precios tal cual y editarlos manualmente:';
+
+            const tcInput = prompt(msgTc, '1');
+            if (tcInput === null) return;
+
+            let tc = parseFloat(tcInput);
+            if (isNaN(tc) || tc <= 0) tc = 1;
+
+            const nuevasPartidas = JSON.parse(JSON.stringify(listaOrigen)).map(p => {
+                let nuevoPrecio = p.precio || 0;
+                if (tc !== 1) {
+                    nuevoPrecio = monActual === 'USD' ? (nuevoPrecio / tc) : (nuevoPrecio * tc);
+                    nuevoPrecio = Math.round(nuevoPrecio * 100) / 100;
+                }
+                const cant = parseFloat(p.cantidad) || 0;
+                return {
+                    ...p,
+                    precio: nuevoPrecio,
+                    total: Math.round(cant * nuevoPrecio * 100) / 100
+                };
+            });
+
+            if (monActual === 'USD') {
+                cot.partidasUSD = nuevasPartidas;
+                cot.partidas = cot.partidasUSD;
+            } else {
+                cot.partidasMXN = nuevasPartidas;
+                cot.partidas = cot.partidasMXN;
+            }
+
+            window.cancelarEdicionPartida();
+            document.getElementById('loading-screen').classList.remove('hidden');
+            await window.guardarEstadoCotizaciones();
+            window.renderPartidas();
+            document.getElementById('loading-screen').classList.add('hidden');
+        };
 
         // --- FUNCIONES DE INTERFAZ Y PANTALLA DIVIDIDA ---
         window.toggleSidebar = function() {
@@ -533,7 +688,7 @@
             window.renderSelectVendedores();
 
             const cotSnap = await getDocs(collection(db, 'cotizaciones'));
-            cotizaciones = cotSnap.docs.map(d => d.data());
+            cotizaciones = cotSnap.docs.map(d => normalizarCotizacion(d.data()));
             
             cotizaciones.sort((a, b) => parseInt(a.id) - parseInt(b.id));
             
@@ -759,12 +914,16 @@
         };
 
         function generarPlantillaVacia() {
-            return {
+            const nueva = {
                 id: Date.now().toString(),
                 nombreTab: `Cot. ${cotizaciones.length + 1}`,
-                datos: { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', moneda: 'MXN', vendedorId: '', notas: '' },
+                datos: { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', moneda: 'MXN', vendedorId: '', vendedorIdMXN: '', vendedorIdUSD: '', notas: '' },
+                partidasMXN: [],
+                partidasUSD: [],
                 partidas: []
             };
+            nueva.partidas = nueva.partidasMXN;
+            return nueva;
         }
 
         window.nuevaCotizacion = async function() {
@@ -800,8 +959,22 @@
         };
 
         window.guardarEstadoCotizaciones = async function() {
-            if(cotizaciones[cotIndexActiva]){
-                cotizaciones[cotIndexActiva].datos = {
+            const cot = cotizaciones[cotIndexActiva];
+            if(cot){
+                normalizarCotizacion(cot);
+                const mon = document.getElementById('cot-moneda').value || 'MXN';
+                const vendActual = document.getElementById('cot-vendedor').value;
+
+                const vendMXN = mon === 'MXN' ? vendActual : (cot.datos.vendedorIdMXN || '');
+                const vendUSD = mon === 'USD' ? vendActual : (cot.datos.vendedorIdUSD || '');
+
+                if (mon === 'USD') {
+                    cot.partidasUSD = cot.partidas;
+                } else {
+                    cot.partidasMXN = cot.partidas;
+                }
+
+                cot.datos = {
                     folioMid: document.getElementById('cot-folio-mid').value,
                     folioEnd: document.getElementById('cot-folio-end').value,
                     cliente: document.getElementById('cot-cliente').value,
@@ -812,12 +985,15 @@
                     vigencia: document.getElementById('cot-vigencia').value,
                     plazo: document.getElementById('cot-plazo').value,
                     notas: document.getElementById('cot-notas').value,
-                    moneda: document.getElementById('cot-moneda').value,
-                    vendedorId: document.getElementById('cot-vendedor').value
+                    moneda: mon,
+                    vendedorId: vendActual,
+                    vendedorIdMXN: vendMXN,
+                    vendedorIdUSD: vendUSD
                 };
-                cotizaciones[cotIndexActiva].nombreTab = `Cot. ${cotIndexActiva + 1}`;
-                await setDoc(doc(db, "cotizaciones", cotizaciones[cotIndexActiva].id), cotizaciones[cotIndexActiva]);
+                cot.nombreTab = `Cot. ${cotIndexActiva + 1}`;
+                await setDoc(doc(db, "cotizaciones", cot.id), cot);
                 window.renderSelectTabs();
+                actualizarIndicadoresMoneda();
             }
         };
 
@@ -847,6 +1023,8 @@
         window.cargarCotizacionUI = function() {
             const cot = cotizaciones[cotIndexActiva];
             if (!cot) return;
+            normalizarCotizacion(cot);
+
             document.getElementById('cot-folio-mid').value = cot.datos.folioMid || '';
             document.getElementById('cot-folio-end').value = cot.datos.folioEnd || '';
             document.getElementById('cot-cliente').value = cot.datos.cliente || '';
@@ -860,7 +1038,9 @@
             document.getElementById('cot-moneda').value = cot.datos.moneda || 'MXN';
             
             window.renderSelectVendedores();
-            document.getElementById('cot-vendedor').value = cot.datos.vendedorId || '';
+            const mon = cot.datos.moneda || 'MXN';
+            const vendGuardado = mon === 'USD' ? (cot.datos.vendedorIdUSD || cot.datos.vendedorId) : (cot.datos.vendedorIdMXN || cot.datos.vendedorId);
+            document.getElementById('cot-vendedor').value = vendGuardado || '';
             
             window.renderPartidas();
         };
@@ -976,6 +1156,7 @@
 
         window.agregarPartida = async function() {
             const cot = cotizaciones[cotIndexActiva];
+            normalizarCotizacion(cot);
             
             const pda = document.getElementById('part-pda').value;
             const cant = parseFloat(document.getElementById('part-cant').value);
@@ -1020,11 +1201,15 @@
             const lista = document.getElementById('lista-partidas');
             let granTotal = 0;
             
+            actualizarIndicadoresMoneda();
+
             if (!cot || !cot.partidas) {
                 lista.innerHTML = '';
                 document.getElementById('cot-total-label').innerText = 'Total: $0.00';
                 return;
             }
+
+            const mon = cot.datos?.moneda || 'MXN';
 
             lista.innerHTML = cot.partidas.map((p, i) => {
                 granTotal += p.total;
@@ -1037,7 +1222,7 @@
                         <span class="text-xs text-gray-500 font-bold block">${esc(p.notaArriba)}</span>
                         <span class="text-xs font-bold text-blue-700">${esc(p.descCorta)}</span>
                         <span class="text-xs text-red-600 font-bold ml-2">${esc(p.modelo)}</span><br>
-                        <span class="text-gray-500 text-xs">${p.cantidad} ${esc(p.um)} x $${p.precio.toLocaleString('en-US', {minimumFractionDigits:2})}</span>
+                        <span class="text-gray-500 text-xs">${p.cantidad} ${esc(p.um)} x $${p.precio.toLocaleString('en-US', {minimumFractionDigits:2})} ${mon}</span>
                         ${numInc > 0 ? `<span class="ml-1 text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded font-bold">+${numInc} Incluye</span>` : ''}
                         ${numNot > 0 ? `<span class="ml-1 text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">+${numNot} Notas</span>` : ''}
                         ${p.pdf ? `
@@ -1055,7 +1240,7 @@
                 </div>`;
             }).join('');
 
-            document.getElementById('cot-total-label').innerText = `Total: $${granTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('cot-total-label').innerText = `Total (${mon}): $${granTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
         };
 
         window.eliminarPartida = async function(index) {
@@ -1262,7 +1447,7 @@
             window.cancelarEdicionPartida();
             document.getElementById('loading-screen').classList.remove('hidden');
             await window.guardarEstadoCotizaciones();
-            const copia = JSON.parse(JSON.stringify(cotizaciones[cotIndexActiva]));
+            const copia = normalizarCotizacion(JSON.parse(JSON.stringify(cotizaciones[cotIndexActiva])));
             copia.id = Date.now().toString();
             cotizaciones.push(copia);
             cotIndexActiva = cotizaciones.length - 1;
@@ -1278,7 +1463,7 @@
         window.seleccionarEquipoPorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipo(c); };
         window.seleccionarIncluyePorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipoIncluye(c); };
         ['guardarEquipo','eliminarEquipo','eliminarVendedor','eliminarUsuario','nuevaCotizacion','duplicarCotizacion',
-         'eliminarCotizacionActual','cambiarCotizacionTab','agregarPartida','eliminarPartida'].forEach(n => {
+         'eliminarCotizacionActual','cambiarCotizacionTab','cambiarMonedaCotizacion','copiarPartidasOtraMoneda','agregarPartida','eliminarPartida'].forEach(n => {
             const f = window[n];
             window[n] = async (...a) => {
                 try { return await f(...a); }
@@ -1296,4 +1481,3 @@
     </script>
 </body>
 </html>
-
