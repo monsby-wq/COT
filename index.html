@@ -135,7 +135,10 @@
 
                 <div id="grid-cotizaciones" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-white p-4 rounded shadow">
-                        <h4 class="font-bold mb-3 border-b">Configuración Inicial</h4>
+                        <div class="flex justify-between items-center mb-3 border-b pb-1.5">
+                            <h4 class="font-bold">Configuración Inicial</h4>
+                            <span id="badge-moneda-datos" class="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">🇲🇽 Datos en MXN</span>
+                        </div>
                         <div class="grid grid-cols-2 gap-2 mb-4">
                             <select id="cot-vendedor" class="border p-2 rounded w-full border-red-300 text-sm" onchange="guardarEstadoCotizaciones()"></select>
                             <select id="cot-moneda" class="border p-2 rounded w-full text-sm font-bold bg-emerald-50 text-emerald-900 border-emerald-300" onchange="cambiarMonedaCotizacion()">
@@ -232,9 +235,14 @@
                                 <input type="text" id="inc-marca" placeholder="Marca" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase">
                                 <input type="text" id="inc-tiempo" placeholder="T.E. (Opcional)" class="border p-1.5 rounded text-xs font-bold">
                             </div>
-                            <button type="button" onclick="agregarItemIncluye()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded text-xs w-full transition mb-2">
-                                + Añadir a INCLUYE
-                            </button>
+                            <div class="flex gap-1.5 mb-2">
+                                <button type="button" id="btn-agregar-incluye" onclick="agregarItemIncluye()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded text-xs w-full transition">
+                                    + Añadir a INCLUYE
+                                </button>
+                                <button type="button" id="btn-cancelar-incluye" onclick="cancelarEdicionIncluye()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-1 px-2.5 rounded text-xs transition hidden">
+                                    Cancelar
+                                </button>
+                            </div>
                             <div id="lista-incluye-temp" class="text-xs space-y-1 max-h-28 overflow-y-auto"></div>
                         </div>
 
@@ -318,18 +326,91 @@
         let cotizaciones = [];
         let cotIndexActiva = 0;
         let partidaEditandoIndex = null;
+        let incluyeEditandoIndex = null;
 
         // Listas temporales para la partida que se está armando
         let tempIncluye = [];
         let tempNotasPartida = [];
 
-        // --- NORMALIZADOR PARA MANTENER PARTIDAS EN PESOS (MXN) Y DÓLARES (USD) ---
+        // --- FUNCIONES AUXILIARES DE DATOS Y ORDENAMIENTO DE PARTIDAS ---
+        function crearDatosMonedaVacios() {
+            return { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', notas: '', vendedorId: '' };
+        }
+
+        function extraerDatosMoneda(origen, vendEspecifico) {
+            const d = origen || {};
+            return {
+                folioMid: d.folioMid || '',
+                folioEnd: d.folioEnd || '',
+                cliente: d.cliente || '',
+                referencia: d.referencia || '',
+                contacto: d.contacto || '',
+                lugar: d.lugar || '',
+                pago: d.pago || '',
+                vigencia: d.vigencia || '',
+                plazo: d.plazo || '',
+                notas: d.notas || '',
+                vendedorId: vendEspecifico !== undefined ? vendEspecifico : (d.vendedorId || '')
+            };
+        }
+
+        function tieneInformacionCapturada(d) {
+            if (!d) return false;
+            return Boolean(d.folioMid || d.folioEnd || d.cliente || d.referencia || d.contacto || d.lugar || d.pago || d.vigencia || d.plazo || d.notas);
+        }
+
+        // Ordena las partidas de forma consecutiva según su número de partida (1, 2, 3, 4, 8...)
+        function ordenarPartidasConsecutivas(lista) {
+            if (!Array.isArray(lista)) return;
+            lista.sort((a, b) => {
+                const numA = parseFloat(a.pda);
+                const numB = parseFloat(b.pda);
+                const validA = !isNaN(numA);
+                const validB = !isNaN(numB);
+                if (validA && validB) return numA - numB;
+                if (validA) return -1;
+                if (validB) return 1;
+                return 0;
+            });
+        }
+
+        // Obtiene el primer número de partida consecutivo disponible (ej. si existen 1, 2, 3, 8 -> sugiere 4)
+        function obtenerSiguientePdaDisponible(lista) {
+            if (!Array.isArray(lista) || lista.length === 0) return 1;
+            const usados = new Set();
+            lista.forEach((p, idx) => {
+                const n = parseInt(p.pda, 10);
+                if (!isNaN(n) && n > 0) usados.add(n);
+                else usados.add(idx + 1);
+            });
+            let candidato = 1;
+            while (usados.has(candidato)) candidato++;
+            return candidato;
+        }
+
+        function actualizarPlaceholderPda() {
+            const cot = cotizaciones[cotIndexActiva];
+            const inp = document.getElementById('part-pda');
+            if (!inp || !cot || partidaEditandoIndex !== null) return;
+            const sig = obtenerSiguientePdaDisponible(cot.partidas);
+            inp.placeholder = `Pda. (${sig})`;
+        }
+
+        // --- NORMALIZADOR PARA MANTENER DATOS Y PARTIDAS EN PESOS (MXN) Y DÓLARES (USD) ---
         function normalizarCotizacion(cot) {
             if (!cot) return cot;
-            if (!cot.datos) {
-                cot.datos = { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', moneda: 'MXN', vendedorId: '', vendedorIdMXN: '', vendedorIdUSD: '', notas: '' };
+            const mon = (cot.monedaActiva || cot.datos?.moneda || 'MXN');
+            cot.monedaActiva = mon;
+
+            if (!cot.datosMXN && !cot.datosUSD) {
+                const base = cot.datos || crearDatosMonedaVacios();
+                cot.datosMXN = extraerDatosMoneda(base, base.vendedorIdMXN !== undefined ? base.vendedorIdMXN : (mon === 'MXN' ? base.vendedorId : ''));
+                cot.datosUSD = extraerDatosMoneda(base, base.vendedorIdUSD !== undefined ? base.vendedorIdUSD : (mon === 'USD' ? base.vendedorId : ''));
+            } else {
+                cot.datosMXN = extraerDatosMoneda(cot.datosMXN);
+                cot.datosUSD = extraerDatosMoneda(cot.datosUSD);
             }
-            const mon = cot.datos.moneda || 'MXN';
+
             if (!Array.isArray(cot.partidasMXN) && !Array.isArray(cot.partidasUSD)) {
                 const existentes = Array.isArray(cot.partidas) ? cot.partidas : [];
                 cot.partidasMXN = mon === 'MXN' ? JSON.parse(JSON.stringify(existentes)) : [];
@@ -338,17 +419,53 @@
                 if (!Array.isArray(cot.partidasMXN)) cot.partidasMXN = [];
                 if (!Array.isArray(cot.partidasUSD)) cot.partidasUSD = [];
             }
-            if (cot.datos.vendedorIdMXN === undefined) cot.datos.vendedorIdMXN = mon === 'MXN' ? (cot.datos.vendedorId || '') : '';
-            if (cot.datos.vendedorIdUSD === undefined) cot.datos.vendedorIdUSD = mon === 'USD' ? (cot.datos.vendedorId || '') : '';
+
+            ordenarPartidasConsecutivas(cot.partidasMXN);
+            ordenarPartidasConsecutivas(cot.partidasUSD);
+
+            const datosActivos = mon === 'USD' ? cot.datosUSD : cot.datosMXN;
+            cot.datos = { ...datosActivos, moneda: mon };
             cot.partidas = mon === 'USD' ? cot.partidasUSD : cot.partidasMXN;
             return cot;
+        }
+
+        function leerFormularioDatosUI() {
+            return {
+                folioMid: document.getElementById('cot-folio-mid').value,
+                folioEnd: document.getElementById('cot-folio-end').value,
+                cliente: document.getElementById('cot-cliente').value,
+                referencia: document.getElementById('cot-referencia').value,
+                contacto: document.getElementById('cot-contacto').value,
+                lugar: document.getElementById('cot-lugar').value,
+                pago: document.getElementById('cot-pago').value,
+                vigencia: document.getElementById('cot-vigencia').value,
+                plazo: document.getElementById('cot-plazo').value,
+                notas: document.getElementById('cot-notas').value,
+                vendedorId: document.getElementById('cot-vendedor').value
+            };
+        }
+
+        function escribirFormularioDatosUI(d, moneda) {
+            document.getElementById('cot-folio-mid').value = d.folioMid || '';
+            document.getElementById('cot-folio-end').value = d.folioEnd || '';
+            document.getElementById('cot-cliente').value = d.cliente || '';
+            document.getElementById('cot-referencia').value = d.referencia || '';
+            document.getElementById('cot-contacto').value = d.contacto || '';
+            document.getElementById('cot-lugar').value = d.lugar || '';
+            document.getElementById('cot-pago').value = d.pago || '';
+            document.getElementById('cot-vigencia').value = d.vigencia || '';
+            document.getElementById('cot-plazo').value = d.plazo || '';
+            document.getElementById('cot-notas').value = d.notas || '';
+            document.getElementById('cot-moneda').value = moneda || 'MXN';
+            window.renderSelectVendedores();
+            document.getElementById('cot-vendedor').value = d.vendedorId || '';
         }
 
         function actualizarIndicadoresMoneda() {
             const cot = cotizaciones[cotIndexActiva];
             if (!cot) return;
             normalizarCotizacion(cot);
-            const mon = cot.datos.moneda || 'MXN';
+            const mon = cot.monedaActiva || 'MXN';
             const cantMXN = cot.partidasMXN.length;
             const cantUSD = cot.partidasUSD.length;
 
@@ -357,12 +474,20 @@
             if (optMXN) optMXN.textContent = `MXN - Pesos (${cantMXN} pda${cantMXN === 1 ? '' : 's'})`;
             if (optUSD) optUSD.textContent = `USD - Dólares (${cantUSD} pda${cantUSD === 1 ? '' : 's'})`;
 
+            const clsBadge = mon === 'MXN'
+                ? 'text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold'
+                : 'text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold';
+
             const badge = document.getElementById('badge-moneda-partidas');
             if (badge) {
                 badge.textContent = mon === 'MXN' ? '🇲🇽 Editando en MXN' : '🇺🇸 Editando en USD';
-                badge.className = mon === 'MXN'
-                    ? 'text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold'
-                    : 'text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold';
+                badge.className = clsBadge;
+            }
+
+            const badgeDatos = document.getElementById('badge-moneda-datos');
+            if (badgeDatos) {
+                badgeDatos.textContent = mon === 'MXN' ? '🇲🇽 Datos en MXN' : '🇺🇸 Datos en USD';
+                badgeDatos.className = clsBadge;
             }
 
             const btnCopiar = document.getElementById('btn-copiar-moneda');
@@ -373,37 +498,43 @@
             }
         }
 
-        // --- CAMBIO DE MONEDA CONSERVANDO INFORMACIÓN DE AMBAS ---
+        // --- CAMBIO DE MONEDA CONSERVANDO DATOS Y PARTIDAS DE AMBAS ---
         window.cambiarMonedaCotizacion = async function() {
             const cot = cotizaciones[cotIndexActiva];
             if (!cot) return;
             normalizarCotizacion(cot);
 
-            const monedaAnterior = cot.datos.moneda || 'MXN';
+            const monedaAnterior = cot.monedaActiva || 'MXN';
             const nuevaMoneda = document.getElementById('cot-moneda').value;
             if (monedaAnterior === nuevaMoneda) return;
 
             window.cancelarEdicionPartida();
 
-            // Guarda el vendedor y las partidas de la moneda que se estaba visualizando
-            const vendActual = document.getElementById('cot-vendedor').value;
+            // 1. Guarda los datos comerciales, folio, condiciones y partidas de la moneda en la que estábamos
+            const datosCapturados = leerFormularioDatosUI();
             if (monedaAnterior === 'USD') {
-                cot.datos.vendedorIdUSD = vendActual;
+                cot.datosUSD = datosCapturados;
                 cot.partidasUSD = cot.partidas;
             } else {
-                cot.datos.vendedorIdMXN = vendActual;
+                cot.datosMXN = datosCapturados;
                 cot.partidasMXN = cot.partidas;
             }
 
-            // Cambia a la nueva moneda y restaura sus partidas y su vendedor (o mantiene el actual si aún no tenía)
-            cot.datos.moneda = nuevaMoneda;
+            // 2. Si la moneda destino aún está completamente vacía, precarga los datos base para ahorrar captura
+            const datosDestino = nuevaMoneda === 'USD' ? cot.datosUSD : cot.datosMXN;
+            if (!tieneInformacionCapturada(datosDestino) && tieneInformacionCapturada(datosCapturados)) {
+                const copiaInicial = { ...datosCapturados, vendedorId: datosDestino.vendedorId || datosCapturados.vendedorId };
+                if (nuevaMoneda === 'USD') cot.datosUSD = copiaInicial;
+                else cot.datosMXN = copiaInicial;
+            }
+
+            // 3. Activa la nueva moneda y carga sus datos y partidas propios en pantalla
+            cot.monedaActiva = nuevaMoneda;
+            const nuevosDatosActivos = nuevaMoneda === 'USD' ? cot.datosUSD : cot.datosMXN;
+            cot.datos = { ...nuevosDatosActivos, moneda: nuevaMoneda };
             cot.partidas = nuevaMoneda === 'USD' ? cot.partidasUSD : cot.partidasMXN;
 
-            const vendNuevaMoneda = nuevaMoneda === 'USD' ? cot.datos.vendedorIdUSD : cot.datos.vendedorIdMXN;
-            if (vendNuevaMoneda) {
-                document.getElementById('cot-vendedor').value = vendNuevaMoneda;
-                cot.datos.vendedorId = vendNuevaMoneda;
-            }
+            escribirFormularioDatosUI(nuevosDatosActivos, nuevaMoneda);
 
             document.getElementById('loading-screen').classList.remove('hidden');
             await window.guardarEstadoCotizaciones();
@@ -411,56 +542,72 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        // --- COPIAR PARTIDAS ENTRE MXN Y USD ---
+        // --- COPIAR PARTIDAS Y DATOS ENTRE MXN Y USD ---
         window.copiarPartidasOtraMoneda = async function() {
             const cot = cotizaciones[cotIndexActiva];
             if (!cot) return;
             normalizarCotizacion(cot);
 
-            const monActual = cot.datos.moneda || 'MXN';
+            const monActual = cot.monedaActiva || 'MXN';
             const monOrigen = monActual === 'MXN' ? 'USD' : 'MXN';
             const listaOrigen = monActual === 'MXN' ? cot.partidasUSD : cot.partidasMXN;
+            const datosOrigen = monActual === 'MXN' ? cot.datosUSD : cot.datosMXN;
 
-            if (!listaOrigen || listaOrigen.length === 0) {
-                return alert(`⚠️ No hay partidas guardadas en ${monOrigen} dentro de esta cotización para copiar.`);
+            if ((!listaOrigen || listaOrigen.length === 0) && !tieneInformacionCapturada(datosOrigen)) {
+                return alert(`⚠️ No hay información ni partidas guardadas en ${monOrigen} dentro de esta cotización para copiar.`);
             }
 
-            if (cot.partidas.length > 0) {
+            if (cot.partidas.length > 0 && listaOrigen.length > 0) {
                 if (!confirm(`Ya tienes ${cot.partidas.length} partida(s) en ${monActual}. ¿Deseas reemplazarlas con las ${listaOrigen.length} partida(s) de ${monOrigen}?`)) {
                     return;
                 }
             }
 
-            const msgTc = monActual === 'USD'
-                ? 'Opcional: Si deseas dividir los precios de MXN a USD con un Tipo de Cambio, escríbelo aquí (ej. 20.00).\n\nDeja "1" para copiar los precios tal cual y editarlos manualmente:'
-                : 'Opcional: Si deseas multiplicar los precios de USD a MXN con un Tipo de Cambio, escríbelo aquí (ej. 20.00).\n\nDeja "1" para copiar los precios tal cual y editarlos manualmente:';
+            if (listaOrigen && listaOrigen.length > 0) {
+                const msgTc = monActual === 'USD'
+                    ? 'Opcional: Si deseas dividir los precios de MXN a USD con un Tipo de Cambio, escríbelo aquí (ej. 20.00).\n\nDeja "1" para copiar los precios tal cual y editarlos manualmente:'
+                    : 'Opcional: Si deseas multiplicar los precios de USD a MXN con un Tipo de Cambio, escríbelo aquí (ej. 20.00).\n\nDeja "1" para copiar los precios tal cual y editarlos manualmente:';
 
-            const tcInput = prompt(msgTc, '1');
-            if (tcInput === null) return;
+                const tcInput = prompt(msgTc, '1');
+                if (tcInput === null) return;
 
-            let tc = parseFloat(tcInput);
-            if (isNaN(tc) || tc <= 0) tc = 1;
+                let tc = parseFloat(tcInput);
+                if (isNaN(tc) || tc <= 0) tc = 1;
 
-            const nuevasPartidas = JSON.parse(JSON.stringify(listaOrigen)).map(p => {
-                let nuevoPrecio = p.precio || 0;
-                if (tc !== 1) {
-                    nuevoPrecio = monActual === 'USD' ? (nuevoPrecio / tc) : (nuevoPrecio * tc);
-                    nuevoPrecio = Math.round(nuevoPrecio * 100) / 100;
+                const nuevasPartidas = JSON.parse(JSON.stringify(listaOrigen)).map(p => {
+                    let nuevoPrecio = p.precio || 0;
+                    if (tc !== 1) {
+                        nuevoPrecio = monActual === 'USD' ? (nuevoPrecio / tc) : (nuevoPrecio * tc);
+                        nuevoPrecio = Math.round(nuevoPrecio * 100) / 100;
+                    }
+                    const cant = parseFloat(p.cantidad) || 0;
+                    return {
+                        ...p,
+                        precio: nuevoPrecio,
+                        total: Math.round(cant * nuevoPrecio * 100) / 100
+                    };
+                });
+
+                ordenarPartidasConsecutivas(nuevasPartidas);
+
+                if (monActual === 'USD') {
+                    cot.partidasUSD = nuevasPartidas;
+                    cot.partidas = cot.partidasUSD;
+                } else {
+                    cot.partidasMXN = nuevasPartidas;
+                    cot.partidas = cot.partidasMXN;
                 }
-                const cant = parseFloat(p.cantidad) || 0;
-                return {
-                    ...p,
-                    precio: nuevoPrecio,
-                    total: Math.round(cant * nuevoPrecio * 100) / 100
-                };
-            });
+            }
 
-            if (monActual === 'USD') {
-                cot.partidasUSD = nuevasPartidas;
-                cot.partidas = cot.partidasUSD;
-            } else {
-                cot.partidasMXN = nuevasPartidas;
-                cot.partidas = cot.partidasMXN;
+            if (tieneInformacionCapturada(datosOrigen)) {
+                const datosActualesUI = leerFormularioDatosUI();
+                if (!tieneInformacionCapturada(datosActualesUI) || confirm(`¿Deseas copiar también los Datos Comerciales, Folio y Condiciones de ${monOrigen} a ${monActual}?`)) {
+                    const vendConservar = datosActualesUI.vendedorId || datosOrigen.vendedorId;
+                    const datosCopiados = { ...datosOrigen, vendedorId: vendConservar };
+                    if (monActual === 'USD') cot.datosUSD = datosCopiados;
+                    else cot.datosMXN = datosCopiados;
+                    escribirFormularioDatosUI(datosCopiados, monActual);
+                }
             }
 
             window.cancelarEdicionPartida();
@@ -484,7 +631,7 @@
             document.getElementById(idPanel).classList.toggle('hidden');
         };
 
-        // --- MANEJO DE SUB-PARTIDAS (INCLUYE) ---
+        // --- MANEJO DE SUB-PARTIDAS (INCLUYE) CON OPCIÓN DE EDITAR ---
         window.buscarEquipoParaIncluye = function() {
             const f = document.getElementById('buscador-incluye').value.toLowerCase();
             const ul = document.getElementById('resultados-busqueda-incluye');
@@ -515,6 +662,52 @@
             document.getElementById('resultados-busqueda-incluye').classList.add('hidden');
         };
 
+        window.editarItemIncluye = function(i) {
+            const inc = tempIncluye[i];
+            if (!inc) return;
+            incluyeEditandoIndex = i;
+
+            document.getElementById('inc-prefijo').value = inc.prefijo || '•';
+            document.getElementById('inc-desc-corta').value = inc.descCorta || '';
+            document.getElementById('inc-desc-normal').value = inc.descNormal || '';
+            document.getElementById('inc-modelo').value = inc.modelo || '';
+            document.getElementById('inc-marca').value = inc.marca || '';
+            document.getElementById('inc-tiempo').value = inc.tiempo || '';
+
+            const btn = document.getElementById('btn-agregar-incluye');
+            if (btn) {
+                btn.innerText = '💾 Actualizar en INCLUYE';
+                btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                btn.classList.add('bg-amber-600', 'hover:bg-amber-700');
+            }
+            const btnCancel = document.getElementById('btn-cancelar-incluye');
+            if (btnCancel) btnCancel.classList.remove('hidden');
+
+            document.getElementById('panel-incluye').classList.remove('hidden');
+            window.renderTempIncluye();
+        };
+
+        window.cancelarEdicionIncluye = function() {
+            incluyeEditandoIndex = null;
+            document.getElementById('inc-prefijo').value = '•';
+            document.getElementById('inc-desc-corta').value = '';
+            document.getElementById('inc-desc-normal').value = '';
+            document.getElementById('inc-modelo').value = '';
+            document.getElementById('inc-marca').value = '';
+            document.getElementById('inc-tiempo').value = '';
+
+            const btn = document.getElementById('btn-agregar-incluye');
+            if (btn) {
+                btn.innerText = '+ Añadir a INCLUYE';
+                btn.classList.remove('bg-amber-600', 'hover:bg-amber-700');
+                btn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+            }
+            const btnCancel = document.getElementById('btn-cancelar-incluye');
+            if (btnCancel) btnCancel.classList.add('hidden');
+
+            window.renderTempIncluye();
+        };
+
         window.agregarItemIncluye = function() {
             const prefijo = document.getElementById('inc-prefijo').value.trim() || '•';
             const descCorta = document.getElementById('inc-desc-corta').value.trim();
@@ -525,19 +718,20 @@
 
             if (!descCorta && !descNormal) return alert("⚠️ Ingresa al menos la descripción del accesorio a incluir.");
 
-            tempIncluye.push({ prefijo, descCorta, descNormal, modelo, marca, tiempo });
+            const itemObj = { prefijo, descCorta, descNormal, modelo, marca, tiempo };
 
-            document.getElementById('inc-prefijo').value = '•';
-            document.getElementById('inc-desc-corta').value = '';
-            document.getElementById('inc-desc-normal').value = '';
-            document.getElementById('inc-modelo').value = '';
-            document.getElementById('inc-marca').value = '';
-            document.getElementById('inc-tiempo').value = '';
+            if (incluyeEditandoIndex !== null) {
+                tempIncluye[incluyeEditandoIndex] = itemObj;
+            } else {
+                tempIncluye.push(itemObj);
+            }
 
-            window.renderTempIncluye();
+            window.cancelarEdicionIncluye();
         };
 
         window.eliminarItemIncluye = function(i) {
+            if (incluyeEditandoIndex === i) window.cancelarEdicionIncluye();
+            else if (incluyeEditandoIndex !== null && i < incluyeEditandoIndex) incluyeEditandoIndex--;
             tempIncluye.splice(i, 1);
             window.renderTempIncluye();
         };
@@ -546,14 +740,17 @@
             document.getElementById('btn-toggle-incluye').innerText = `➕ INCLUYE (${tempIncluye.length})`;
             const cont = document.getElementById('lista-incluye-temp');
             cont.innerHTML = tempIncluye.map((inc, i) => `
-                <div class="bg-white p-1.5 rounded border flex justify-between items-center">
+                <div class="p-1.5 rounded border flex justify-between items-center ${incluyeEditandoIndex === i ? 'bg-amber-100 border-amber-400' : 'bg-white'}">
                     <div class="truncate pr-2">
                         <b>${esc(inc.prefijo)}</b> <span class="text-blue-700 font-bold">${esc(inc.descCorta)}</span> 
                         <span class="text-gray-600">${inc.descNormal ? esc(inc.descNormal.substring(0,25)) + '...' : ''}</span>
                         <span class="text-red-600 font-bold">${esc(inc.modelo)} ${esc(inc.marca)}</span>
                         <b>${esc(inc.tiempo)}</b>
                     </div>
-                    <button type="button" onclick="eliminarItemIncluye(${i})" class="text-red-500 font-bold px-1">X</button>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button type="button" onclick="editarItemIncluye(${i})" title="Editar este artículo" class="text-blue-600 hover:text-blue-800 font-bold px-1">✏️</button>
+                        <button type="button" onclick="eliminarItemIncluye(${i})" title="Eliminar" class="text-red-500 hover:text-red-700 font-bold px-1">X</button>
+                    </div>
                 </div>
             `).join('');
         };
@@ -917,7 +1114,10 @@
             const nueva = {
                 id: Date.now().toString(),
                 nombreTab: `Cot. ${cotizaciones.length + 1}`,
-                datos: { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', moneda: 'MXN', vendedorId: '', vendedorIdMXN: '', vendedorIdUSD: '', notas: '' },
+                monedaActiva: 'MXN',
+                datosMXN: crearDatosMonedaVacios(),
+                datosUSD: crearDatosMonedaVacios(),
+                datos: { ...crearDatosMonedaVacios(), moneda: 'MXN' },
                 partidasMXN: [],
                 partidasUSD: [],
                 partidas: []
@@ -963,33 +1163,22 @@
             if(cot){
                 normalizarCotizacion(cot);
                 const mon = document.getElementById('cot-moneda').value || 'MXN';
-                const vendActual = document.getElementById('cot-vendedor').value;
+                cot.monedaActiva = mon;
 
-                const vendMXN = mon === 'MXN' ? vendActual : (cot.datos.vendedorIdMXN || '');
-                const vendUSD = mon === 'USD' ? vendActual : (cot.datos.vendedorIdUSD || '');
+                const datosCapturados = leerFormularioDatosUI();
 
                 if (mon === 'USD') {
+                    cot.datosUSD = datosCapturados;
                     cot.partidasUSD = cot.partidas;
                 } else {
+                    cot.datosMXN = datosCapturados;
                     cot.partidasMXN = cot.partidas;
                 }
 
-                cot.datos = {
-                    folioMid: document.getElementById('cot-folio-mid').value,
-                    folioEnd: document.getElementById('cot-folio-end').value,
-                    cliente: document.getElementById('cot-cliente').value,
-                    referencia: document.getElementById('cot-referencia').value,
-                    contacto: document.getElementById('cot-contacto').value,
-                    lugar: document.getElementById('cot-lugar').value,
-                    pago: document.getElementById('cot-pago').value,
-                    vigencia: document.getElementById('cot-vigencia').value,
-                    plazo: document.getElementById('cot-plazo').value,
-                    notas: document.getElementById('cot-notas').value,
-                    moneda: mon,
-                    vendedorId: vendActual,
-                    vendedorIdMXN: vendMXN,
-                    vendedorIdUSD: vendUSD
-                };
+                ordenarPartidasConsecutivas(cot.partidasMXN);
+                ordenarPartidasConsecutivas(cot.partidasUSD);
+
+                cot.datos = { ...datosCapturados, moneda: mon };
                 cot.nombreTab = `Cot. ${cotIndexActiva + 1}`;
                 await setDoc(doc(db, "cotizaciones", cot.id), cot);
                 window.renderSelectTabs();
@@ -1000,8 +1189,13 @@
         window.renderSelectTabs = function() {
             const select = document.getElementById('cotizacion-activa');
             select.innerHTML = cotizaciones.map((c, i) => {
-                const folioStr = c.datos && c.datos.folioMid ? ` [NO-${c.datos.folioMid.toUpperCase()}-${ANIO}]` : '';
-                return `<option value="${i}">✏️ Cot. ${i + 1}${folioStr} - ${esc(c.datos.cliente) || 'Nueva'}</option>`;
+                normalizarCotizacion(c);
+                const dAct = c.monedaActiva === 'USD' ? c.datosUSD : c.datosMXN;
+                const dAlt = c.monedaActiva === 'USD' ? c.datosMXN : c.datosUSD;
+                const folioMid = dAct?.folioMid || dAlt?.folioMid || '';
+                const cliente = dAct?.cliente || dAlt?.cliente || 'Nueva';
+                const folioStr = folioMid ? ` [NO-${folioMid.toUpperCase()}-${ANIO}]` : '';
+                return `<option value="${i}">✏️ Cot. ${i + 1}${folioStr} - ${esc(cliente)}</option>`;
             }).join('');
             select.value = cotIndexActiva;
         };
@@ -1025,22 +1219,9 @@
             if (!cot) return;
             normalizarCotizacion(cot);
 
-            document.getElementById('cot-folio-mid').value = cot.datos.folioMid || '';
-            document.getElementById('cot-folio-end').value = cot.datos.folioEnd || '';
-            document.getElementById('cot-cliente').value = cot.datos.cliente || '';
-            document.getElementById('cot-referencia').value = cot.datos.referencia || '';
-            document.getElementById('cot-contacto').value = cot.datos.contacto || '';
-            document.getElementById('cot-lugar').value = cot.datos.lugar || '';
-            document.getElementById('cot-pago').value = cot.datos.pago || '';
-            document.getElementById('cot-vigencia').value = cot.datos.vigencia || '';
-            document.getElementById('cot-plazo').value = cot.datos.plazo || '';
-            document.getElementById('cot-notas').value = cot.datos.notas || '';
-            document.getElementById('cot-moneda').value = cot.datos.moneda || 'MXN';
-            
-            window.renderSelectVendedores();
-            const mon = cot.datos.moneda || 'MXN';
-            const vendGuardado = mon === 'USD' ? (cot.datos.vendedorIdUSD || cot.datos.vendedorId) : (cot.datos.vendedorIdMXN || cot.datos.vendedorId);
-            document.getElementById('cot-vendedor').value = vendGuardado || '';
+            const mon = cot.monedaActiva || 'MXN';
+            const datosActivos = mon === 'USD' ? cot.datosUSD : cot.datosMXN;
+            escribirFormularioDatosUI(datosActivos, mon);
             
             window.renderPartidas();
         };
@@ -1094,8 +1275,9 @@
             if (!p) return;
 
             partidaEditandoIndex = index;
+            window.cancelarEdicionIncluye();
 
-            document.getElementById('part-pda').value = p.pda || '';
+            document.getElementById('part-pda').value = p.pda || (index + 1);
             document.getElementById('part-nota-arriba').value = p.notaArriba || '';
             document.getElementById('part-cant').value = p.cantidad || '';
             document.getElementById('part-um').value = p.um || '';
@@ -1138,7 +1320,7 @@
 
             tempIncluye = [];
             tempNotasPartida = [];
-            window.renderTempIncluye();
+            window.cancelarEdicionIncluye();
             window.renderTempNotasPartida();
             sugerirNumeroNota();
 
@@ -1158,7 +1340,9 @@
             const cot = cotizaciones[cotIndexActiva];
             normalizarCotizacion(cot);
             
-            const pda = document.getElementById('part-pda').value;
+            const pdaInput = document.getElementById('part-pda').value.trim();
+            const pda = pdaInput !== '' ? pdaInput : String(obtenerSiguientePdaDisponible(cot.partidas));
+
             const cant = parseFloat(document.getElementById('part-cant').value);
             const um = document.getElementById('part-um').value;
             
@@ -1188,6 +1372,9 @@
                 cot.partidas.push(partidaObj);
             }
 
+            // Ordena automáticamente para mantener numeración consecutiva (1, 2, 3, 4, 8...)
+            ordenarPartidasConsecutivas(cot.partidas);
+
             window.cancelarEdicionPartida();
             
             document.getElementById('loading-screen').classList.remove('hidden');
@@ -1202,6 +1389,7 @@
             let granTotal = 0;
             
             actualizarIndicadoresMoneda();
+            actualizarPlaceholderPda();
 
             if (!cot || !cot.partidas) {
                 lista.innerHTML = '';
@@ -1209,7 +1397,7 @@
                 return;
             }
 
-            const mon = cot.datos?.moneda || 'MXN';
+            const mon = cot.monedaActiva || 'MXN';
 
             lista.innerHTML = cot.partidas.map((p, i) => {
                 granTotal += p.total;
@@ -1218,8 +1406,8 @@
                 return `
                 <div class="border-b py-2 flex justify-between items-center ${partidaEditandoIndex === i ? 'bg-amber-50' : ''}">
                     <div>
-                        <span class="font-bold mr-2">${esc(p.pda || (i+1))}</span>
-                        <span class="text-xs text-gray-500 font-bold block">${esc(p.notaArriba)}</span>
+                        <span class="font-bold mr-2 bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded text-xs">Pda. ${esc(p.pda || (i+1))}</span>
+                        <span class="text-xs text-gray-500 font-bold block mt-0.5">${esc(p.notaArriba)}</span>
                         <span class="text-xs font-bold text-blue-700">${esc(p.descCorta)}</span>
                         <span class="text-xs text-red-600 font-bold ml-2">${esc(p.modelo)}</span><br>
                         <span class="text-gray-500 text-xs">${p.cantidad} ${esc(p.um)} x $${p.precio.toLocaleString('en-US', {minimumFractionDigits:2})} ${mon}</span>
@@ -1289,6 +1477,8 @@
                 const vend = vendedores.find(v => v.id.toString() === d.vendedorId.toString());
                 if (!vend) { document.getElementById('loading-screen').classList.add('hidden'); return alert('⚠️ Vendedor inválido.'); }
                 
+                ordenarPartidasConsecutivas(cot.partidas);
+
                 let totalSuma = cot.partidas.reduce((acc, curr) => acc + curr.total, 0);
                 const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
                 const hoy = new Date();
