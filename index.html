@@ -80,7 +80,7 @@
             background-color: #0B192C !important;
         }
 
-        /* Menús desplegables flotantes de búsqueda (legibles sobre otros textos) */
+        /* Menús desplegables flotantes de búsqueda */
         #resultados-busqueda,
         #resultados-busqueda-incluye {
             background-color: rgba(255, 255, 255, 0.96) !important;
@@ -377,7 +377,7 @@
                         <select id="cotizacion-activa" onchange="cambiarCotizacionTab()" class="p-1.5 rounded-lg font-bold text-[#0B192C] text-sm max-w-xs"></select>
                         <!-- Selector de Versiones / Revisiones con Fecha y Hora -->
                         <div class="flex items-center gap-1">
-                            <select id="cot-version-activa" onchange="cambiarVersionCotizacion()" title="Consultar historial de versiones con fecha y hora" class="p-1.5 rounded-lg font-bold !text-[#0E859F] text-xs max-w-xs"></select>
+                            <select id="cot-version-activa" onchange="cambiarVersionCotizacion(this.value)" title="Consultar historial de versiones con fecha y hora" class="p-1.5 rounded-lg font-bold !text-[#0E859F] text-xs max-w-xs"></select>
                             <button type="button" onclick="crearNuevaRevision()" title="Guardar versión actual con fecha/hora e iniciar una nueva Revisión (Ej. REV 1, REV 2)" class="bg-[#0E859F] hover:bg-[#0b6e84] text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">+ Nueva Rev.</button>
                             <button type="button" id="btn-eliminar-version" onclick="eliminarVersionActual()" title="Eliminar únicamente esta revisión" class="text-red-500 hover:bg-red-500/10 px-2 py-1.5 rounded-lg text-xs font-bold transition hidden">✕</button>
                         </div>
@@ -402,15 +402,18 @@
                             </select>
                         </div>
 
-                        <div class="flex flex-wrap justify-between items-center mb-2 gap-1">
+                        <div class="flex flex-wrap justify-between items-center mb-1.5 gap-1">
                             <h4 class="font-bold text-[#0B192C]">Estructura del Folio</h4>
                             <span id="badge-version-actual" class="text-[11px] font-bold text-[#ED813C]">📜 Versión 1 (Original)</span>
                         </div>
+                        <!-- Botones directos para cambiar entre versiones (V1: Original, V2: REV 1...) con un clic -->
+                        <div id="barra-botones-versiones" class="flex flex-wrap gap-1.5 mb-2.5"></div>
+
                         <div class="flex flex-wrap items-center gap-2 mb-4">
                             <span class="font-bold text-[#0E859F]">NO-</span>
                             <input type="text" id="cot-folio-mid" placeholder="XXX" class="p-2 w-16 text-center font-bold uppercase rounded-lg" onchange="guardarEstadoCotizaciones()">
                             <span class="font-bold text-[#0E859F]" id="lbl-anio"></span>
-                            <input type="text" id="cot-folio-end" placeholder="Rev" class="p-2 w-24 text-center font-bold uppercase rounded-lg" onchange="guardarEstadoCotizaciones()">
+                            <input type="text" id="cot-folio-end" placeholder="Rev" class="p-2 w-24 text-center font-bold uppercase rounded-lg" onchange="manejarCambioCampoRev()">
                             <button type="button" onclick="crearNuevaRevision()" title="Congelar versión actual y generar nueva revisión (REV 1, REV 2...)" class="az-orange-btn text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
                                 📌 Guardar y Crear Rev.
                             </button>
@@ -448,7 +451,7 @@
                             <ul id="resultados-busqueda" class="rounded-lg max-h-40 overflow-y-auto hidden absolute z-50 w-full left-0 mt-1"></ul>
                         </div>
                         
-                        <!-- Pda. ahora es tipo texto para permitir números, letras y caracteres (Ej: 1, 2, M1, M2, A-1) -->
+                        <!-- Pda. acepta números, letras y caracteres (Ej: 1, 2, M1, M2, A-1) -->
                         <div class="grid grid-cols-4 gap-1.5 mb-2">
                             <input type="text" id="part-pda" placeholder="Pda. (Ej: 1 o M1)" class="p-2 rounded-lg uppercase text-sm">
                             <input type="number" id="part-cant" placeholder="Cant." class="p-2 rounded-lg text-sm">
@@ -590,6 +593,9 @@
 
         let tempIncluye = [];
         let tempNotasPartida = [];
+
+        // Respaldo en memoria de la versión cuando se abre, para proteger la Original si el usuario cambia "Rev" después de editar
+        let respaldoVersionAlAbrir = null;
 
         // --- FORMATEADOR DE FECHA Y HORA PARA VERSIONES ---
         function formatearFechaHora(inputDate) {
@@ -771,7 +777,6 @@
             return Boolean(d.folioMid || d.folioEnd || d.cliente || d.referencia || d.contacto || d.lugar || d.pago || d.vigencia || d.plazo || d.notas);
         }
 
-        // Ordena de forma consecutiva tanto números (1, 2, 3, 10) como claves alfanuméricas (M1, M2, M3, M10)
         function ordenarPartidasConsecutivas(lista) {
             if (!Array.isArray(lista)) return;
             lista.sort((a, b) => {
@@ -784,11 +789,9 @@
             });
         }
 
-        // Sugiere el siguiente número o clave alfanumérica disponible (Ej: si hay M1, M2 -> sugiere M3; si hay 1, 2, 4 -> sugiere 3)
         function obtenerSiguientePdaDisponible(lista) {
             if (!Array.isArray(lista) || lista.length === 0) return '1';
 
-            // Revisa si la última partida capturada tiene algún prefijo de letras (como "M" en "M1")
             let prefijoDetectado = '';
             for (let i = lista.length - 1; i >= 0; i--) {
                 const val = String(lista[i].pda ?? '').trim().toUpperCase();
@@ -844,7 +847,20 @@
             return `REV ${totalVers}`;
         }
 
-        // Sincroniza los datos de la versión activa hacia las propiedades principales de la cotización
+        function tomarRespaldoVersionActual() {
+            const cot = cotizaciones[cotIndexActiva];
+            if (!cot || !Array.isArray(cot.versiones) || !cot.versiones[cot.versionActiva]) {
+                respaldoVersionAlAbrir = null;
+                return;
+            }
+            respaldoVersionAlAbrir = {
+                cotId: cot.id,
+                versionIndex: cot.versionActiva,
+                snapshot: JSON.parse(JSON.stringify(cot.versiones[cot.versionActiva]))
+            };
+        }
+
+        // Sincroniza los datos de la versión solicitada hacia las propiedades principales de la cotización
         function cargarVersionEnCotizacion(cot, indexVer) {
             if (!cot || !Array.isArray(cot.versiones) || cot.versiones.length === 0) return;
             const idx = Math.max(0, Math.min(indexVer, cot.versiones.length - 1));
@@ -964,6 +980,7 @@
             const selectVer = document.getElementById('cot-version-activa');
             const badgeVer = document.getElementById('badge-version-actual');
             const btnDelVer = document.getElementById('btn-eliminar-version');
+            const barraBotones = document.getElementById('barra-botones-versiones');
             if (!cot || !selectVer) return;
 
             normalizarCotizacion(cot);
@@ -972,7 +989,7 @@
                 const fh = v.fechaHora ? ` | 📅 ${v.fechaHora}` : '';
                 return `<option value="${idx}">📜 V${idx + 1}: ${esc(etq)}${esc(fh)}</option>`;
             }).join('');
-            selectVer.value = cot.versionActiva;
+            selectVer.value = String(cot.versionActiva);
 
             if (badgeVer) {
                 const vAct = cot.versiones[cot.versionActiva] || {};
@@ -981,30 +998,139 @@
                 badgeVer.textContent = `📜 V${cot.versionActiva + 1} de ${cot.versiones.length}: ${etqActiva}${fhActiva}`;
             }
 
+            // Renderiza pestañas/botones directos para cambiar entre versiones con un clic
+            if (barraBotones) {
+                if (cot.versiones.length > 1) {
+                    barraBotones.innerHTML = cot.versiones.map((v, idx) => {
+                        const activa = idx === cot.versionActiva;
+                        const etq = obtenerEtiquetaVersion(v, idx);
+                        const fh = v.fechaHora ? ` (${v.fechaHora})` : '';
+                        const cls = activa
+                            ? 'bg-[#0E859F] text-white font-bold px-2.5 py-1 rounded-lg text-[11px] transition shadow-sm'
+                            : 'bg-[#0B192C]/10 hover:bg-[#0E859F]/20 text-[#0B192C] font-semibold px-2.5 py-1 rounded-lg text-[11px] transition';
+                        return `<button type="button" onclick="cambiarVersionCotizacion(${idx})" class="${cls}">V${idx + 1}: ${esc(etq)}${esc(fh)}</button>`;
+                    }).join('');
+                } else {
+                    barraBotones.innerHTML = '';
+                }
+            }
+
             if (btnDelVer) {
                 if (cot.versiones.length > 1) btnDelVer.classList.remove('hidden');
                 else btnDelVer.classList.add('hidden');
             }
         }
 
-        // --- CAMBIAR ENTRE VERSIONES (ORIGINAL, REV 1, REV 2...) ---
-        window.cambiarVersionCotizacion = async function() {
+        // --- CAMBIAR ENTRE VERSIONES CORREGIDO (LEE EL ÍNDICE ANTES DE LIMPIAR FORMULARIO) ---
+        window.cambiarVersionCotizacion = async function(indexExplicito) {
             const cot = cotizaciones[cotIndexActiva];
             if (!cot) return;
-            window.cancelarEdicionPartida();
 
-            const nuevoVerIndex = parseInt(document.getElementById('cot-version-activa').value, 10);
+            // 1. IMPORTANTE: Capturar primero el índice elegido antes de cualquier renderizado
+            const selectEl = document.getElementById('cot-version-activa');
+            const nuevoVerIndex = (indexExplicito !== undefined && indexExplicito !== null)
+                ? parseInt(indexExplicito, 10)
+                : parseInt(selectEl.value, 10);
+
             if (isNaN(nuevoVerIndex) || nuevoVerIndex === cot.versionActiva) return;
 
             document.getElementById('loading-screen').classList.remove('hidden');
+
+            // 2. Guardar estado de la versión que estamos dejando
             await window.guardarEstadoCotizaciones();
 
+            // 3. Limpiar variables de edición de partida sin tocar el selector de versiones
+            partidaEditandoIndex = null;
+            incluyeEditandoIndex = null;
+            tempIncluye = [];
+            tempNotasPartida = [];
+
+            // 4. Cargar la versión seleccionada (ej. V1 = 0) y reflejarla en la interfaz
             cargarVersionEnCotizacion(cot, nuevoVerIndex);
             await setDoc(doc(db, "cotizaciones", cot.id), cot);
 
-            window.renderSelectTabs();
             window.cargarCotizacionUI();
+            window.renderSelectTabs();
+            tomarRespaldoVersionActual();
+
             document.getElementById('loading-screen').classList.add('hidden');
+        };
+
+        // --- PROTECCIÓN AUTOMÁTICA CUANDO EL USUARIO ESCRIBE "REV 1" EN LA CASILLA REV ---
+        window.manejarCambioCampoRev = async function() {
+            const cot = cotizaciones[cotIndexActiva];
+            if (!cot) return;
+            normalizarCotizacion(cot);
+
+            const nuevoRev = document.getElementById('cot-folio-end').value.trim().toUpperCase();
+            const snap = (respaldoVersionAlAbrir && respaldoVersionAlAbrir.cotId === cot.id && respaldoVersionAlAbrir.versionIndex === cot.versionActiva)
+                ? respaldoVersionAlAbrir.snapshot
+                : null;
+
+            const mon = cot.monedaActiva || 'MXN';
+            const revAnterior = snap
+                ? ((mon === 'USD' ? snap.datosUSD?.folioEnd : snap.datosMXN?.folioEnd) || '').trim().toUpperCase()
+                : '';
+
+            const teniaDatosPrevios = snap && (
+                (Array.isArray(snap.partidasMXN) && snap.partidasMXN.length > 0) ||
+                (Array.isArray(snap.partidasUSD) && snap.partidasUSD.length > 0) ||
+                tieneInformacionCapturada(snap.datosMXN) ||
+                tieneInformacionCapturada(snap.datosUSD)
+            );
+
+            // Si la versión ya tenía datos y el usuario cambió el código de Revisión (ej. de vacío "" a "REV 1")
+            if (teniaDatosPrevios && nuevoRev !== '' && nuevoRev !== revAnterior) {
+                const etqAnt = revAnterior || (cot.versionActiva === 0 ? 'Original (Sin Rev)' : `V${cot.versionActiva + 1}`);
+                const crearNueva = confirm(
+                    `Ingresaste "${nuevoRev}" en el campo Rev.\n\n` +
+                    `¿Deseas guardar esto como una NUEVA versión/revisión y conservar intacta la versión "${etqAnt}"?\n\n` +
+                    `• Aceptar = Crear nueva versión "${nuevoRev}" y conservar "${etqAnt}"\n` +
+                    `• Cancelar = Modificar la versión actual sin crear otra`
+                );
+
+                if (crearNueva) {
+                    document.getElementById('loading-screen').classList.remove('hidden');
+
+                    // 1. Capturamos todos los datos y partidas actuales en pantalla para la nueva revisión
+                    const datosNuevosUI = leerFormularioDatosUI();
+                    datosNuevosUI.folioEnd = nuevoRev;
+
+                    const ahoraTs = Date.now();
+                    const ahoraStr = formatearFechaHora(ahoraTs);
+
+                    const nuevaVer = {
+                        idVer: String(ahoraTs),
+                        fechaHora: ahoraStr,
+                        monedaActiva: mon,
+                        datosMXN: JSON.parse(JSON.stringify(mon === 'MXN' ? datosNuevosUI : (cot.datosMXN || crearDatosMonedaVacios()))),
+                        datosUSD: JSON.parse(JSON.stringify(mon === 'USD' ? datosNuevosUI : (cot.datosUSD || crearDatosMonedaVacios()))),
+                        partidasMXN: JSON.parse(JSON.stringify(cot.partidasMXN || [])),
+                        partidasUSD: JSON.parse(JSON.stringify(cot.partidasUSD || []))
+                    };
+                    nuevaVer.datosMXN.folioEnd = nuevoRev;
+                    nuevaVer.datosUSD.folioEnd = nuevoRev;
+                    nuevaVer.etiqueta = nuevoRev;
+
+                    // 2. Restauramos intacta la versión anterior desde el respaldo tomado al abrirla
+                    cot.versiones[cot.versionActiva] = JSON.parse(JSON.stringify(snap));
+                    cot.versiones[cot.versionActiva].etiqueta = obtenerEtiquetaVersion(cot.versiones[cot.versionActiva], cot.versionActiva);
+
+                    // 3. Agregamos la nueva revisión y la activamos
+                    cot.versiones.push(nuevaVer);
+                    cargarVersionEnCotizacion(cot, cot.versiones.length - 1);
+
+                    await setDoc(doc(db, "cotizaciones", cot.id), cot);
+                    window.cargarCotizacionUI();
+                    window.renderSelectTabs();
+                    tomarRespaldoVersionActual();
+
+                    document.getElementById('loading-screen').classList.add('hidden');
+                    return;
+                }
+            }
+
+            await window.guardarEstadoCotizaciones();
         };
 
         // --- CREAR UNA NUEVA REVISIÓN CON FECHA Y HORA EXACTA ---
@@ -1013,11 +1139,9 @@
             if (!cot) return;
             window.cancelarEdicionPartida();
 
-            await window.guardarEstadoCotizaciones();
-
             const sugerencia = sugerirSiguienteCodigoRevision(cot);
             const codigoRev = prompt(
-                `Se guardará intacta la versión actual y se creará una nueva revisión con fecha y hora actual.\n\nIngresa el código para el campo Rev (Ej. REV 1, REV 2):`,
+                `Se conservará intacta la versión anterior y se creará una nueva revisión con fecha y hora actual.\n\nIngresa el código para el campo Rev (Ej. REV 1, REV 2):`,
                 sugerencia
             );
             if (codigoRev === null) return;
@@ -1028,26 +1152,47 @@
 
             document.getElementById('loading-screen').classList.remove('hidden');
 
+            // Leemos el estado actual en pantalla para la nueva versión
+            const mon = document.getElementById('cot-moneda').value || cot.monedaActiva || 'MXN';
+            const datosCapturados = leerFormularioDatosUI();
+
+            const datosMXNClon = JSON.parse(JSON.stringify(mon === 'MXN' ? datosCapturados : (cot.datosMXN || crearDatosMonedaVacios())));
+            const datosUSDClon = JSON.parse(JSON.stringify(mon === 'USD' ? datosCapturados : (cot.datosUSD || crearDatosMonedaVacios())));
+            datosMXNClon.folioEnd = revLimpia;
+            datosUSDClon.folioEnd = revLimpia;
+
             const nuevaVer = {
                 idVer: String(ahoraTs),
                 fechaHora: ahoraStr,
-                monedaActiva: cot.monedaActiva || 'MXN',
-                datosMXN: JSON.parse(JSON.stringify(cot.datosMXN || crearDatosMonedaVacios())),
-                datosUSD: JSON.parse(JSON.stringify(cot.datosUSD || crearDatosMonedaVacios())),
+                etiqueta: revLimpia,
+                monedaActiva: mon,
+                datosMXN: datosMXNClon,
+                datosUSD: datosUSDClon,
                 partidasMXN: JSON.parse(JSON.stringify(cot.partidasMXN || [])),
                 partidasUSD: JSON.parse(JSON.stringify(cot.partidasUSD || []))
             };
 
-            nuevaVer.datosMXN.folioEnd = revLimpia;
-            nuevaVer.datosUSD.folioEnd = revLimpia;
-            nuevaVer.etiqueta = revLimpia;
+            // Si la versión anterior tenía respaldo al abrirse y el usuario la había modificado antes de presionar "+ Nueva Rev.", restauramos la versión anterior a su estado original
+            if (respaldoVersionAlAbrir && respaldoVersionAlAbrir.cotId === cot.id && respaldoVersionAlAbrir.versionIndex === cot.versionActiva) {
+                const snap = respaldoVersionAlAbrir.snapshot;
+                const teniaPartidasSnap = (Array.isArray(snap.partidasMXN) && snap.partidasMXN.length > 0) || (Array.isArray(snap.partidasUSD) && snap.partidasUSD.length > 0);
+                if (teniaPartidasSnap) {
+                    cot.versiones[cot.versionActiva] = JSON.parse(JSON.stringify(snap));
+                    cot.versiones[cot.versionActiva].etiqueta = obtenerEtiquetaVersion(cot.versiones[cot.versionActiva], cot.versionActiva);
+                } else {
+                    guardarCotizacionEnVersionActiva(cot);
+                }
+            } else {
+                guardarCotizacionEnVersionActiva(cot);
+            }
 
             cot.versiones.push(nuevaVer);
             cargarVersionEnCotizacion(cot, cot.versiones.length - 1);
 
             await setDoc(doc(db, "cotizaciones", cot.id), cot);
-            window.renderSelectTabs();
             window.cargarCotizacionUI();
+            window.renderSelectTabs();
+            tomarRespaldoVersionActual();
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
@@ -1068,8 +1213,9 @@
             cargarVersionEnCotizacion(cot, nuevoIdx);
 
             await setDoc(doc(db, "cotizaciones", cot.id), cot);
-            window.renderSelectTabs();
             window.cargarCotizacionUI();
+            window.renderSelectTabs();
+            tomarRespaldoVersionActual();
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
@@ -1573,6 +1719,7 @@
             cotIndexActiva = 0;
             window.renderSelectTabs();
             window.cargarCotizacionUI();
+            tomarRespaldoVersionActual();
             window.mostrarSeccion('cotizaciones');
         }
 
@@ -1869,6 +2016,7 @@
             
             window.renderSelectTabs();
             window.cargarCotizacionUI();
+            tomarRespaldoVersionActual();
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
@@ -1884,6 +2032,7 @@
                 cotIndexActiva = 0;
                 window.renderSelectTabs();
                 window.cargarCotizacionUI();
+                tomarRespaldoVersionActual();
                 document.getElementById('loading-screen').classList.add('hidden');
             }
         };
@@ -1913,6 +2062,18 @@
 
                 guardarCotizacionEnVersionActiva(cot);
 
+                // Si la versión recién creada aún estaba vacía en el respaldo inicial, actualiza el respaldo
+                if (!respaldoVersionAlAbrir || respaldoVersionAlAbrir.cotId !== cot.id || respaldoVersionAlAbrir.versionIndex !== cot.versionActiva) {
+                    tomarRespaldoVersionActual();
+                } else {
+                    const snap = respaldoVersionAlAbrir.snapshot;
+                    const snapVacio = (!snap.partidasMXN || snap.partidasMXN.length === 0) && (!snap.partidasUSD || snap.partidasUSD.length === 0);
+                    const actualConPartidas = (cot.partidasMXN && cot.partidasMXN.length > 0) || (cot.partidasUSD && cot.partidasUSD.length > 0);
+                    if (snapVacio && actualConPartidas) {
+                        tomarRespaldoVersionActual();
+                    }
+                }
+
                 await setDoc(doc(db, "cotizaciones", cot.id), cot);
                 window.renderSelectTabs();
                 actualizarIndicadoresMoneda();
@@ -1936,11 +2097,16 @@
         };
 
         window.cambiarCotizacionTab = async function() {
-            window.cancelarEdicionPartida();
-            const nuevoIndex = parseInt(document.getElementById('cotizacion-activa').value);
+            const nuevoIndex = parseInt(document.getElementById('cotizacion-activa').value, 10);
+            if (isNaN(nuevoIndex) || nuevoIndex === cotIndexActiva) return;
+
             document.getElementById('loading-screen').classList.remove('hidden');
-            
             await window.guardarEstadoCotizaciones();
+
+            partidaEditandoIndex = null;
+            incluyeEditandoIndex = null;
+            tempIncluye = [];
+            tempNotasPartida = [];
             
             cotIndexActiva = nuevoIndex;
             const cot = cotizaciones[cotIndexActiva];
@@ -1948,6 +2114,7 @@
 
             window.renderSelectTabs();
             window.cargarCotizacionUI();
+            tomarRespaldoVersionActual();
             
             document.getElementById('loading-screen').classList.add('hidden');
         };
@@ -2381,6 +2548,7 @@
             await setDoc(doc(db, "cotizaciones", copia.id), copia);
             window.renderSelectTabs();
             window.cargarCotizacionUI();
+            tomarRespaldoVersionActual();
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
@@ -2388,7 +2556,7 @@
         window.seleccionarEquipoPorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipo(c); };
         window.seleccionarIncluyePorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipoIncluye(c); };
         ['guardarEquipo','eliminarEquipo','eliminarVendedor','eliminarUsuario','nuevaCotizacion','duplicarCotizacion',
-         'eliminarCotizacionActual','cambiarCotizacionTab','cambiarVersionCotizacion','crearNuevaRevision','eliminarVersionActual',
+         'eliminarCotizacionActual','cambiarCotizacionTab','cambiarVersionCotizacion','crearNuevaRevision','eliminarVersionActual','manejarCambioCampoRev',
          'cambiarMonedaCotizacion','copiarPartidasOtraMoneda','agregarPartida','eliminarPartida'].forEach(n => {
             const f = window[n];
             window[n] = async (...a) => {
