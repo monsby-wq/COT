@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlphaZero</title>
-    <!-- Favicon luminoso de alto contraste (Fondo blanco + Degradado Naranja/Azul intenso) -->
+    <!-- Favicon luminoso de alto contraste -->
     <link id="dynamic-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='50%25' x2='100%25' y2='50%25'%3E%3Cstop offset='0%25' stop-color='%23ED813C'/%3E%3Cstop offset='50%25' stop-color='%230E859F'/%3E%3Cstop offset='100%25' stop-color='%230E5DF0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='60' cy='60' r='56' fill='%23FFFFFF' stroke='url(%23g)' stroke-width='8'/%3E%3Cpolygon points='60,10 95,25 110,60 95,95 60,110 25,95 10,60 25,25' fill='none' stroke='url(%23g)' stroke-width='4'/%3E%3Cpath d='M60 22 L60 72 M34 52 L86 52 M34 52 L34 78 M86 52 L86 78 M42 90 L78 90' stroke='url(%23g)' stroke-width='6' stroke-linecap='round'/%3E%3Ccircle cx='60' cy='78' r='12' fill='%23FFFFFF' stroke='url(%23g)' stroke-width='6'/%3E%3Ccircle cx='44' cy='36' r='6' fill='%23ED813C'/%3E%3Ccircle cx='76' cy='36' r='6' fill='%230E859F'/%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -25,7 +25,7 @@
         .sidebar-collapsed .sidebar-text { display: none !important; }
         .sidebar-collapsed .sidebar-header { justify-content: center !important; }
 
-        /* Gradientes y estilos corporativos AlphaZero */
+        /* Gradientes corporativos AlphaZero */
         .az-gradient-text {
             background: linear-gradient(90deg, #ED813C 0%, #CE8550 35%, #0E859F 75%, #0E5DF0 100%);
             -webkit-background-clip: text;
@@ -43,14 +43,50 @@
         .az-orange-btn:hover {
             background: linear-gradient(90deg, #d96e2b 0%, #b87341 100%);
         }
+
+        /* Tarjetas, tablas y contenedores transparentes para lucir la marca de agua */
         .az-card {
-            background: rgba(255, 255, 255, 0.84);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(14, 133, 159, 0.18);
+            background: rgba(255, 255, 255, 0.32) !important;
+            border: 1px solid rgba(14, 133, 159, 0.28);
+        }
+        .az-login-card {
+            background: rgba(255, 255, 255, 0.72) !important;
+            border: 1px solid rgba(255, 255, 255, 0.35);
         }
         .az-top-border {
             border-top: 4px solid transparent;
             border-image: linear-gradient(90deg, #ED813C, #CE8550, #0E859F, #0E5DF0) 1;
+        }
+
+        /* Campos de texto, selectores y áreas transparentes en la aplicación */
+        #main-content input:not([type="file"]),
+        #main-content textarea,
+        #main-content select {
+            background-color: rgba(255, 255, 255, 0.42) !important;
+            border-color: rgba(14, 133, 159, 0.32);
+            color: #0B192C;
+            font-weight: 500;
+        }
+        #main-content input:not([type="file"]):focus,
+        #main-content textarea:focus,
+        #main-content select:focus {
+            background-color: rgba(255, 255, 255, 0.75) !important;
+            border-color: #0E859F;
+            outline: none;
+        }
+        #main-content input::placeholder,
+        #main-content textarea::placeholder {
+            color: rgba(11, 25, 44, 0.55);
+        }
+
+        /* Listas y tablas internas transparentes */
+        #lista-partidas,
+        #lista-catalogo,
+        #lista-cuentas,
+        #lista-incluye-temp,
+        #lista-notas-temp {
+            background-color: rgba(255, 255, 255, 0.25) !important;
+            border-color: rgba(14, 133, 159, 0.28);
         }
     </style>
     <!-- Librerías de Word -->
@@ -59,7 +95,7 @@
 </head>
 <body class="text-gray-800 relative selection:bg-[#0E859F] selection:text-white">
 
-    <!-- IMPORTANTE: Sin display:none para que el navegador sí dibuje los degradados del logo -->
+    <!-- Símbolo vectorial del emblema AlphaZero -->
     <svg style="position:absolute; width:0; height:0; overflow:hidden;" aria-hidden="true">
         <defs>
             <linearGradient id="azGrad" x1="0%" y1="50%" x2="100%" y2="50%">
@@ -137,14 +173,14 @@
     <div id="login-container" class="flex h-screen bg-[#0B192C] items-center justify-center relative overflow-hidden hidden">
         <!-- Marca de agua gigante en el fondo del Login -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-            <img id="login-watermark-img" class="w-[850px] max-w-[92vw] max-h-[90vh] object-contain opacity-25 hidden" alt="Marca de agua AlphaZero">
-            <svg id="login-watermark-svg" class="w-[680px] h-[680px] opacity-20"><use href="#alphazero-emblem"></use></svg>
+            <img id="login-watermark-img" class="w-[880px] max-w-[94vw] max-h-[92vh] object-contain opacity-35 hidden" alt="Marca de agua AlphaZero">
+            <svg id="login-watermark-svg" class="w-[720px] h-[720px] opacity-30"><use href="#alphazero-emblem"></use></svg>
         </div>
         <div class="absolute -left-24 -bottom-24 w-96 h-96 rounded-full bg-[#ED813C] opacity-15 blur-3xl pointer-events-none"></div>
         <div class="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-[#0E859F] opacity-20 blur-3xl pointer-events-none"></div>
 
-        <!-- Tarjeta de Login -->
-        <div class="bg-white/95 backdrop-blur-md p-8 rounded-xl shadow-2xl w-96 max-w-[92vw] relative z-10 az-top-border">
+        <!-- Tarjeta de Login Transparente -->
+        <div class="az-login-card p-8 rounded-xl shadow-2xl w-96 max-w-[92vw] relative z-10 az-top-border">
             <div class="flex flex-col items-center text-center mb-6">
                 <img id="login-card-img" class="h-24 object-contain mb-2 hidden" alt="Logo AlphaZero">
                 <div id="login-card-svg-wrap" class="flex flex-col items-center">
@@ -152,12 +188,12 @@
                     <h2 class="text-3xl font-extrabold tracking-wider leading-none">
                         <span class="text-[#0B192C]">ALPHA</span><span class="az-gradient-text">ZERO</span>
                     </h2>
-                    <p class="text-[11px] font-semibold tracking-[0.22em] text-gray-500 mt-1">SISTEMAS CONTRAINCENDIOS</p>
+                    <p class="text-[11px] font-semibold tracking-[0.22em] text-gray-700 mt-1">SISTEMAS CONTRAINCENDIOS</p>
                 </div>
-                <p class="text-gray-400 text-[11px] mt-3">CONTACTA A UN ADMINISTRADOR PARA SER DADO DE ALTA</p>
+                <p class="text-gray-700 font-semibold text-[11px] mt-3">CONTACTA A UN ADMINISTRADOR PARA SER DADO DE ALTA</p>
             </div>
-            <input type="email" id="login-user" placeholder="Correo electrónico" class="border border-gray-300 focus:border-[#0E859F] focus:outline-none p-3 w-full mb-3 rounded-lg bg-gray-50/90 text-sm">
-            <input type="password" id="login-pass" placeholder="Contraseña (Mínimo 6 caracteres)" class="border border-gray-300 focus:border-[#0E859F] focus:outline-none p-3 w-full mb-6 rounded-lg bg-gray-50/90 text-sm">
+            <input type="email" id="login-user" placeholder="Correo electrónico" class="border border-gray-400/70 focus:border-[#0E859F] focus:outline-none p-3 w-full mb-3 rounded-lg bg-white/60 focus:bg-white/85 text-sm font-medium text-[#0B192C] placeholder-gray-600">
+            <input type="password" id="login-pass" placeholder="Contraseña (Mínimo 6 caracteres)" class="border border-gray-400/70 focus:border-[#0E859F] focus:outline-none p-3 w-full mb-6 rounded-lg bg-white/60 focus:bg-white/85 text-sm font-medium text-[#0B192C] placeholder-gray-600">
             <button onclick="iniciarSesion()" class="az-gradient-btn text-white font-bold px-4 py-3 rounded-lg w-full transition shadow-lg tracking-wider">INICIAR SESIÓN</button>
         </div>
     </div>
@@ -197,7 +233,6 @@
                 <span class="text-xl">⚙️</span> <span class="sidebar-text">Gestión de Usuarios</span>
             </button>
 
-            <!-- Botón para subir la imagen exacta del logo de AlphaZero y guardarla en la nube -->
             <button id="btn-subir-logo" onclick="document.getElementById('input-logo-oficial').click()" title="Subir imagen del logo AlphaZero para marca de agua y pestaña" class="text-left mb-3 py-2 px-2.5 rounded-lg text-cyan-300 hover:bg-white/10 font-bold hidden flex items-center gap-3 w-full justify-center md:justify-start transition text-xs">
                 <span class="text-lg">🖼️</span> <span class="sidebar-text">Subir Logo Oficial</span>
             </button>
@@ -219,15 +254,13 @@
         <!-- Contenedor Principal con Marca de Agua Fija en Toda la Página -->
         <div class="flex-1 p-4 overflow-y-auto relative" id="main-content">
             
-            <!-- MARCA DE AGUA FIJA EN EL FONDO DEL PROGRAMA (Siempre visible detrás de todas las secciones) -->
+            <!-- MARCA DE AGUA FIJA EN EL FONDO DEL PROGRAMA (Visible a través de todas las tablas y tarjetas transparentes) -->
             <div class="fixed inset-0 pointer-events-none select-none flex flex-col items-center justify-center z-0 md:pl-56">
-                <!-- Si subes tu archivo JPG/PNG se muestra esta imagen sin fondo blanco -->
-                <img id="app-watermark-img" class="w-[680px] max-w-[85vw] max-h-[80vh] object-contain opacity-[0.18] hidden" alt="Marca de agua AlphaZero">
-                <!-- Mientras no se haya subido archivo externo, se muestra el emblema vectorial completo -->
+                <img id="app-watermark-img" class="w-[740px] max-w-[88vw] max-h-[84vh] object-contain opacity-[0.26] hidden" alt="Marca de agua AlphaZero">
                 <div id="app-watermark-svg-wrap" class="flex flex-col items-center justify-center">
-                    <svg class="w-[480px] h-[480px] max-w-[80vw] max-h-[70vh] opacity-[0.16]"><use href="#alphazero-emblem"></use></svg>
-                    <div class="text-4xl font-black tracking-[0.25em] opacity-[0.12] mt-2 text-[#0B192C]">ALPHAZERO</div>
-                    <div class="text-xs font-bold tracking-[0.35em] opacity-[0.14] text-[#0E859F]">SISTEMAS CONTRAINCENDIOS</div>
+                    <svg class="w-[520px] h-[520px] max-w-[82vw] max-h-[74vh] opacity-[0.24]"><use href="#alphazero-emblem"></use></svg>
+                    <div class="text-4xl font-black tracking-[0.25em] opacity-[0.18] mt-2 text-[#0B192C]">ALPHAZERO</div>
+                    <div class="text-xs font-bold tracking-[0.35em] opacity-[0.20] text-[#0E859F]">SISTEMAS CONTRAINCENDIOS</div>
                 </div>
             </div>
 
@@ -235,16 +268,16 @@
             <div id="sec-usuarios" class="hidden relative z-10">
                 <div class="flex flex-wrap justify-between items-center border-b-2 border-[#0E859F]/30 pb-2 mb-4 gap-2">
                     <h3 class="text-2xl font-extrabold text-[#0B192C]">Gestión de Accesos</h3>
-                    <button onclick=" document.getElementById('input-logo-oficial').click() " class="bg-white hover:bg-cyan-50 text-[#0E859F] border border-[#0E859F]/40 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition">
+                    <button onclick="document.getElementById('input-logo-oficial').click()" class="bg-white/60 hover:bg-white/90 text-[#0E859F] border border-[#0E859F]/40 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition">
                         🖼️ Cargar Imagen de Logo AlphaZero
                     </button>
                 </div>
                 <div class="az-card p-6 rounded-xl shadow mb-6 border-l-4 border-l-[#ED813C]">
                     <h4 class="font-bold mb-1 text-[#0B192C]">Dar de alta o sincronizar vendedor</h4>
-                    <p class="text-xs text-gray-500 mb-3">Si un vendedor ya había sido creado antes y no aparece abajo, ingresa su correo y contraseña aquí para reactivarlo en la lista.</p>
+                    <p class="text-xs text-gray-700 mb-3">Si un vendedor ya había sido creado antes y no aparece abajo, ingresa su correo y contraseña aquí para reactivarlo en la lista.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="email" id="new-user" placeholder="Correo Electrónico" class="border p-2 rounded bg-white/90">
-                        <input type="text" id="new-pass" placeholder="Contraseña de acceso (mín. 6 caracteres)" class="border p-2 rounded bg-white/90">
+                        <input type="email" id="new-user" placeholder="Correo Electrónico" class="border p-2 rounded">
+                        <input type="text" id="new-pass" placeholder="Contraseña de acceso (mín. 6 caracteres)" class="border p-2 rounded">
                         <button onclick="crearUsuario()" class="az-gradient-btn text-white px-4 py-2 rounded-lg shadow font-bold md:col-span-2 transition">Crear / Sincronizar Cuenta</button>
                     </div>
                 </div>
@@ -259,7 +292,7 @@
             <div id="sec-vendedores" class="hidden relative z-10">
                 <h3 class="text-2xl font-extrabold border-b-2 border-[#0E859F]/30 pb-2 mb-4 text-[#0B192C]">Administrar Vendedores (Formatos Word)</h3>
                 <div class="az-card p-6 rounded-xl shadow mb-6 az-top-border">
-                    <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor" class="border p-2 w-full mb-3 rounded bg-white/90">
+                    <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor" class="border p-2 w-full mb-3 rounded">
                     <label class="block mb-2 text-sm font-bold text-[#0B192C]">Subir formato (.docx):</label>
                     <input type="file" id="vend-file" accept=".docx" class="mb-4 block">
                     <button onclick="guardarVendedor()" class="az-gradient-btn text-white px-5 py-2 rounded-lg shadow font-bold transition">Guardar Cambios</button>
@@ -272,18 +305,18 @@
                 <h3 class="text-2xl font-extrabold border-b-2 border-[#0E859F]/30 pb-2 mb-4 text-[#0B192C]">Catálogo AlphaZero</h3>
                 <div class="az-card p-6 rounded-xl shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 az-top-border">
                     <input type="hidden" id="cat-id">
-                    <input type="text" id="cat-desc-corta" placeholder="DESCRIPCIÓN CORTA" class="border p-2 md:col-span-2 rounded font-bold text-[#0E5DF0] bg-white/90">
-                    <textarea id="cat-desc" placeholder="DESCRIPCIÓN DETALLADA" class="border p-2 md:col-span-2 rounded bg-white/90"></textarea>
-                    <input type="text" id="cat-um" placeholder="UNIDAD DE MEDIDA" class="border p-2 rounded uppercase bg-white/90">
-                    <input type="text" id="cat-marca" placeholder="Marca" class="border p-2 rounded uppercase bg-white/90">
-                    <input type="text" id="cat-modelo" placeholder="Modelo" class="border p-2 rounded uppercase bg-white/90">
-                    <input type="url" id="cat-pdf" placeholder="🔗 Enlace de Ficha Técnica (Drive / Web)" class="border p-2 rounded text-[#0E859F] bg-cyan-50/70">
+                    <input type="text" id="cat-desc-corta" placeholder="DESCRIPCIÓN CORTA" class="border p-2 md:col-span-2 rounded font-bold text-[#0E5DF0]">
+                    <textarea id="cat-desc" placeholder="DESCRIPCIÓN DETALLADA" class="border p-2 md:col-span-2 rounded"></textarea>
+                    <input type="text" id="cat-um" placeholder="UNIDAD DE MEDIDA" class="border p-2 rounded uppercase">
+                    <input type="text" id="cat-marca" placeholder="Marca" class="border p-2 rounded uppercase">
+                    <input type="text" id="cat-modelo" placeholder="Modelo" class="border p-2 rounded uppercase">
+                    <input type="url" id="cat-pdf" placeholder="🔗 Enlace de Ficha Técnica (Drive / Web)" class="border p-2 rounded text-[#0E859F]">
                     <div class="md:col-span-2 flex gap-2 mt-2">
                         <button onclick="guardarEquipo()" class="az-gradient-btn text-white px-5 py-2 rounded-lg shadow font-bold transition">GUARDAR</button>
-                        <button onclick="limpiarFormCatalogo()" class="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-lg shadow font-bold transition">LIMPIAR</button>
+                        <button onclick="limpiarFormCatalogo()" class="bg-gray-500/80 hover:bg-gray-600 text-white px-5 py-2 rounded-lg shadow font-bold transition">LIMPIAR</button>
                     </div>
                 </div>
-                <input type="text" id="buscador-catalogo" oninput="renderCatalogo()" placeholder="🔍 BUSCAR EQUIPO EN CATÁLOGO..." class="border-2 border-[#0E859F]/40 p-2.5 w-full mb-4 rounded-lg bg-white/90 font-bold text-[#0B192C]">
+                <input type="text" id="buscador-catalogo" oninput="renderCatalogo()" placeholder="🔍 BUSCAR EQUIPO EN CATÁLOGO..." class="border-2 border-[#0E859F]/40 p-2.5 w-full mb-4 rounded-lg font-bold text-[#0B192C]">
                 <div id="lista-catalogo" class="az-card rounded-xl shadow p-4 max-h-96 overflow-y-auto"></div>
             </div>
 
@@ -296,133 +329,133 @@
                         <h3 class="text-xl font-extrabold text-[#0B192C]">Cotizaciones <span class="az-gradient-text">AlphaZero</span></h3>
                     </div>
                     <div class="flex flex-wrap gap-2 items-center">
-                        <button onclick="toggleColumnasCotizacion()" title="Cambiar entre 1 y 2 columnas para pantalla dividida" class="bg-white hover:bg-gray-100 text-[#0B192C] border border-gray-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">📐 1 Col / 2 Col</button>
-                        <select id="cotizacion-activa" onchange="cambiarCotizacionTab()" class="border-2 border-[#0E859F]/40 p-1.5 rounded-lg font-bold bg-white text-[#0B192C] text-sm max-w-xs shadow-sm"></select>
-                        <button onclick="nuevaCotizacion()" class="bg-[#0B192C] hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-sm font-bold transition shadow">+ Nueva</button>
-                        <button onclick="duplicarCotizacion()" title="Crear una copia de esta cotización con todas sus partidas" class="bg-[#0E859F] hover:bg-[#0b6e84] text-white px-3 py-1.5 rounded-lg text-sm font-bold transition shadow">📋 Duplicar</button>
-                        <button onclick="eliminarCotizacionActual()" class="bg-[#ED813C] hover:bg-[#d96e2b] text-white px-3 py-1.5 rounded-lg text-sm font-bold transition shadow">🗑️ Eliminar</button>
+                        <button onclick="toggleColumnasCotizacion()" title="Cambiar entre 1 y 2 columnas para pantalla dividida" class="bg-white/50 hover:bg-white/80 text-[#0B192C] border border-gray-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">📐 1 Col / 2 Col</button>
+                        <select id="cotizacion-activa" onchange="cambiarCotizacionTab()" class="border-2 border-[#0E859F]/40 p-1.5 rounded-lg font-bold text-[#0B192C] text-sm max-w-xs shadow-sm"></select>
+                        <button onclick="nuevaCotizacion()" class="bg-[#0B192C]/90 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-sm font-bold transition shadow">+ Nueva</button>
+                        <button onclick="duplicarCotizacion()" title="Crear una copia de esta cotización con todas sus partidas" class="bg-[#0E859F]/90 hover:bg-[#0b6e84] text-white px-3 py-1.5 rounded-lg text-sm font-bold transition shadow">📋 Duplicar</button>
+                        <button onclick="eliminarCotizacionActual()" class="bg-[#ED813C]/90 hover:bg-[#d96e2b] text-white px-3 py-1.5 rounded-lg text-sm font-bold transition shadow">🗑️ Eliminar</button>
                     </div>
                 </div>
 
                 <div id="grid-cotizaciones" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Columna Izquierda: Datos Generales -->
                     <div class="az-card p-4 rounded-xl shadow az-top-border">
-                        <div class="flex justify-between items-center mb-3 border-b border-gray-200 pb-1.5">
+                        <div class="flex justify-between items-center mb-3 border-b border-gray-300/60 pb-1.5">
                             <h4 class="font-bold text-[#0B192C]">Configuración Inicial</h4>
-                            <span id="badge-moneda-datos" class="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">🇲🇽 Datos en MXN</span>
+                            <span id="badge-moneda-datos" class="text-xs px-2 py-0.5 rounded bg-emerald-100/80 text-emerald-900 font-bold">🇲🇽 Datos en MXN</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2 mb-4">
-                            <select id="cot-vendedor" class="border p-2 rounded-lg w-full border-[#ED813C] text-sm bg-white/90 font-semibold" onchange="guardarEstadoCotizaciones()"></select>
-                            <select id="cot-moneda" class="border p-2 rounded-lg w-full text-sm font-bold bg-cyan-50 text-[#0E859F] border-[#0E859F]/50" onchange="cambiarMonedaCotizacion()">
+                            <select id="cot-vendedor" class="border p-2 rounded-lg w-full border-[#ED813C] text-sm font-semibold" onchange="guardarEstadoCotizaciones()"></select>
+                            <select id="cot-moneda" class="border p-2 rounded-lg w-full text-sm font-bold text-[#0E859F] border-[#0E859F]/50" onchange="cambiarMonedaCotizacion()">
                                 <option id="opt-moneda-mxn" value="MXN">MXN - Pesos Mexicanos</option>
                                 <option id="opt-moneda-usd" value="USD">USD - Dólares</option>
                             </select>
                         </div>
 
-                        <h4 class="font-bold mb-3 border-b border-gray-200 text-[#0B192C]">Estructura del Folio</h4>
+                        <h4 class="font-bold mb-3 border-b border-gray-300/60 text-[#0B192C]">Estructura del Folio</h4>
                         <div class="flex items-center gap-2 mb-4">
                             <span class="font-bold text-[#0E859F]">NO-</span>
-                            <input type="text" id="cot-folio-mid" placeholder="XXX" class="border p-2 w-16 text-center font-bold uppercase rounded-lg bg-white/90" onchange="guardarEstadoCotizaciones()">
+                            <input type="text" id="cot-folio-mid" placeholder="XXX" class="border p-2 w-16 text-center font-bold uppercase rounded-lg" onchange="guardarEstadoCotizaciones()">
                             <span class="font-bold text-[#0E859F]" id="lbl-anio"></span>
-                            <input type="text" id="cot-folio-end" placeholder="Rev" class="border p-2 w-16 text-center font-bold uppercase rounded-lg bg-white/90" onchange="guardarEstadoCotizaciones()">
+                            <input type="text" id="cot-folio-end" placeholder="Rev" class="border p-2 w-16 text-center font-bold uppercase rounded-lg" onchange="guardarEstadoCotizaciones()">
                         </div>
 
-                        <h4 class="font-bold mb-3 border-b border-gray-200 text-[#0B192C]">Datos Comerciales</h4>
-                        <input type="text" id="cot-cliente" placeholder="Cliente" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-referencia" placeholder="Referencia de cotización" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-contacto" placeholder="Datos de contacto" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
+                        <h4 class="font-bold mb-3 border-b border-gray-300/60 text-[#0B192C]">Datos Comerciales</h4>
+                        <input type="text" id="cot-cliente" placeholder="Cliente" class="border p-2 w-full mb-2 rounded-lg text-sm" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-referencia" placeholder="Referencia de cotización" class="border p-2 w-full mb-2 rounded-lg text-sm" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-contacto" placeholder="Datos de contacto" class="border p-2 w-full mb-2 rounded-lg text-sm" onchange="guardarEstadoCotizaciones()">
                         
-                        <h4 class="font-bold mb-3 border-b border-gray-200 mt-4 text-[#0B192C]">Condiciones</h4>
-                        <input type="text" id="cot-lugar" placeholder="Lugar de entrega" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-pago" placeholder="Condiciones de pago" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-vigencia" placeholder="Vigencia de la propuesta" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega general" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
-                        <textarea id="cot-notas" placeholder="Notas Generales (Aparecerá junto al subtotal)" class="border p-2 w-full mb-2 rounded-lg h-20 text-sm bg-white/90" onchange="guardarEstadoCotizaciones()"></textarea>
+                        <h4 class="font-bold mb-3 border-b border-gray-300/60 mt-4 text-[#0B192C]">Condiciones</h4>
+                        <input type="text" id="cot-lugar" placeholder="Lugar de entrega" class="border p-2 w-full mb-2 rounded-lg text-sm" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-pago" placeholder="Condiciones de pago" class="border p-2 w-full mb-2 rounded-lg text-sm" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-vigencia" placeholder="Vigencia de la propuesta" class="border p-2 w-full mb-2 rounded-lg text-sm" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega general" class="border p-2 w-full mb-2 rounded-lg text-sm" onchange="guardarEstadoCotizaciones()">
+                        <textarea id="cot-notas" placeholder="Notas Generales (Aparecerá junto al subtotal)" class="border p-2 w-full mb-2 rounded-lg h-20 text-sm" onchange="guardarEstadoCotizaciones()"></textarea>
                     </div>
 
                     <!-- Columna Derecha: Constructor de Partidas -->
                     <div class="az-card p-4 rounded-xl shadow relative az-top-border">
-                        <div class="flex flex-wrap justify-between items-center mb-3 border-b border-gray-200 pb-1.5 gap-2">
+                        <div class="flex flex-wrap justify-between items-center mb-3 border-b border-gray-300/60 pb-1.5 gap-2">
                             <h4 class="font-bold flex items-center gap-2 text-[#0B192C]">
                                 <span>Partidas</span>
-                                <span id="badge-moneda-partidas" class="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">MXN</span>
+                                <span id="badge-moneda-partidas" class="text-xs px-2 py-0.5 rounded bg-emerald-100/80 text-emerald-900 font-bold">MXN</span>
                             </h4>
-                            <button type="button" id="btn-copiar-moneda" onclick="copiarPartidasOtraMoneda()" class="bg-cyan-50 hover:bg-cyan-100 text-[#0E859F] border border-[#0E859F]/40 px-2.5 py-1 rounded-lg text-xs font-bold transition shadow-sm">
+                            <button type="button" id="btn-copiar-moneda" onclick="copiarPartidasOtraMoneda()" class="bg-white/50 hover:bg-white/80 text-[#0E859F] border border-[#0E859F]/40 px-2.5 py-1 rounded-lg text-xs font-bold transition shadow-sm">
                                 🔄 Copiar de USD
                             </button>
                         </div>
                         
-                        <input type="text" id="part-nota-arriba" placeholder="Nota Superior (Ej: *****OPCIÓN 1*****)" class="border p-2 w-full mb-2 rounded-lg font-bold text-center text-gray-700 bg-gray-50/90 text-sm">
+                        <input type="text" id="part-nota-arriba" placeholder="Nota Superior (Ej: *****OPCIÓN 1*****)" class="border p-2 w-full mb-2 rounded-lg font-bold text-center text-gray-800 text-sm">
                         
                         <div class="mb-2 relative">
-                            <input type="text" id="buscador-equipo-partida" oninput="buscarEquipoParaPartida()" placeholder="🔍 Buscar equipo del catálogo..." class="border-2 border-[#CE8550]/60 p-2 w-full rounded-lg bg-orange-50/70 font-bold text-sm focus:border-[#ED813C] focus:outline-none">
-                            <ul id="resultados-busqueda" class="bg-white border rounded-lg max-h-40 overflow-y-auto hidden shadow-xl absolute z-50 w-full left-0 mt-1"></ul>
+                            <input type="text" id="buscador-equipo-partida" oninput="buscarEquipoParaPartida()" placeholder="🔍 Buscar equipo del catálogo..." class="border-2 border-[#CE8550]/60 p-2 w-full rounded-lg font-bold text-sm focus:border-[#ED813C] focus:outline-none">
+                            <ul id="resultados-busqueda" class="bg-white/95 border rounded-lg max-h-40 overflow-y-auto hidden shadow-xl absolute z-50 w-full left-0 mt-1"></ul>
                         </div>
                         
                         <div class="grid grid-cols-4 gap-1.5 mb-2">
-                            <input type="number" id="part-pda" placeholder="Pda." class="border p-2 rounded-lg text-sm bg-white/90">
-                            <input type="number" id="part-cant" placeholder="Cant." class="border p-2 rounded-lg text-sm bg-white/90">
-                            <input type="text" id="part-um" placeholder="U.M." class="border p-2 rounded-lg uppercase text-sm bg-white/90">
-                            <input type="number" id="part-precio" placeholder="Precio" class="border p-2 rounded-lg text-sm bg-white/90">
+                            <input type="number" id="part-pda" placeholder="Pda." class="border p-2 rounded-lg text-sm">
+                            <input type="number" id="part-cant" placeholder="Cant." class="border p-2 rounded-lg text-sm">
+                            <input type="text" id="part-um" placeholder="U.M." class="border p-2 rounded-lg uppercase text-sm">
+                            <input type="number" id="part-precio" placeholder="Precio" class="border p-2 rounded-lg text-sm">
                         </div>
                         
-                        <input type="text" id="part-desc-corta" placeholder="Descripción Corta" class="border p-2 w-full mb-2 rounded-lg font-bold text-[#0E5DF0] text-sm bg-white/90">
-                        <textarea id="part-desc" placeholder="Descripción" class="border p-2 w-full mb-2 rounded-lg h-20 text-sm bg-white/90"></textarea>
+                        <input type="text" id="part-desc-corta" placeholder="Descripción Corta" class="border p-2 w-full mb-2 rounded-lg font-bold !text-[#0E5DF0] text-sm">
+                        <textarea id="part-desc" placeholder="Descripción" class="border p-2 w-full mb-2 rounded-lg h-20 text-sm"></textarea>
                         
                         <div class="grid grid-cols-2 gap-2 mb-2">
-                            <input type="text" id="part-modelo" placeholder="Modelo" class="border p-2 w-full rounded-lg font-bold text-red-600 uppercase text-sm bg-white/90">
-                            <input type="text" id="part-marca" placeholder="Marca" class="border p-2 w-full rounded-lg font-bold text-red-600 uppercase text-sm bg-white/90">
+                            <input type="text" id="part-modelo" placeholder="Modelo" class="border p-2 w-full rounded-lg font-bold !text-red-600 uppercase text-sm">
+                            <input type="text" id="part-marca" placeholder="Marca" class="border p-2 w-full rounded-lg font-bold !text-red-600 uppercase text-sm">
                         </div>
 
-                        <input type="url" id="part-pdf" placeholder="🔗 Enlace de Ficha Técnica (Automático)" class="border p-2 w-full mb-2 rounded-lg text-[#0E859F] bg-cyan-50/60 text-xs">
-                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega (Se colocará al final de la partida)" class="border p-2 w-full mb-3 rounded-lg font-bold text-sm bg-white/90">
+                        <input type="url" id="part-pdf" placeholder="🔗 Enlace de Ficha Técnica (Automático)" class="border p-2 w-full mb-2 rounded-lg !text-[#0E859F] text-xs">
+                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega (Se colocará al final de la partida)" class="border p-2 w-full mb-3 rounded-lg font-bold text-sm">
 
                         <!-- BOTONES DESPLEGABLES PARA INCLUYE Y NOTAS DE PARTIDA -->
                         <div class="grid grid-cols-2 gap-2 mb-3">
-                            <button type="button" onclick="togglePanelExtra('panel-incluye')" id="btn-toggle-incluye" class="bg-cyan-50 hover:bg-cyan-100 text-[#0E859F] border border-[#0E859F]/30 font-bold py-1.5 px-2 rounded-lg text-xs transition">
+                            <button type="button" onclick="togglePanelExtra('panel-incluye')" id="btn-toggle-incluye" class="bg-cyan-50/50 hover:bg-cyan-100/70 text-[#0E859F] border border-[#0E859F]/40 font-bold py-1.5 px-2 rounded-lg text-xs transition">
                                 ➕ INCLUYE (0)
                             </button>
-                            <button type="button" onclick="togglePanelExtra('panel-notas-partida')" id="btn-toggle-notas" class="bg-orange-50 hover:bg-orange-100 text-[#CE8550] border border-[#CE8550]/40 font-bold py-1.5 px-2 rounded-lg text-xs transition">
+                            <button type="button" onclick="togglePanelExtra('panel-notas-partida')" id="btn-toggle-notas" class="bg-orange-50/50 hover:bg-orange-100/70 text-[#CE8550] border border-[#CE8550]/50 font-bold py-1.5 px-2 rounded-lg text-xs transition">
                                 📝 NOTAS DE PARTIDA (0)
                             </button>
                         </div>
 
                         <!-- PANEL 1: SECCIÓN INCLUYE -->
-                        <div id="panel-incluye" class="hidden bg-cyan-50/70 border border-[#0E859F]/30 p-3 rounded-lg mb-3">
+                        <div id="panel-incluye" class="hidden bg-white/30 border border-[#0E859F]/35 p-3 rounded-lg mb-3">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-xs font-bold text-[#0B192C]">Agregar sub-partida a "INCLUYE:"</span>
-                                <span class="text-[10px] text-gray-500">Se imprimirá debajo del equipo</span>
+                                <span class="text-[10px] text-gray-700">Se imprimirá debajo del equipo</span>
                             </div>
                             <div class="mb-2 relative">
-                                <input type="text" id="buscador-incluye" oninput="buscarEquipoParaIncluye()" placeholder="🔍 Buscar accesorio en catálogo (opcional)..." class="border p-1.5 w-full rounded bg-white text-xs">
-                                <ul id="resultados-busqueda-incluye" class="bg-white border rounded max-h-32 overflow-y-auto hidden shadow-lg absolute z-50 w-full left-0 mt-1"></ul>
+                                <input type="text" id="buscador-incluye" oninput="buscarEquipoParaIncluye()" placeholder="🔍 Buscar accesorio en catálogo (opcional)..." class="border p-1.5 w-full rounded text-xs">
+                                <ul id="resultados-busqueda-incluye" class="bg-white/95 border rounded max-h-32 overflow-y-auto hidden shadow-lg absolute z-50 w-full left-0 mt-1"></ul>
                             </div>
                             <div class="grid grid-cols-3 gap-1.5 mb-1.5">
-                                <input type="text" id="inc-prefijo" placeholder="Ej: • o (1 PZA)." value="•" class="border p-1.5 rounded text-xs font-bold bg-white">
-                                <input type="text" id="inc-desc-corta" placeholder="Descripción Azul (Ej: BASE PARA DETECTOR)" class="border p-1.5 rounded text-xs font-bold text-[#0E5DF0] col-span-2 bg-white">
+                                <input type="text" id="inc-prefijo" placeholder="Ej: • o (1 PZA)." value="•" class="border p-1.5 rounded text-xs font-bold">
+                                <input type="text" id="inc-desc-corta" placeholder="Descripción Azul (Ej: BASE PARA DETECTOR)" class="border p-1.5 rounded text-xs font-bold !text-[#0E5DF0] col-span-2">
                             </div>
-                            <input type="text" id="inc-desc-normal" placeholder="Descripción adicional en negro (Opcional)" class="border p-1.5 w-full rounded text-xs mb-1.5 bg-white">
+                            <input type="text" id="inc-desc-normal" placeholder="Descripción adicional en negro (Opcional)" class="border p-1.5 w-full rounded text-xs mb-1.5">
                             <div class="grid grid-cols-3 gap-1.5 mb-2">
-                                <input type="text" id="inc-modelo" placeholder="Modelo o NP: 123" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase bg-white">
-                                <input type="text" id="inc-marca" placeholder="Marca" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase bg-white">
-                                <input type="text" id="inc-tiempo" placeholder="T.E. (Opcional)" class="border p-1.5 rounded text-xs font-bold bg-white">
+                                <input type="text" id="inc-modelo" placeholder="Modelo o NP: 123" class="border p-1.5 rounded text-xs font-bold !text-red-600 uppercase">
+                                <input type="text" id="inc-marca" placeholder="Marca" class="border p-1.5 rounded text-xs font-bold !text-red-600 uppercase">
+                                <input type="text" id="inc-tiempo" placeholder="T.E. (Opcional)" class="border p-1.5 rounded text-xs font-bold">
                             </div>
                             <div class="flex gap-1.5 mb-2">
-                                <button type="button" id="btn-agregar-incluye" onclick="agregarItemIncluye()" class="bg-[#0E859F] hover:bg-[#0b6e84] text-white font-bold py-1 px-3 rounded text-xs w-full transition">
+                                <button type="button" id="btn-agregar-incluye" onclick="agregarItemIncluye()" class="bg-[#0E859F]/90 hover:bg-[#0b6e84] text-white font-bold py-1 px-3 rounded text-xs w-full transition">
                                     + Añadir a INCLUYE
                                 </button>
                                 <button type="button" id="btn-cancelar-incluye" onclick="cancelarEdicionIncluye()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-1 px-2.5 rounded text-xs transition hidden">
                                     Cancelar
                                 </button>
                             </div>
-                            <div id="lista-incluye-temp" class="text-xs space-y-1 max-h-28 overflow-y-auto"></div>
+                            <div id="lista-incluye-temp" class="text-xs space-y-1 max-h-28 overflow-y-auto p-1 rounded"></div>
                         </div>
 
                         <!-- PANEL 2: NOTAS DE LA PARTIDA -->
-                        <div id="panel-notas-partida" class="hidden bg-orange-50/70 border border-[#CE8550]/40 p-3 rounded-lg mb-3">
+                        <div id="panel-notas-partida" class="hidden bg-white/30 border border-[#CE8550]/45 p-3 rounded-lg mb-3">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-xs font-bold text-[#0B192C]">Agregar Notas o Viñetas a la Partida</span>
-                                <select id="nota-tipo" onchange="cambiarTipoNotaUI()" class="border rounded p-1 text-xs font-bold bg-white">
+                                <select id="nota-tipo" onchange="cambiarTipoNotaUI()" class="border rounded p-1 text-xs font-bold">
                                     <option value="nota">Nota de Texto (NOTA 1, NOTA 2...)</option>
                                     <option value="vineta">Viñeta de Opción (• Azul + Rojo)</option>
                                 </select>
@@ -430,22 +463,22 @@
                             
                             <div id="form-nota-texto">
                                 <div class="grid grid-cols-3 gap-1.5 mb-1.5">
-                                    <input type="text" id="nota-titulo" placeholder="Ej: NOTA 1:" value="NOTA 1:" class="border p-1.5 rounded text-xs font-bold bg-white">
-                                    <input type="text" id="nota-cuerpo" placeholder="Texto de la nota..." class="border p-1.5 rounded text-xs col-span-2 bg-white">
+                                    <input type="text" id="nota-titulo" placeholder="Ej: NOTA 1:" value="NOTA 1:" class="border p-1.5 rounded text-xs font-bold">
+                                    <input type="text" id="nota-cuerpo" placeholder="Texto de la nota..." class="border p-1.5 rounded text-xs col-span-2">
                                 </div>
                             </div>
 
                             <div id="form-nota-vineta" class="hidden">
                                 <div class="grid grid-cols-2 gap-1.5 mb-1.5">
-                                    <input type="text" id="nota-vineta-azul" placeholder="Texto en Azul (Ej: PLACA DE ORIFICIO...)" class="border p-1.5 rounded text-xs font-bold text-[#0E5DF0] bg-white">
-                                    <input type="text" id="nota-vineta-rojo" placeholder="Marca/Mod en Rojo (Ej: MCA CHEMGUARD)" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase bg-white">
+                                    <input type="text" id="nota-vineta-azul" placeholder="Texto en Azul (Ej: PLACA DE ORIFICIO...)" class="border p-1.5 rounded text-xs font-bold !text-[#0E5DF0]">
+                                    <input type="text" id="nota-vineta-rojo" placeholder="Marca/Mod en Rojo (Ej: MCA CHEMGUARD)" class="border p-1.5 rounded text-xs font-bold !text-red-600 uppercase">
                                 </div>
                             </div>
 
                             <button type="button" onclick="agregarNotaPartida()" class="az-orange-btn text-white font-bold py-1 px-3 rounded text-xs w-full transition mb-2">
                                 + Añadir Nota / Viñeta a la Partida
                             </button>
-                            <div id="lista-notas-temp" class="text-xs space-y-1 max-h-28 overflow-y-auto"></div>
+                            <div id="lista-notas-temp" class="text-xs space-y-1 max-h-28 overflow-y-auto p-1 rounded"></div>
                         </div>
                         
                         <!-- Botones de Añadir / Actualizar Partida -->
@@ -454,8 +487,8 @@
                             <button id="btn-cancelar-edicion" onclick="cancelarEdicionPartida()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold px-3 py-2.5 rounded-lg shadow transition text-sm hidden">Cancelar</button>
                         </div>
 
-                        <h4 class="font-bold mt-5 mb-2 border-b border-gray-200 text-[#0B192C]">Partidas Agregadas</h4>
-                        <div id="lista-partidas" class="text-sm bg-white/80 p-2 border rounded-lg h-40 overflow-y-auto"></div>
+                        <h4 class="font-bold mt-5 mb-2 border-b border-gray-300/60 text-[#0B192C]">Partidas Agregadas</h4>
+                        <div id="lista-partidas" class="text-sm p-2 border rounded-lg h-40 overflow-y-auto"></div>
                         <div class="text-right font-extrabold text-lg mt-2 text-[#0B192C]" id="cot-total-label">Total: $0.00</div>
                         
                         <button onclick="generarDocumentoWord()" class="az-orange-btn text-white text-base font-extrabold tracking-wide px-4 py-3 rounded-lg shadow-lg w-full mt-3 transition">DESCARGAR COTIZACIÓN</button>
@@ -507,7 +540,6 @@
             localStorage.setItem('az_logo_cache', logoDataUrl);
             if (faviconDataUrl) localStorage.setItem('az_fav_cache', faviconDataUrl);
 
-            // 1. Marca de agua en Login
             const loginWmImg = document.getElementById('login-watermark-img');
             const loginWmSvg = document.getElementById('login-watermark-svg');
             if (loginWmImg && loginWmSvg) {
@@ -516,7 +548,6 @@
                 loginWmSvg.classList.add('hidden');
             }
 
-            // 2. Tarjeta de Login
             const loginCardImg = document.getElementById('login-card-img');
             const loginCardSvg = document.getElementById('login-card-svg-wrap');
             if (loginCardImg && loginCardSvg) {
@@ -525,7 +556,6 @@
                 loginCardSvg.classList.add('hidden');
             }
 
-            // 3. Marca de agua fija en toda la aplicación
             const appWmImg = document.getElementById('app-watermark-img');
             const appWmSvg = document.getElementById('app-watermark-svg-wrap');
             if (appWmImg && appWmSvg) {
@@ -534,7 +564,6 @@
                 appWmSvg.classList.add('hidden');
             }
 
-            // 4. Iconos de barra lateral, cabecera y carga
             const iconSrc = faviconDataUrl || logoDataUrl;
             [['sidebar-logo-img','sidebar-logo-svg'], ['header-cot-img','header-cot-svg'], ['loading-custom-img','loading-default-svg']].forEach(([imgId, svgId]) => {
                 const imgEl = document.getElementById(imgId);
@@ -546,7 +575,6 @@
                 }
             });
 
-            // 5. Pestaña del navegador (Favicon)
             const favLink = document.getElementById('dynamic-favicon');
             if (favLink && iconSrc) {
                 favLink.type = 'image/png';
@@ -581,7 +609,6 @@
                 const img = new Image();
                 img.onload = async function() {
                     try {
-                        // 1. Lienzo principal: Quita el fondo blanco automáticamente para que luzca perfecto como marca de agua
                         const maxW = 900;
                         const scale = Math.min(1, maxW / img.width);
                         const w = Math.round(img.width * scale);
@@ -597,7 +624,6 @@
                         const d = imgData.data;
                         for (let i = 0; i < d.length; i += 4) {
                             const r = d[i], g = d[i+1], b = d[i+2];
-                            // Elimina píxeles blancos y casi blancos del fondo
                             if (r > 240 && g > 240 && b > 240) {
                                 d[i+3] = 0;
                             } else if (r > 220 && g > 220 && b > 220) {
@@ -608,7 +634,6 @@
                         ctx.putImageData(imgData, 0, 0);
                         const logoTransparente = canvas.toDataURL('image/png');
 
-                        // 2. Lienzo para el ícono de la pestaña (recorta el círculo izquierdo del emblema sobre círculo blanco)
                         const favCanvas = document.createElement('canvas');
                         favCanvas.width = 128;
                         favCanvas.height = 128;
@@ -619,7 +644,6 @@
                         fctx.fillStyle = '#FFFFFF';
                         fctx.fill();
 
-                        // Si la imagen es horizontal (como el logo completo de AlphaZero), toma la mitad izquierda donde está el círculo
                         const cropSize = img.width > img.height * 1.25 ? img.height : Math.min(img.width, img.height);
                         const sx = img.width > img.height * 1.25 ? Math.max(0, (img.width * 0.52 - cropSize) / 2) : (img.width - cropSize) / 2;
                         const sy = (img.height - cropSize) / 2;
@@ -787,8 +811,8 @@
             if (optUSD) optUSD.textContent = `USD - Dólares (${cantUSD} pda${cantUSD === 1 ? '' : 's'})`;
 
             const clsBadge = mon === 'MXN'
-                ? 'text-xs px-2 py-0.5 rounded bg-cyan-100 text-[#0E859F] font-bold'
-                : 'text-xs px-2 py-0.5 rounded bg-orange-100 text-[#ED813C] font-bold';
+                ? 'text-xs px-2 py-0.5 rounded bg-cyan-100/80 text-[#0E859F] font-bold'
+                : 'text-xs px-2 py-0.5 rounded bg-orange-100/80 text-[#ED813C] font-bold';
 
             const badge = document.getElementById('badge-moneda-partidas');
             if (badge) {
@@ -983,7 +1007,7 @@
             const btn = document.getElementById('btn-agregar-incluye');
             if (btn) {
                 btn.innerText = '💾 Actualizar en INCLUYE';
-                btn.classList.remove('bg-[#0E859F]', 'hover:bg-[#0b6e84]');
+                btn.classList.remove('bg-[#0E859F]/90', 'hover:bg-[#0b6e84]');
                 btn.classList.add('bg-[#ED813C]', 'hover:bg-[#d96e2b]');
             }
             const btnCancel = document.getElementById('btn-cancelar-incluye');
@@ -1006,7 +1030,7 @@
             if (btn) {
                 btn.innerText = '+ Añadir a INCLUYE';
                 btn.classList.remove('bg-[#ED813C]', 'hover:bg-[#d96e2b]');
-                btn.classList.add('bg-[#0E859F]', 'hover:bg-[#0b6e84]');
+                btn.classList.add('bg-[#0E859F]/90', 'hover:bg-[#0b6e84]');
             }
             const btnCancel = document.getElementById('btn-cancelar-incluye');
             if (btnCancel) btnCancel.classList.add('hidden');
@@ -1046,10 +1070,10 @@
             document.getElementById('btn-toggle-incluye').innerText = `➕ INCLUYE (${tempIncluye.length})`;
             const cont = document.getElementById('lista-incluye-temp');
             cont.innerHTML = tempIncluye.map((inc, i) => `
-                <div class="p-1.5 rounded border flex justify-between items-center ${incluyeEditandoIndex === i ? 'bg-orange-100 border-[#ED813C]' : 'bg-white'}">
+                <div class="p-1.5 rounded border flex justify-between items-center ${incluyeEditandoIndex === i ? 'bg-orange-100/70 border-[#ED813C]' : 'bg-white/45 border-gray-300/60'}">
                     <div class="truncate pr-2">
                         <b>${esc(inc.prefijo)}</b> <span class="text-[#0E5DF0] font-bold">${esc(inc.descCorta)}</span> 
-                        <span class="text-gray-600">${inc.descNormal ? esc(inc.descNormal.substring(0,25)) + '...' : ''}</span>
+                        <span class="text-gray-700">${inc.descNormal ? esc(inc.descNormal.substring(0,25)) + '...' : ''}</span>
                         <span class="text-red-600 font-bold">${esc(inc.modelo)} ${esc(inc.marca)}</span>
                         <b>${esc(inc.tiempo)}</b>
                     </div>
@@ -1109,7 +1133,7 @@
             document.getElementById('btn-toggle-notas').innerText = `📝 NOTAS DE PARTIDA (${tempNotasPartida.length})`;
             const cont = document.getElementById('lista-notas-temp');
             cont.innerHTML = tempNotasPartida.map((n, i) => `
-                <div class="bg-white p-1.5 rounded border flex justify-between items-center">
+                <div class="bg-white/45 p-1.5 rounded border border-gray-300/60 flex justify-between items-center">
                     <div class="truncate pr-2">
                         ${n.tipo === 'nota' 
                             ? `<b>${esc(n.titulo)}</b> <span>${esc(n.texto)}</span>` 
@@ -1251,13 +1275,12 @@
             }
         };
 
-        // --- RENDERIZADO Y ALTA DE VENDEDORES ACTIVOS CORREGIDO ---
         window.renderUsuarios = function() {
             const lista = document.getElementById('lista-cuentas');
             if (!lista) return;
 
             const tarjetaMaster = `
-                <div class="bg-slate-900 text-white p-3.5 border border-[#0E859F] rounded-lg shadow-sm flex justify-between items-center">
+                <div class="bg-[#0B192C]/85 text-white p-3.5 border border-[#0E859F] rounded-lg shadow-sm flex justify-between items-center">
                     <div>
                         <span class="font-bold">master@alphazero.com</span>
                         <span class="text-[10px] bg-[#ED813C] text-white font-bold px-2 py-0.5 rounded ml-1">MASTER</span>
@@ -1270,18 +1293,18 @@
             const vendedoresFiltrados = dbUsuarios.filter(u => (u.email || '').toLowerCase() !== 'master@alphazero.com');
 
             const tarjetasVendedores = vendedoresFiltrados.map(u => `
-                <div class="bg-white/95 p-3.5 border border-gray-200 rounded-lg shadow-sm flex justify-between items-center">
+                <div class="bg-white/45 p-3.5 border border-[#0E859F]/30 rounded-lg shadow-sm flex justify-between items-center">
                     <div>
                         <span class="font-bold text-[#0B192C]">${esc(u.email)}</span>
-                        <span class="text-xs bg-cyan-100 text-[#0E859F] font-bold px-1.5 py-0.5 rounded ml-1">${esc(u.role || 'vendedor')}</span>
-                        ${u.pass ? `<p class="text-xs text-gray-500 mt-0.5">Contraseña: <b>${esc(u.pass)}</b></p>` : `<p class="text-xs text-emerald-600 font-semibold mt-0.5">Acceso habilitado</p>`}
+                        <span class="text-xs bg-cyan-100/80 text-[#0E859F] font-bold px-1.5 py-0.5 rounded ml-1">${esc(u.role || 'vendedor')}</span>
+                        ${u.pass ? `<p class="text-xs text-gray-700 mt-0.5">Contraseña: <b>${esc(u.pass)}</b></p>` : `<p class="text-xs text-emerald-700 font-semibold mt-0.5">Acceso habilitado</p>`}
                     </div>
-                    <button onclick="eliminarUsuario('${esc(u.id || u.email)}')" title="Revocar acceso" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1 rounded text-xs transition">Eliminar</button>
+                    <button onclick="eliminarUsuario('${esc(u.id || u.email)}')" title="Revocar acceso" class="bg-red-50/80 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1 rounded text-xs transition">Eliminar</button>
                 </div>
             `).join('');
 
             lista.innerHTML = tarjetaMaster + (tarjetasVendedores || `
-                <div class="bg-amber-50/90 p-3.5 border border-amber-200 rounded-lg text-xs text-amber-900 flex items-center">
+                <div class="bg-amber-50/60 p-3.5 border border-amber-300/70 rounded-lg text-xs text-amber-900 flex items-center">
                     No hay vendedores adicionales registrados en la lista. Ingresa arriba el correo y contraseña de tu vendedor y presiona "Crear / Sincronizar Cuenta".
                 </div>
             `);
@@ -1302,7 +1325,6 @@
                     await createUserWithEmailAndPassword(secondaryAuth, emailKey, pass);
                     await secondaryAuth.signOut();
                 } catch (authError) {
-                    // Si el correo ya existía en Firebase Authentication, lo sincronizamos en Firestore para que aparezca activo
                     if (authError.code === 'auth/email-already-in-use') {
                         yaExistiaEnAuth = true;
                     } else {
@@ -1447,16 +1469,16 @@
             );
 
             lista.innerHTML = filtrados.map(c => `
-                <div class="border-b py-2 flex justify-between items-center hover:bg-cyan-50/40 px-2 rounded">
+                <div class="border-b border-gray-300/60 py-2 flex justify-between items-center hover:bg-white/40 px-2 rounded">
                     <div>
                         <p class="font-bold text-[#0E5DF0]">${esc(c.descCorta) || 'Sin desc. corta'}</p>
-                        <p class="text-sm">${esc((c.desc || '').substring(0, 60))}...</p>
+                        <p class="text-sm text-[#0B192C]">${esc((c.desc || '').substring(0, 60))}...</p>
                         <p class="text-xs text-red-600 font-bold">Mod: ${esc(c.modelo)} | Marca: ${esc(c.marca)} | U.M.: ${esc(c.um)}</p>
                     </div>
                     <div class="flex items-center">
                         ${c.pdf ? `
-                            <a href="${esc(c.pdf)}" target="_blank" class="bg-orange-100 text-[#ED813C] hover:bg-orange-200 px-3 py-1 rounded text-xs font-bold mr-1 transition shadow-sm">📄 Ver Ficha</a>
-                            <a href="${esc(obtenerEnlaceDescarga(c.pdf))}" target="_blank" download class="bg-cyan-100 text-[#0E859F] hover:bg-cyan-200 px-3 py-1 rounded text-xs font-bold mr-4 transition shadow-sm">⬇️ Descargar</a>
+                            <a href="${esc(c.pdf)}" target="_blank" class="bg-orange-100/80 text-[#ED813C] hover:bg-orange-200 px-3 py-1 rounded text-xs font-bold mr-1 transition shadow-sm">📄 Ver Ficha</a>
+                            <a href="${esc(obtenerEnlaceDescarga(c.pdf))}" target="_blank" download class="bg-cyan-100/80 text-[#0E859F] hover:bg-cyan-200 px-3 py-1 rounded text-xs font-bold mr-4 transition shadow-sm">⬇️ Descargar</a>
                         ` : ''}
                         <button onclick="editarEquipo('${c.id}')" class="text-[#0E859F] font-bold mr-3">Editar</button>
                         <button onclick="eliminarEquipo('${c.id}')" class="text-red-500 font-bold">Eliminar</button>
@@ -1778,18 +1800,18 @@
                 const numInc = p.incluyeList ? p.incluyeList.length : 0;
                 const numNot = p.notasList ? p.notasList.length : 0;
                 return `
-                <div class="border-b py-2 flex justify-between items-center ${partidaEditandoIndex === i ? 'bg-orange-50' : ''}">
+                <div class="border-b border-gray-300/60 py-2 flex justify-between items-center px-1 rounded ${partidaEditandoIndex === i ? 'bg-orange-100/50' : 'hover:bg-white/30'}">
                     <div>
-                        <span class="font-bold mr-2 bg-[#0B192C] text-white px-2 py-0.5 rounded text-xs">Pda. ${esc(p.pda || (i+1))}</span>
-                        <span class="text-xs text-gray-500 font-bold block mt-0.5">${esc(p.notaArriba)}</span>
+                        <span class="font-bold mr-2 bg-[#0B192C]/90 text-white px-2 py-0.5 rounded text-xs">Pda. ${esc(p.pda || (i+1))}</span>
+                        <span class="text-xs text-gray-700 font-bold block mt-0.5">${esc(p.notaArriba)}</span>
                         <span class="text-xs font-bold text-[#0E5DF0]">${esc(p.descCorta)}</span>
                         <span class="text-xs text-red-600 font-bold ml-2">${esc(p.modelo)}</span><br>
-                        <span class="text-gray-500 text-xs">${p.cantidad} ${esc(p.um)} x $${p.precio.toLocaleString('en-US', {minimumFractionDigits:2})} ${mon}</span>
-                        ${numInc > 0 ? `<span class="ml-1 text-[10px] bg-cyan-100 text-[#0E859F] px-1.5 py-0.5 rounded font-bold">+${numInc} Incluye</span>` : ''}
-                        ${numNot > 0 ? `<span class="ml-1 text-[10px] bg-orange-100 text-[#CE8550] px-1.5 py-0.5 rounded font-bold">+${numNot} Notas</span>` : ''}
+                        <span class="text-gray-700 font-medium text-xs">${p.cantidad} ${esc(p.um)} x $${p.precio.toLocaleString('en-US', {minimumFractionDigits:2})} ${mon}</span>
+                        ${numInc > 0 ? `<span class="ml-1 text-[10px] bg-cyan-100/80 text-[#0E859F] px-1.5 py-0.5 rounded font-bold">+${numInc} Incluye</span>` : ''}
+                        ${numNot > 0 ? `<span class="ml-1 text-[10px] bg-orange-100/80 text-[#CE8550] px-1.5 py-0.5 rounded font-bold">+${numNot} Notas</span>` : ''}
                         ${p.pdf ? `
-                            <a href="${esc(p.pdf)}" target="_blank" class="ml-2 text-xs bg-orange-100 text-[#ED813C] px-2 py-0.5 rounded font-bold hover:bg-orange-200 inline-block transition">📄 Ver Ficha</a>
-                            <a href="${esc(obtenerEnlaceDescarga(p.pdf))}" target="_blank" download class="ml-1 text-xs bg-cyan-100 text-[#0E859F] px-2 py-0.5 rounded font-bold hover:bg-cyan-200 inline-block transition">⬇️ Descargar</a>
+                            <a href="${esc(p.pdf)}" target="_blank" class="ml-2 text-xs bg-orange-100/80 text-[#ED813C] px-2 py-0.5 rounded font-bold hover:bg-orange-200 inline-block transition">📄 Ver Ficha</a>
+                            <a href="${esc(obtenerEnlaceDescarga(p.pdf))}" target="_blank" download class="ml-1 text-xs bg-cyan-100/80 text-[#0E859F] px-2 py-0.5 rounded font-bold hover:bg-cyan-200 inline-block transition">⬇️ Descargar</a>
                         ` : ''}
                     </div>
                     <div class="flex flex-col items-end shrink-0 ml-2">
