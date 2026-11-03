@@ -3,240 +3,399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GENERADOR DE COTIZACIONES</title>
+    <title>AlphaZero</title>
+    <!-- Favicon de AlphaZero en la pestaña del navegador -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='azg' x1='0%25' y1='50%25' x2='100%25' y2='50%25'%3E%3Cstop offset='0%25' stop-color='%23ED813C'/%3E%3Cstop offset='40%25' stop-color='%23CE8550'/%3E%3Cstop offset='75%25' stop-color='%230E859F'/%3E%3Cstop offset='100%25' stop-color='%230E5DF0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='100' cy='100' r='92' fill='%230F1E36' stroke='url(%23azg)' stroke-width='10'/%3E%3Ccircle cx='100' cy='100' r='72' fill='none' stroke='url(%23azg)' stroke-width='4' stroke-dasharray='18 8'/%3E%3Cpath d='M100 32 L100 135 M60 85 L140 85 M60 85 L60 125 M140 85 L140 125 M78 145 L122 145' stroke='url(%23azg)' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='100' cy='135' r='16' fill='%230F1E36' stroke='url(%23azg)' stroke-width='6'/%3E%3Ccircle cx='75' cy='62' r='9' fill='url(%23azg)'/%3E%3Ccircle cx='125' cy='62' r='9' fill='url(%23azg)'/%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            --az-bronze: #CE8550;
+            --az-orange: #ED813C;
+            --az-teal: #0E859F;
+            --az-blue: #0E5DF0;
+            --az-navy: #0B192C;
+        }
         .hidden { display: none !important; }
-        body { font-family: ui-sans-serif, system-ui, sans-serif; }
-        #loading-screen { background: rgba(15, 23, 42, 0.9); z-index: 9999; }
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #F4F7FA;
+        }
+        #loading-screen { background: rgba(11, 25, 44, 0.92); z-index: 9999; }
         .sidebar-collapsed { width: 4.5rem !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; align-items: center; }
         .sidebar-collapsed .sidebar-text { display: none !important; }
         .sidebar-collapsed .sidebar-header { justify-content: center !important; }
+
+        /* Gradientes y estilos corporativos AlphaZero */
+        .az-gradient-text {
+            background: linear-gradient(90deg, #ED813C 0%, #CE8550 35%, #0E859F 75%, #0E5DF0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .az-gradient-bg {
+            background: linear-gradient(135deg, #ED813C 0%, #CE8550 30%, #0E859F 75%, #0E5DF0 100%);
+        }
+        .az-gradient-btn {
+            background: linear-gradient(90deg, #0E859F 0%, #0E5DF0 100%);
+        }
+        .az-gradient-btn:hover {
+            background: linear-gradient(90deg, #0b6e84 0%, #0b4cc4 100%);
+        }
+        .az-orange-btn {
+            background: linear-gradient(90deg, #ED813C 0%, #CE8550 100%);
+        }
+        .az-orange-btn:hover {
+            background: linear-gradient(90deg, #d96e2b 0%, #b87341 100%);
+        }
+        .az-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(14, 133, 159, 0.16);
+        }
+        .az-top-border {
+            border-top: 4px solid transparent;
+            border-image: linear-gradient(90deg, #ED813C, #CE8550, #0E859F, #0E5DF0) 1;
+        }
     </style>
     <!-- Librerías de Word -->
     <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.4/dist/pizzip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.37.11/build/docxtemplater.js"></script>
 </head>
-<body class="bg-gray-100 font-sans text-gray-800">
+<body class="text-gray-800 relative selection:bg-[#0E859F] selection:text-white">
+
+    <!-- DEFINICIÓN VECTORIAL DEL EMBLEMA ALPHAZERO PARA REUTILIZAR EN MARCAS DE AGUA Y CABECERAS -->
+    <svg class="hidden" aria-hidden="true">
+        <symbol id="alphazero-emblem" viewBox="0 0 400 400">
+            <defs>
+                <linearGradient id="azGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+                    <stop offset="0%" stop-color="#ED813C"/>
+                    <stop offset="35%" stop-color="#CE8550"/>
+                    <stop offset="70%" stop-color="#0E859F"/>
+                    <stop offset="100%" stop-color="#0E5DF0"/>
+                </linearGradient>
+            </defs>
+            <!-- Anillo Geométrico Exterior (Iris de Ingeniería) -->
+            <circle cx="200" cy="200" r="185" fill="none" stroke="url(#azGrad)" stroke-width="5"/>
+            <circle cx="200" cy="200" r="138" fill="none" stroke="url(#azGrad)" stroke-width="4"/>
+            <g stroke="url(#azGrad)" stroke-width="2.5" fill="none">
+                <path d="M200 15 L295 45 L105 45 Z"/>
+                <path d="M295 45 L360 120 L200 62 Z"/>
+                <path d="M360 120 L385 200 L295 95 Z"/>
+                <path d="M385 200 L360 280 L338 200 Z"/>
+                <path d="M360 280 L295 355 L315 265 Z"/>
+                <path d="M295 355 L200 385 L270 320 Z"/>
+                <path d="M200 385 L105 355 L200 338 Z"/>
+                <path d="M105 355 L40 280 L105 305 Z"/>
+                <path d="M40 280 L15 200 L62 200 Z"/>
+                <path d="M15 200 L40 120 L85 135 Z"/>
+                <path d="M40 120 L105 45 L130 80 Z"/>
+                <!-- Líneas envolventes del iris -->
+                <path d="M62 200 L130 80 L270 80 L338 200 L270 320 L130 320 Z"/>
+                <path d="M95 110 L200 62 L305 110 L338 225 L260 330 L140 330 L62 225 Z"/>
+            </g>
+            <!-- Sistema Contraincendios Interno (Tuberías, Bomba, Rociadores, Alarmas y Paneles) -->
+            <g stroke="url(#azGrad)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Columna central -->
+                <line x1="194" y1="64" x2="194" y2="215"/>
+                <line x1="206" y1="64" x2="206" y2="215"/>
+                <!-- Alarmas superiores (Campanas) -->
+                <circle cx="152" cy="112" r="18"/>
+                <circle cx="152" cy="112" r="4" fill="url(#azGrad)"/>
+                <path d="M140 134 L164 134"/>
+                <circle cx="248" cy="112" r="18"/>
+                <circle cx="248" cy="112" r="4" fill="url(#azGrad)"/>
+                <path d="M236 134 L260 134"/>
+                <!-- Ramales superiores y rociadores (Sprinklers) -->
+                <path d="M72 152 L175 152 L175 190"/>
+                <path d="M328 152 L225 152 L225 190"/>
+                <!-- Rociador Izquierdo -->
+                <circle cx="115" cy="172" r="10"/>
+                <path d="M102 184 L92 194 M110 186 L104 198 M120 186 L126 198 M128 184 L138 194" stroke-width="2.5"/>
+                <!-- Rociador Derecho -->
+                <circle cx="285" cy="172" r="10"/>
+                <path d="M272 184 L262 194 M280 186 L274 198 M290 186 L296 198 M298 184 L308 194" stroke-width="2.5"/>
+                <!-- Paneles de Control Laterales -->
+                <rect x="88" y="218" width="32" height="32" rx="3"/>
+                <rect x="94" y="224" width="20" height="18" rx="1" stroke-width="2.5"/>
+                <rect x="280" y="218" width="32" height="32" rx="3"/>
+                <circle cx="296" cy="234" r="9" stroke-width="2.5"/>
+                <!-- Tuberías principales e interconexiones -->
+                <path d="M68 200 L332 200"/>
+                <path d="M104 250 L104 295 L155 295"/>
+                <path d="M296 250 L296 295 L245 295"/>
+                <path d="M142 190 L142 295"/>
+                <path d="M258 190 L258 295"/>
+                <!-- Bomba Central y Motor -->
+                <rect x="180" y="218" width="40" height="42" rx="4"/>
+                <line x1="188" y1="226" x2="188" y2="252" stroke-width="2.5"/>
+                <line x1="196" y1="226" x2="196" y2="252" stroke-width="2.5"/>
+                <line x1="204" y1="226" x2="204" y2="252" stroke-width="2.5"/>
+                <line x1="212" y1="226" x2="212" y2="252" stroke-width="2.5"/>
+                <circle cx="200" cy="288" r="22"/>
+                <path d="M185 273 L215 303 M215 273 L185 303" stroke-width="2.5"/>
+                <path d="M168 318 L232 318"/>
+            </g>
+        </symbol>
+    </svg>
 
     <!-- PANTALLA DE CARGA GLOBAL -->
-    <div id="loading-screen" class="fixed inset-0 flex items-center justify-center hidden">
-        <div class="text-white text-xl font-bold animate-pulse">☁️ Conectando...</div>
+    <div id="loading-screen" class="fixed inset-0 flex flex-col items-center justify-center hidden">
+        <svg class="w-20 h-20 animate-spin mb-4" style="animation-duration: 6s;"><use href="#alphazero-emblem"></use></svg>
+        <div class="text-white text-xl font-bold tracking-wider animate-pulse">Sincronizando con AlphaZero...</div>
     </div>
 
-    <!-- PANTALLA DE INICIO DE SESIÓN -->
-    <div id="login-container" class="flex h-screen bg-slate-900 items-center justify-center hidden">
-        <div class="bg-white p-8 rounded shadow-2xl w-96 max-w-[92vw]">
-            <div class="text-center mb-6">
-                <h2 class="text-3xl font-bold text-slate-800 tracking-wider">LOGIN</h2>
-                <p class="text-gray-500 text-sm">CONTACTA A UN ADMINISTRADOR PARA SER DADO DE ALTA</p>
+    <!-- PANTALLA DE INICIO DE SESIÓN CON MARCA DE AGUA ALPHAZERO -->
+    <div id="login-container" class="flex h-screen bg-[#0B192C] items-center justify-center relative overflow-hidden hidden">
+        <!-- Marca de agua gigante en el fondo del Login -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+            <svg class="w-[780px] h-[780px] opacity-[0.10] transform scale-110"><use href="#alphazero-emblem"></use></svg>
+        </div>
+        <!-- Resplandor ambiental con los colores del logo -->
+        <div class="absolute -left-24 -bottom-24 w-96 h-96 rounded-full bg-[#ED813C] opacity-15 blur-3xl pointer-events-none"></div>
+        <div class="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-[#0E859F] opacity-20 blur-3xl pointer-events-none"></div>
+
+        <!-- Tarjeta de Login -->
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-xl shadow-2xl w-96 max-w-[92vw] relative z-10 az-top-border">
+            <div class="flex flex-col items-center text-center mb-6">
+                <svg class="w-24 h-24 mb-2 drop-shadow-sm"><use href="#alphazero-emblem"></use></svg>
+                <h2 class="text-3xl font-extrabold tracking-wider leading-none">
+                    <span class="text-[#0B192C]">ALPHA</span><span class="az-gradient-text">ZERO</span>
+                </h2>
+                <p class="text-[11px] font-semibold tracking-[0.22em] text-gray-500 mt-1">SISTEMAS CONTRAINCENDIOS</p>
+                <p class="text-gray-400 text-[11px] mt-3">CONTACTA A UN ADMINISTRADOR PARA SER DADO DE ALTA</p>
             </div>
-            <input type="email" id="login-user" placeholder="Correo electrónico" class="border p-3 w-full mb-3 rounded bg-gray-50">
-            <input type="password" id="login-pass" placeholder="Contraseña (Mínimo 6 caracteres)" class="border p-3 w-full mb-6 rounded bg-gray-50">
-            <button onclick="iniciarSesion()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-3 rounded w-full transition shadow-lg">INICIAR SESIÓN</button>
+            <input type="email" id="login-user" placeholder="Correo electrónico" class="border border-gray-300 focus:border-[#0E859F] focus:outline-none p-3 w-full mb-3 rounded-lg bg-gray-50/90 text-sm">
+            <input type="password" id="login-pass" placeholder="Contraseña (Mínimo 6 caracteres)" class="border border-gray-300 focus:border-[#0E859F] focus:outline-none p-3 w-full mb-6 rounded-lg bg-gray-50/90 text-sm">
+            <button onclick="iniciarSesion()" class="az-gradient-btn text-white font-bold px-4 py-3 rounded-lg w-full transition shadow-lg tracking-wider">INICIAR SESIÓN</button>
         </div>
     </div>
 
     <!-- APLICACIÓN PRINCIPAL -->
-    <div id="app-container" class="flex h-screen hidden">
-        <!-- Menú Lateral Contraíble -->
-        <div id="sidebar" class="w-60 bg-slate-800 text-white p-4 flex flex-col transition-all duration-300 shrink-0">
-            <div class="flex items-center justify-between mb-8 sidebar-header w-full">
-                <h2 class="text-xl font-bold tracking-wider text-blue-400 sidebar-text leading-tight">HERRAMIENTAS<br><span class="text-xs text-gray-400">EN LINEA 🟢</span></h2>
-                <button onclick="toggleSidebar()" title="Contraer / Expandir barra lateral" class="bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1.5 rounded text-lg font-bold transition shadow">
+    <div id="app-container" class="flex h-screen hidden relative overflow-hidden">
+        
+        <!-- Menú Lateral Contraíble con colores AlphaZero -->
+        <div id="sidebar" class="w-64 bg-[#0B192C] text-white p-4 flex flex-col transition-all duration-300 shrink-0 relative z-20 border-r border-[#0E859F]/30 shadow-xl">
+            <div class="flex items-center justify-between mb-8 sidebar-header w-full border-b border-slate-700/80 pb-4">
+                <div class="flex items-center gap-2.5 sidebar-text">
+                    <svg class="w-11 h-11 shrink-0"><use href="#alphazero-emblem"></use></svg>
+                    <div class="leading-tight">
+                        <h2 class="text-lg font-extrabold tracking-wider">
+                            <span class="text-white">ALPHA</span><span class="az-gradient-text">ZERO</span>
+                        </h2>
+                        <span class="text-[10px] text-[#0E859F] font-bold tracking-widest block">CONTRAINCENDIOS 🟢</span>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar()" title="Contraer / Expandir barra lateral" class="bg-slate-800 hover:bg-[#0E859F] text-white px-2.5 py-1.5 rounded text-lg font-bold transition shadow">
                     ☰
                 </button>
             </div>
             
-            <button onclick="mostrarSeccion('cotizaciones')" title="Crear Cotización" class="text-left mb-4 hover:text-blue-400 font-bold flex items-center gap-3 w-full justify-center md:justify-start">
+            <button onclick="mostrarSeccion('cotizaciones')" title="Crear Cotización" class="text-left mb-3 py-2 px-2.5 rounded-lg hover:bg-white/10 hover:text-[#ED813C] font-bold flex items-center gap-3 w-full justify-center md:justify-start transition">
                 <span class="text-xl">📄</span> <span class="sidebar-text">Crear Cotización</span>
             </button>
-            <button onclick="mostrarSeccion('catalogo')" title="Catálogo" class="text-left mb-4 hover:text-blue-400 font-bold flex items-center gap-3 w-full justify-center md:justify-start">
+            <button onclick="mostrarSeccion('catalogo')" title="Catálogo" class="text-left mb-3 py-2 px-2.5 rounded-lg hover:bg-white/10 hover:text-[#ED813C] font-bold flex items-center gap-3 w-full justify-center md:justify-start transition">
                 <span class="text-xl">📦</span> <span class="sidebar-text">Catálogo</span>
             </button>
-            <button onclick="mostrarSeccion('vendedores')" title="Vendedores" class="text-left mb-4 hover:text-blue-400 font-bold flex items-center gap-3 w-full justify-center md:justify-start">
+            <button onclick="mostrarSeccion('vendedores')" title="Vendedores" class="text-left mb-3 py-2 px-2.5 rounded-lg hover:bg-white/10 hover:text-[#ED813C] font-bold flex items-center gap-3 w-full justify-center md:justify-start transition">
                 <span class="text-xl">👥</span> <span class="sidebar-text">Vendedores</span>
             </button>
             
-            <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" title="Gestión de Usuarios" class="text-left mb-4 text-yellow-400 hover:text-yellow-200 font-bold hidden border-t border-slate-600 pt-4 mt-2 flex items-center gap-3 w-full justify-center md:justify-start">
+            <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" title="Gestión de Usuarios" class="text-left mb-3 py-2 px-2.5 rounded-lg text-[#ED813C] hover:bg-white/10 font-bold hidden border-t border-slate-700 pt-4 mt-2 flex items-center gap-3 w-full justify-center md:justify-start transition">
                 <span class="text-xl">⚙️</span> <span class="sidebar-text">Gestión de Usuarios</span>
             </button>
             
-            <div class="mt-auto border-t border-slate-600 pt-4 w-full">
+            <!-- Paleta decorativa de identidad AlphaZero en la barra lateral -->
+            <div class="mt-auto border-t border-slate-700 pt-4 w-full">
+                <div class="flex gap-1.5 mb-3 sidebar-text">
+                    <span class="h-1.5 flex-1 rounded-full bg-[#CE8550]"></span>
+                    <span class="h-1.5 flex-1 rounded-full bg-[#ED813C]"></span>
+                    <span class="h-1.5 flex-1 rounded-full bg-[#0E859F]"></span>
+                    <span class="h-1.5 flex-1 rounded-full bg-[#0E5DF0]"></span>
+                </div>
                 <p class="text-xs text-gray-400 mb-2 sidebar-text">Conectado como:<br><span id="lbl-usuario-actual" class="font-bold text-white text-sm break-words"></span></p>
-                <button onclick="cerrarSesion()" title="Cerrar Sesión" class="bg-red-600 hover:bg-red-700 w-full text-white px-3 py-2 rounded text-sm font-bold transition shadow flex items-center justify-center gap-2">
+                <button onclick="cerrarSesion()" title="Cerrar Sesión" class="az-orange-btn w-full text-white px-3 py-2 rounded-lg text-sm font-bold transition shadow flex items-center justify-center gap-2">
                     <span>🚪</span> <span class="sidebar-text">Cerrar Sesión</span>
                 </button>
             </div>
         </div>
 
-        <!-- Contenido Principal -->
-        <div class="flex-1 p-4 overflow-y-auto" id="main-content">
+        <!-- Contenedor Principal con Marca de Agua Fija en Toda la Página -->
+        <div class="flex-1 p-4 overflow-y-auto relative" id="main-content">
             
+            <!-- MARCA DE AGUA FIJA EN EL FONDO DEL PROGRAMA -->
+            <div class="fixed inset-0 pointer-events-none select-none flex flex-col items-center justify-center z-0 md:pl-56">
+                <svg class="w-[540px] h-[540px] max-w-[85vw] max-h-[85vh] opacity-[0.07]"><use href="#alphazero-emblem"></use></svg>
+                <div class="text-4xl font-black tracking-[0.25em] opacity-[0.05] mt-2 text-[#0B192C]">ALPHAZERO</div>
+                <div class="text-xs font-bold tracking-[0.35em] opacity-[0.05] text-[#0E859F]">SISTEMAS CONTRAINCENDIOS</div>
+            </div>
+
             <!-- SECCIÓN: GESTIÓN DE USUARIOS (Solo Master) -->
-            <div id="sec-usuarios" class="hidden">
-                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Gestión de Accesos</h3>
-                <div class="bg-yellow-50 p-6 rounded shadow mb-6 border border-yellow-200">
-                    <h4 class="font-bold mb-3">Dar de alta nuevo vendedor</h4>
+            <div id="sec-usuarios" class="hidden relative z-10">
+                <h3 class="text-2xl font-extrabold border-b-2 border-[#0E859F]/30 pb-2 mb-4 text-[#0B192C]">Gestión de Accesos</h3>
+                <div class="az-card p-6 rounded-xl shadow mb-6 border-l-4 border-l-[#ED813C]">
+                    <h4 class="font-bold mb-3 text-[#0B192C]">Dar de alta nuevo vendedor</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="email" id="new-user" placeholder="Correo Eléctronico" class="border p-2 rounded">
-                        <input type="text" id="new-pass" placeholder="Contraseña de acceso" class="border p-2 rounded">
-                        <button onclick="crearUsuario()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-bold md:col-span-2 transition">Crear Cuenta</button>
+                        <input type="email" id="new-user" placeholder="Correo Electrónico" class="border p-2 rounded bg-white/90">
+                        <input type="text" id="new-pass" placeholder="Contraseña de acceso" class="border p-2 rounded bg-white/90">
+                        <button onclick="crearUsuario()" class="az-gradient-btn text-white px-4 py-2 rounded-lg shadow font-bold md:col-span-2 transition">Crear Cuenta</button>
                     </div>
                 </div>
-                <h4 class="font-bold mb-3">Vendedores Activos</h4>
-                <div id="lista-cuentas" class="bg-white rounded shadow p-4 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <h4 class="font-bold mb-3 text-[#0B192C]">Vendedores Activos</h4>
+                <div id="lista-cuentas" class="az-card rounded-xl shadow p-4 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
             <!-- SECCIÓN: VENDEDORES -->
-            <div id="sec-vendedores" class="hidden">
-                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Administrar Vendedores</h3>
-                <div class="bg-white p-6 rounded shadow mb-6">
-                    <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor" class="border p-2 w-full mb-3 rounded">
-                    <label class="block mb-2 text-sm font-bold">Subir formato (.docx):</label>
+            <div id="sec-vendedores" class="hidden relative z-10">
+                <h3 class="text-2xl font-extrabold border-b-2 border-[#0E859F]/30 pb-2 mb-4 text-[#0B192C]">Administrar Vendedores</h3>
+                <div class="az-card p-6 rounded-xl shadow mb-6 az-top-border">
+                    <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor" class="border p-2 w-full mb-3 rounded bg-white/90">
+                    <label class="block mb-2 text-sm font-bold text-[#0B192C]">Subir formato (.docx):</label>
                     <input type="file" id="vend-file" accept=".docx" class="mb-4 block">
-                    <button onclick="guardarVendedor()" class="bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded shadow font-bold transition">Guardar Cambios</button>
+                    <button onclick="guardarVendedor()" class="az-gradient-btn text-white px-5 py-2 rounded-lg shadow font-bold transition">Guardar Cambios</button>
                 </div>
                 <div id="lista-vendedores" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
             <!-- SECCIÓN: CATÁLOGO -->
-            <div id="sec-catalogo" class="hidden">
-                <h3 class="text-2xl font-bold border-b pb-2 mb-4">Catálogo</h3>
-                <div class="bg-white p-6 rounded shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="sec-catalogo" class="hidden relative z-10">
+                <h3 class="text-2xl font-extrabold border-b-2 border-[#0E859F]/30 pb-2 mb-4 text-[#0B192C]">Catálogo AlphaZero</h3>
+                <div class="az-card p-6 rounded-xl shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 az-top-border">
                     <input type="hidden" id="cat-id">
-                    <input type="text" id="cat-desc-corta" placeholder="DESCRIPCIÓN CORTA" class="border p-2 md:col-span-2 rounded font-bold text-blue-800">
-                    <textarea id="cat-desc" placeholder="DESCRIPCIÓN DETALLADA" class="border p-2 md:col-span-2 rounded"></textarea>
-                    <input type="text" id="cat-um" placeholder="UNIDAD DE MEDIDA" class="border p-2 rounded uppercase">
-                    <input type="text" id="cat-marca" placeholder="Marca" class="border p-2 rounded uppercase">
-                    <input type="text" id="cat-modelo" placeholder="Modelo" class="border p-2 rounded uppercase">
-                    <input type="url" id="cat-pdf" placeholder="🔗 Enlace de Ficha Técnica (Drive / Web)" class="border p-2 rounded text-blue-700 bg-blue-50">
+                    <input type="text" id="cat-desc-corta" placeholder="DESCRIPCIÓN CORTA" class="border p-2 md:col-span-2 rounded font-bold text-[#0E5DF0] bg-white/90">
+                    <textarea id="cat-desc" placeholder="DESCRIPCIÓN DETALLADA" class="border p-2 md:col-span-2 rounded bg-white/90"></textarea>
+                    <input type="text" id="cat-um" placeholder="UNIDAD DE MEDIDA" class="border p-2 rounded uppercase bg-white/90">
+                    <input type="text" id="cat-marca" placeholder="Marca" class="border p-2 rounded uppercase bg-white/90">
+                    <input type="text" id="cat-modelo" placeholder="Modelo" class="border p-2 rounded uppercase bg-white/90">
+                    <input type="url" id="cat-pdf" placeholder="🔗 Enlace de Ficha Técnica (Drive / Web)" class="border p-2 rounded text-[#0E859F] bg-cyan-50/70">
                     <div class="md:col-span-2 flex gap-2 mt-2">
-                        <button onclick="guardarEquipo()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-bold transition">GUARDAR</button>
-                        <button onclick="limpiarFormCatalogo()" class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow font-bold transition">LIMPIAR</button>
+                        <button onclick="guardarEquipo()" class="az-gradient-btn text-white px-5 py-2 rounded-lg shadow font-bold transition">GUARDAR</button>
+                        <button onclick="limpiarFormCatalogo()" class="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-lg shadow font-bold transition">LIMPIAR</button>
                     </div>
                 </div>
-                <input type="text" id="buscador-catalogo" oninput="renderCatalogo()" placeholder="BUSCAR EQUIPO..." class="border p-2 w-full mb-4 rounded bg-blue-50 font-bold">
-                <div id="lista-catalogo" class="bg-white rounded shadow p-4 max-h-96 overflow-y-auto"></div>
+                <input type="text" id="buscador-catalogo" oninput="renderCatalogo()" placeholder="🔍 BUSCAR EQUIPO EN CATÁLOGO..." class="border-2 border-[#0E859F]/40 p-2.5 w-full mb-4 rounded-lg bg-white/90 font-bold text-[#0B192C]">
+                <div id="lista-catalogo" class="az-card rounded-xl shadow p-4 max-h-96 overflow-y-auto"></div>
             </div>
 
             <!-- SECCIÓN: COTIZACIONES -->
-            <div id="sec-cotizaciones" class="hidden">
-                <div class="flex flex-wrap justify-between items-center mb-3 border-b pb-2 gap-2">
-                    <h3 class="text-xl font-bold">Cotizaciones</h3>
+            <div id="sec-cotizaciones" class="hidden relative z-10">
+                <div class="flex flex-wrap justify-between items-center mb-3 border-b-2 border-[#0E859F]/25 pb-2 gap-2">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-7 h-7"><use href="#alphazero-emblem"></use></svg>
+                        <h3 class="text-xl font-extrabold text-[#0B192C]">Cotizaciones <span class="az-gradient-text">AlphaZero</span></h3>
+                    </div>
                     <div class="flex flex-wrap gap-2 items-center">
-                        <button onclick="toggleColumnasCotizacion()" title="Cambiar entre 1 y 2 columnas para pantalla dividida" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2.5 py-1.5 rounded text-xs font-bold transition">📐 1 Col / 2 Col</button>
-                        <select id="cotizacion-activa" onchange="cambiarCotizacionTab()" class="border p-1.5 rounded font-bold bg-blue-50 text-blue-800 text-sm max-w-xs"></select>
-                        <button onclick="nuevaCotizacion()" class="bg-slate-700 hover:bg-slate-900 text-white px-3 py-1.5 rounded text-sm font-bold transition">+ Nueva</button>
-                        <button onclick="duplicarCotizacion()" title="Crear una copia de esta cotización con todas sus partidas" class="bg-indigo-600 hover:bg-indigo-800 text-white px-3 py-1.5 rounded text-sm font-bold transition">📋 Duplicar</button>
-                        <button onclick="eliminarCotizacionActual()" class="bg-red-500 hover:bg-red-700 text-white px-3 py-1.5 rounded text-sm font-bold transition">🗑️ Eliminar</button>
+                        <button onclick="toggleColumnasCotizacion()" title="Cambiar entre 1 y 2 columnas para pantalla dividida" class="bg-white hover:bg-gray-100 text-[#0B192C] border border-gray-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">📐 1 Col / 2 Col</button>
+                        <select id="cotizacion-activa" onchange="cambiarCotizacionTab()" class="border-2 border-[#0E859F]/40 p-1.5 rounded-lg font-bold bg-white text-[#0B192C] text-sm max-w-xs shadow-sm"></select>
+                        <button onclick="nuevaCotizacion()" class="bg-[#0B192C] hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-sm font-bold transition shadow">+ Nueva</button>
+                        <button onclick="duplicarCotizacion()" title="Crear una copia de esta cotización con todas sus partidas" class="bg-[#0E859F] hover:bg-[#0b6e84] text-white px-3 py-1.5 rounded-lg text-sm font-bold transition shadow">📋 Duplicar</button>
+                        <button onclick="eliminarCotizacionActual()" class="bg-[#ED813C] hover:bg-[#d96e2b] text-white px-3 py-1.5 rounded-lg text-sm font-bold transition shadow">🗑️ Eliminar</button>
                     </div>
                 </div>
 
                 <div id="grid-cotizaciones" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white p-4 rounded shadow">
-                        <div class="flex justify-between items-center mb-3 border-b pb-1.5">
-                            <h4 class="font-bold">Configuración Inicial</h4>
+                    <!-- Columna Izquierda: Datos Generales -->
+                    <div class="az-card p-4 rounded-xl shadow az-top-border">
+                        <div class="flex justify-between items-center mb-3 border-b border-gray-200 pb-1.5">
+                            <h4 class="font-bold text-[#0B192C]">Configuración Inicial</h4>
                             <span id="badge-moneda-datos" class="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">🇲🇽 Datos en MXN</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2 mb-4">
-                            <select id="cot-vendedor" class="border p-2 rounded w-full border-red-300 text-sm" onchange="guardarEstadoCotizaciones()"></select>
-                            <select id="cot-moneda" class="border p-2 rounded w-full text-sm font-bold bg-emerald-50 text-emerald-900 border-emerald-300" onchange="cambiarMonedaCotizacion()">
+                            <select id="cot-vendedor" class="border p-2 rounded-lg w-full border-[#ED813C] text-sm bg-white/90 font-semibold" onchange="guardarEstadoCotizaciones()"></select>
+                            <select id="cot-moneda" class="border p-2 rounded-lg w-full text-sm font-bold bg-cyan-50 text-[#0E859F] border-[#0E859F]/50" onchange="cambiarMonedaCotizacion()">
                                 <option id="opt-moneda-mxn" value="MXN">MXN - Pesos Mexicanos</option>
                                 <option id="opt-moneda-usd" value="USD">USD - Dólares</option>
                             </select>
                         </div>
 
-                        <h4 class="font-bold mb-3 border-b">Estructura del Folio</h4>
+                        <h4 class="font-bold mb-3 border-b border-gray-200 text-[#0B192C]">Estructura del Folio</h4>
                         <div class="flex items-center gap-2 mb-4">
-                            <span class="font-bold text-gray-500">NO-</span>
-                            <input type="text" id="cot-folio-mid" placeholder="XXX" class="border p-2 w-16 text-center font-bold uppercase rounded" onchange="guardarEstadoCotizaciones()">
-                            <span class="font-bold text-gray-500" id="lbl-anio"></span>
-                            <input type="text" id="cot-folio-end" placeholder="Rev" class="border p-2 w-16 text-center font-bold uppercase rounded" onchange="guardarEstadoCotizaciones()">
+                            <span class="font-bold text-[#0E859F]">NO-</span>
+                            <input type="text" id="cot-folio-mid" placeholder="XXX" class="border p-2 w-16 text-center font-bold uppercase rounded-lg bg-white/90" onchange="guardarEstadoCotizaciones()">
+                            <span class="font-bold text-[#0E859F]" id="lbl-anio"></span>
+                            <input type="text" id="cot-folio-end" placeholder="Rev" class="border p-2 w-16 text-center font-bold uppercase rounded-lg bg-white/90" onchange="guardarEstadoCotizaciones()">
                         </div>
 
-                        <h4 class="font-bold mb-3 border-b">Datos Comerciales</h4>
-                        <input type="text" id="cot-cliente" placeholder="Cliente" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-referencia" placeholder="Referencia de cotización" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-contacto" placeholder="Datos de contacto" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
+                        <h4 class="font-bold mb-3 border-b border-gray-200 text-[#0B192C]">Datos Comerciales</h4>
+                        <input type="text" id="cot-cliente" placeholder="Cliente" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-referencia" placeholder="Referencia de cotización" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-contacto" placeholder="Datos de contacto" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
                         
-                        <h4 class="font-bold mb-3 border-b mt-4">Condiciones</h4>
-                        <input type="text" id="cot-lugar" placeholder="Lugar de entrega" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-pago" placeholder="Condiciones de pago" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-vigencia" placeholder="Vigencia de la propuesta" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
-                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega general" class="border p-2 w-full mb-2 rounded text-sm" onchange="guardarEstadoCotizaciones()">
-                        <textarea id="cot-notas" placeholder="Notas Generales (Aparecerá junto al subtotal)" class="border p-2 w-full mb-2 rounded h-20 text-sm" onchange="guardarEstadoCotizaciones()"></textarea>
+                        <h4 class="font-bold mb-3 border-b border-gray-200 mt-4 text-[#0B192C]">Condiciones</h4>
+                        <input type="text" id="cot-lugar" placeholder="Lugar de entrega" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-pago" placeholder="Condiciones de pago" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-vigencia" placeholder="Vigencia de la propuesta" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
+                        <input type="text" id="cot-plazo" placeholder="Plazo de entrega general" class="border p-2 w-full mb-2 rounded-lg text-sm bg-white/90" onchange="guardarEstadoCotizaciones()">
+                        <textarea id="cot-notas" placeholder="Notas Generales (Aparecerá junto al subtotal)" class="border p-2 w-full mb-2 rounded-lg h-20 text-sm bg-white/90" onchange="guardarEstadoCotizaciones()"></textarea>
                     </div>
 
-                    <div class="bg-white p-4 rounded shadow relative">
-                        <div class="flex flex-wrap justify-between items-center mb-3 border-b pb-1.5 gap-2">
-                            <h4 class="font-bold flex items-center gap-2">
+                    <!-- Columna Derecha: Constructor de Partidas -->
+                    <div class="az-card p-4 rounded-xl shadow relative az-top-border">
+                        <div class="flex flex-wrap justify-between items-center mb-3 border-b border-gray-200 pb-1.5 gap-2">
+                            <h4 class="font-bold flex items-center gap-2 text-[#0B192C]">
                                 <span>Partidas</span>
                                 <span id="badge-moneda-partidas" class="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">MXN</span>
                             </h4>
-                            <button type="button" id="btn-copiar-moneda" onclick="copiarPartidasOtraMoneda()" class="bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 px-2.5 py-1 rounded text-xs font-bold transition shadow-sm">
+                            <button type="button" id="btn-copiar-moneda" onclick="copiarPartidasOtraMoneda()" class="bg-cyan-50 hover:bg-cyan-100 text-[#0E859F] border border-[#0E859F]/40 px-2.5 py-1 rounded-lg text-xs font-bold transition shadow-sm">
                                 🔄 Copiar de USD
                             </button>
                         </div>
                         
-                        <input type="text" id="part-nota-arriba" placeholder="Nota Superior (Ej: *****OPCIÓN 1*****)" class="border p-2 w-full mb-2 rounded font-bold text-center text-gray-700 bg-gray-50 text-sm">
+                        <input type="text" id="part-nota-arriba" placeholder="Nota Superior (Ej: *****OPCIÓN 1*****)" class="border p-2 w-full mb-2 rounded-lg font-bold text-center text-gray-700 bg-gray-50/90 text-sm">
                         
                         <div class="mb-2 relative">
-                            <input type="text" id="buscador-equipo-partida" oninput="buscarEquipoParaPartida()" placeholder="🔍 Buscar equipo del catálogo..." class="border p-2 w-full rounded bg-yellow-50 font-bold text-sm">
-                            <ul id="resultados-busqueda" class="bg-white border rounded max-h-40 overflow-y-auto hidden shadow-xl absolute z-50 w-full left-0 mt-1"></ul>
+                            <input type="text" id="buscador-equipo-partida" oninput="buscarEquipoParaPartida()" placeholder="🔍 Buscar equipo del catálogo..." class="border-2 border-[#CE8550]/60 p-2 w-full rounded-lg bg-orange-50/70 font-bold text-sm focus:border-[#ED813C] focus:outline-none">
+                            <ul id="resultados-busqueda" class="bg-white border rounded-lg max-h-40 overflow-y-auto hidden shadow-xl absolute z-50 w-full left-0 mt-1"></ul>
                         </div>
                         
                         <div class="grid grid-cols-4 gap-1.5 mb-2">
-                            <input type="number" id="part-pda" placeholder="Pda." class="border p-2 rounded text-sm">
-                            <input type="number" id="part-cant" placeholder="Cant." class="border p-2 rounded text-sm">
-                            <input type="text" id="part-um" placeholder="U.M." class="border p-2 rounded uppercase text-sm">
-                            <input type="number" id="part-precio" placeholder="Precio" class="border p-2 rounded text-sm">
+                            <input type="number" id="part-pda" placeholder="Pda." class="border p-2 rounded-lg text-sm bg-white/90">
+                            <input type="number" id="part-cant" placeholder="Cant." class="border p-2 rounded-lg text-sm bg-white/90">
+                            <input type="text" id="part-um" placeholder="U.M." class="border p-2 rounded-lg uppercase text-sm bg-white/90">
+                            <input type="number" id="part-precio" placeholder="Precio" class="border p-2 rounded-lg text-sm bg-white/90">
                         </div>
                         
-                        <input type="text" id="part-desc-corta" placeholder="Descripción Corta" class="border p-2 w-full mb-2 rounded font-bold text-blue-700 text-sm">
-                        <textarea id="part-desc" placeholder="Descripción" class="border p-2 w-full mb-2 rounded h-20 text-sm"></textarea>
+                        <input type="text" id="part-desc-corta" placeholder="Descripción Corta" class="border p-2 w-full mb-2 rounded-lg font-bold text-[#0E5DF0] text-sm bg-white/90">
+                        <textarea id="part-desc" placeholder="Descripción" class="border p-2 w-full mb-2 rounded-lg h-20 text-sm bg-white/90"></textarea>
                         
                         <div class="grid grid-cols-2 gap-2 mb-2">
-                            <input type="text" id="part-modelo" placeholder="Modelo" class="border p-2 w-full rounded font-bold text-red-600 uppercase text-sm">
-                            <input type="text" id="part-marca" placeholder="Marca" class="border p-2 w-full rounded font-bold text-red-600 uppercase text-sm">
+                            <input type="text" id="part-modelo" placeholder="Modelo" class="border p-2 w-full rounded-lg font-bold text-red-600 uppercase text-sm bg-white/90">
+                            <input type="text" id="part-marca" placeholder="Marca" class="border p-2 w-full rounded-lg font-bold text-red-600 uppercase text-sm bg-white/90">
                         </div>
 
-                        <input type="url" id="part-pdf" placeholder="🔗 Enlace de Ficha Técnica (Automático)" class="border p-2 w-full mb-2 rounded text-blue-700 bg-blue-50 text-xs">
-                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega (Se colocará al final de la partida)" class="border p-2 w-full mb-3 rounded font-bold text-sm">
+                        <input type="url" id="part-pdf" placeholder="🔗 Enlace de Ficha Técnica (Automático)" class="border p-2 w-full mb-2 rounded-lg text-[#0E859F] bg-cyan-50/60 text-xs">
+                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega (Se colocará al final de la partida)" class="border p-2 w-full mb-3 rounded-lg font-bold text-sm bg-white/90">
 
                         <!-- BOTONES DESPLEGABLES PARA INCLUYE Y NOTAS DE PARTIDA -->
                         <div class="grid grid-cols-2 gap-2 mb-3">
-                            <button type="button" onclick="togglePanelExtra('panel-incluye')" id="btn-toggle-incluye" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold py-1.5 px-2 rounded text-xs transition">
+                            <button type="button" onclick="togglePanelExtra('panel-incluye')" id="btn-toggle-incluye" class="bg-cyan-50 hover:bg-cyan-100 text-[#0E859F] border border-[#0E859F]/30 font-bold py-1.5 px-2 rounded-lg text-xs transition">
                                 ➕ INCLUYE (0)
                             </button>
-                            <button type="button" onclick="togglePanelExtra('panel-notas-partida')" id="btn-toggle-notas" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold py-1.5 px-2 rounded text-xs transition">
+                            <button type="button" onclick="togglePanelExtra('panel-notas-partida')" id="btn-toggle-notas" class="bg-orange-50 hover:bg-orange-100 text-[#CE8550] border border-[#CE8550]/40 font-bold py-1.5 px-2 rounded-lg text-xs transition">
                                 📝 NOTAS DE PARTIDA (0)
                             </button>
                         </div>
 
                         <!-- PANEL 1: SECCIÓN INCLUYE -->
-                        <div id="panel-incluye" class="hidden bg-indigo-50/60 border border-indigo-200 p-3 rounded mb-3">
+                        <div id="panel-incluye" class="hidden bg-cyan-50/70 border border-[#0E859F]/30 p-3 rounded-lg mb-3">
                             <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-indigo-900">Agregar sub-partida a "INCLUYE:"</span>
+                                <span class="text-xs font-bold text-[#0B192C]">Agregar sub-partida a "INCLUYE:"</span>
                                 <span class="text-[10px] text-gray-500">Se imprimirá debajo del equipo</span>
                             </div>
-                            <!-- Buscador de catálogo para Incluye -->
                             <div class="mb-2 relative">
                                 <input type="text" id="buscador-incluye" oninput="buscarEquipoParaIncluye()" placeholder="🔍 Buscar accesorio en catálogo (opcional)..." class="border p-1.5 w-full rounded bg-white text-xs">
                                 <ul id="resultados-busqueda-incluye" class="bg-white border rounded max-h-32 overflow-y-auto hidden shadow-lg absolute z-50 w-full left-0 mt-1"></ul>
                             </div>
                             <div class="grid grid-cols-3 gap-1.5 mb-1.5">
-                                <input type="text" id="inc-prefijo" placeholder="Ej: • o (1 PZA)." value="•" class="border p-1.5 rounded text-xs font-bold">
-                                <input type="text" id="inc-desc-corta" placeholder="Descripción Azul (Ej: BASE PARA DETECTOR)" class="border p-1.5 rounded text-xs font-bold text-blue-700 col-span-2">
+                                <input type="text" id="inc-prefijo" placeholder="Ej: • o (1 PZA)." value="•" class="border p-1.5 rounded text-xs font-bold bg-white">
+                                <input type="text" id="inc-desc-corta" placeholder="Descripción Azul (Ej: BASE PARA DETECTOR)" class="border p-1.5 rounded text-xs font-bold text-[#0E5DF0] col-span-2 bg-white">
                             </div>
-                            <input type="text" id="inc-desc-normal" placeholder="Descripción adicional en negro (Opcional)" class="border p-1.5 w-full rounded text-xs mb-1.5">
+                            <input type="text" id="inc-desc-normal" placeholder="Descripción adicional en negro (Opcional)" class="border p-1.5 w-full rounded text-xs mb-1.5 bg-white">
                             <div class="grid grid-cols-3 gap-1.5 mb-2">
-                                <input type="text" id="inc-modelo" placeholder="Modelo o NP: 123" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase">
-                                <input type="text" id="inc-marca" placeholder="Marca" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase">
-                                <input type="text" id="inc-tiempo" placeholder="T.E. (Opcional)" class="border p-1.5 rounded text-xs font-bold">
+                                <input type="text" id="inc-modelo" placeholder="Modelo o NP: 123" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase bg-white">
+                                <input type="text" id="inc-marca" placeholder="Marca" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase bg-white">
+                                <input type="text" id="inc-tiempo" placeholder="T.E. (Opcional)" class="border p-1.5 rounded text-xs font-bold bg-white">
                             </div>
                             <div class="flex gap-1.5 mb-2">
-                                <button type="button" id="btn-agregar-incluye" onclick="agregarItemIncluye()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3 rounded text-xs w-full transition">
+                                <button type="button" id="btn-agregar-incluye" onclick="agregarItemIncluye()" class="bg-[#0E859F] hover:bg-[#0b6e84] text-white font-bold py-1 px-3 rounded text-xs w-full transition">
                                     + Añadir a INCLUYE
                                 </button>
                                 <button type="button" id="btn-cancelar-incluye" onclick="cancelarEdicionIncluye()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-1 px-2.5 rounded text-xs transition hidden">
@@ -246,33 +405,31 @@
                             <div id="lista-incluye-temp" class="text-xs space-y-1 max-h-28 overflow-y-auto"></div>
                         </div>
 
-                        <!-- PANEL 2: NOTAS DE LA PARTIDA (NOTA 1, NOTA 2 y Viñetas) -->
-                        <div id="panel-notas-partida" class="hidden bg-amber-50/60 border border-amber-200 p-3 rounded mb-3">
+                        <!-- PANEL 2: NOTAS DE LA PARTIDA -->
+                        <div id="panel-notas-partida" class="hidden bg-orange-50/70 border border-[#CE8550]/40 p-3 rounded-lg mb-3">
                             <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-amber-900">Agregar Notas o Viñetas a la Partida</span>
+                                <span class="text-xs font-bold text-[#0B192C]">Agregar Notas o Viñetas a la Partida</span>
                                 <select id="nota-tipo" onchange="cambiarTipoNotaUI()" class="border rounded p-1 text-xs font-bold bg-white">
                                     <option value="nota">Nota de Texto (NOTA 1, NOTA 2...)</option>
                                     <option value="vineta">Viñeta de Opción (• Azul + Rojo)</option>
                                 </select>
                             </div>
                             
-                            <!-- Formulario para Nota Normal -->
                             <div id="form-nota-texto">
                                 <div class="grid grid-cols-3 gap-1.5 mb-1.5">
-                                    <input type="text" id="nota-titulo" placeholder="Ej: NOTA 1:" value="NOTA 1:" class="border p-1.5 rounded text-xs font-bold">
-                                    <input type="text" id="nota-cuerpo" placeholder="Texto de la nota..." class="border p-1.5 rounded text-xs col-span-2">
+                                    <input type="text" id="nota-titulo" placeholder="Ej: NOTA 1:" value="NOTA 1:" class="border p-1.5 rounded text-xs font-bold bg-white">
+                                    <input type="text" id="nota-cuerpo" placeholder="Texto de la nota..." class="border p-1.5 rounded text-xs col-span-2 bg-white">
                                 </div>
                             </div>
 
-                            <!-- Formulario para Viñeta Azul + Rojo dentro de una Nota -->
                             <div id="form-nota-vineta" class="hidden">
                                 <div class="grid grid-cols-2 gap-1.5 mb-1.5">
-                                    <input type="text" id="nota-vineta-azul" placeholder="Texto en Azul (Ej: PLACA DE ORIFICIO...)" class="border p-1.5 rounded text-xs font-bold text-blue-700">
-                                    <input type="text" id="nota-vineta-rojo" placeholder="Marca/Mod en Rojo (Ej: MCA CHEMGUARD)" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase">
+                                    <input type="text" id="nota-vineta-azul" placeholder="Texto en Azul (Ej: PLACA DE ORIFICIO...)" class="border p-1.5 rounded text-xs font-bold text-[#0E5DF0] bg-white">
+                                    <input type="text" id="nota-vineta-rojo" placeholder="Marca/Mod en Rojo (Ej: MCA CHEMGUARD)" class="border p-1.5 rounded text-xs font-bold text-red-600 uppercase bg-white">
                                 </div>
                             </div>
 
-                            <button type="button" onclick="agregarNotaPartida()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-1 px-3 rounded text-xs w-full transition mb-2">
+                            <button type="button" onclick="agregarNotaPartida()" class="az-orange-btn text-white font-bold py-1 px-3 rounded text-xs w-full transition mb-2">
                                 + Añadir Nota / Viñeta a la Partida
                             </button>
                             <div id="lista-notas-temp" class="text-xs space-y-1 max-h-28 overflow-y-auto"></div>
@@ -280,15 +437,15 @@
                         
                         <!-- Botones de Añadir / Actualizar Partida -->
                         <div class="flex gap-2">
-                            <button id="btn-guardar-partida" onclick="agregarPartida()" class="bg-blue-600 hover:bg-blue-800 text-white font-bold px-4 py-2 rounded shadow w-full transition text-sm">Añadir Partida</button>
-                            <button id="btn-cancelar-edicion" onclick="cancelarEdicionPartida()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold px-3 py-2 rounded shadow transition text-sm hidden">Cancelar</button>
+                            <button id="btn-guardar-partida" onclick="agregarPartida()" class="az-gradient-btn text-white font-bold px-4 py-2.5 rounded-lg shadow w-full transition text-sm">Añadir Partida</button>
+                            <button id="btn-cancelar-edicion" onclick="cancelarEdicionPartida()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold px-3 py-2.5 rounded-lg shadow transition text-sm hidden">Cancelar</button>
                         </div>
 
-                        <h4 class="font-bold mt-5 mb-2 border-b">Partidas Agregadas</h4>
-                        <div id="lista-partidas" class="text-sm bg-gray-50 p-2 border rounded h-40 overflow-y-auto"></div>
-                        <div class="text-right font-bold text-lg mt-2 text-blue-900" id="cot-total-label">Total: $0.00</div>
+                        <h4 class="font-bold mt-5 mb-2 border-b border-gray-200 text-[#0B192C]">Partidas Agregadas</h4>
+                        <div id="lista-partidas" class="text-sm bg-white/80 p-2 border rounded-lg h-40 overflow-y-auto"></div>
+                        <div class="text-right font-extrabold text-lg mt-2 text-[#0B192C]" id="cot-total-label">Total: $0.00</div>
                         
-                        <button onclick="generarDocumentoWord()" class="bg-green-600 hover:bg-green-700 text-white text-base font-bold px-4 py-3 rounded shadow w-full mt-3 transition">DESCARGAR COTIZACIÓN</button>
+                        <button onclick="generarDocumentoWord()" class="az-orange-btn text-white text-base font-extrabold tracking-wide px-4 py-3 rounded-lg shadow-lg w-full mt-3 transition">DESCARGAR COTIZACIÓN</button>
                     </div>
                 </div>
             </div>
@@ -328,11 +485,9 @@
         let partidaEditandoIndex = null;
         let incluyeEditandoIndex = null;
 
-        // Listas temporales para la partida que se está armando
         let tempIncluye = [];
         let tempNotasPartida = [];
 
-        // --- FUNCIONES AUXILIARES DE DATOS Y ORDENAMIENTO DE PARTIDAS ---
         function crearDatosMonedaVacios() {
             return { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', notas: '', vendedorId: '' };
         }
@@ -359,7 +514,6 @@
             return Boolean(d.folioMid || d.folioEnd || d.cliente || d.referencia || d.contacto || d.lugar || d.pago || d.vigencia || d.plazo || d.notas);
         }
 
-        // Ordena las partidas de forma consecutiva según su número de partida (1, 2, 3, 4, 8...)
         function ordenarPartidasConsecutivas(lista) {
             if (!Array.isArray(lista)) return;
             lista.sort((a, b) => {
@@ -374,7 +528,6 @@
             });
         }
 
-        // Obtiene el primer número de partida consecutivo disponible (ej. si existen 1, 2, 3, 8 -> sugiere 4)
         function obtenerSiguientePdaDisponible(lista) {
             if (!Array.isArray(lista) || lista.length === 0) return 1;
             const usados = new Set();
@@ -396,7 +549,6 @@
             inp.placeholder = `Pda. (${sig})`;
         }
 
-        // --- NORMALIZADOR PARA MANTENER DATOS Y PARTIDAS EN PESOS (MXN) Y DÓLARES (USD) ---
         function normalizarCotizacion(cot) {
             if (!cot) return cot;
             const mon = (cot.monedaActiva || cot.datos?.moneda || 'MXN');
@@ -475,8 +627,8 @@
             if (optUSD) optUSD.textContent = `USD - Dólares (${cantUSD} pda${cantUSD === 1 ? '' : 's'})`;
 
             const clsBadge = mon === 'MXN'
-                ? 'text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold'
-                : 'text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold';
+                ? 'text-xs px-2 py-0.5 rounded bg-cyan-100 text-[#0E859F] font-bold'
+                : 'text-xs px-2 py-0.5 rounded bg-orange-100 text-[#ED813C] font-bold';
 
             const badge = document.getElementById('badge-moneda-partidas');
             if (badge) {
@@ -498,7 +650,6 @@
             }
         }
 
-        // --- CAMBIO DE MONEDA CONSERVANDO DATOS Y PARTIDAS DE AMBAS ---
         window.cambiarMonedaCotizacion = async function() {
             const cot = cotizaciones[cotIndexActiva];
             if (!cot) return;
@@ -510,7 +661,6 @@
 
             window.cancelarEdicionPartida();
 
-            // 1. Guarda los datos comerciales, folio, condiciones y partidas de la moneda en la que estábamos
             const datosCapturados = leerFormularioDatosUI();
             if (monedaAnterior === 'USD') {
                 cot.datosUSD = datosCapturados;
@@ -520,7 +670,6 @@
                 cot.partidasMXN = cot.partidas;
             }
 
-            // 2. Si la moneda destino aún está completamente vacía, precarga los datos base para ahorrar captura
             const datosDestino = nuevaMoneda === 'USD' ? cot.datosUSD : cot.datosMXN;
             if (!tieneInformacionCapturada(datosDestino) && tieneInformacionCapturada(datosCapturados)) {
                 const copiaInicial = { ...datosCapturados, vendedorId: datosDestino.vendedorId || datosCapturados.vendedorId };
@@ -528,7 +677,6 @@
                 else cot.datosMXN = copiaInicial;
             }
 
-            // 3. Activa la nueva moneda y carga sus datos y partidas propios en pantalla
             cot.monedaActiva = nuevaMoneda;
             const nuevosDatosActivos = nuevaMoneda === 'USD' ? cot.datosUSD : cot.datosMXN;
             cot.datos = { ...nuevosDatosActivos, moneda: nuevaMoneda };
@@ -542,7 +690,6 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        // --- COPIAR PARTIDAS Y DATOS ENTRE MXN Y USD ---
         window.copiarPartidasOtraMoneda = async function() {
             const cot = cotizaciones[cotIndexActiva];
             if (!cot) return;
@@ -617,7 +764,6 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        // --- FUNCIONES DE INTERFAZ Y PANTALLA DIVIDIDA ---
         window.toggleSidebar = function() {
             const sb = document.getElementById('sidebar');
             sb.classList.toggle('sidebar-collapsed');
@@ -645,9 +791,9 @@
             );
 
             ul.innerHTML = filtrados.map(c => `
-                <li class="p-2 border-b cursor-pointer hover:bg-indigo-100 text-xs" onclick="seleccionarIncluyePorId('${c.id}')">
+                <li class="p-2 border-b cursor-pointer hover:bg-cyan-50 text-xs" onclick="seleccionarIncluyePorId('${c.id}')">
                     <span class="text-red-600 font-bold">${esc(c.modelo)}</span> 
-                    <span class="text-blue-800 font-bold">${esc(c.descCorta)}</span>
+                    <span class="text-[#0E5DF0] font-bold">${esc(c.descCorta)}</span>
                 </li>
             `).join('');
             ul.classList.remove('hidden');
@@ -677,8 +823,8 @@
             const btn = document.getElementById('btn-agregar-incluye');
             if (btn) {
                 btn.innerText = '💾 Actualizar en INCLUYE';
-                btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-                btn.classList.add('bg-amber-600', 'hover:bg-amber-700');
+                btn.classList.remove('bg-[#0E859F]', 'hover:bg-[#0b6e84]');
+                btn.classList.add('bg-[#ED813C]', 'hover:bg-[#d96e2b]');
             }
             const btnCancel = document.getElementById('btn-cancelar-incluye');
             if (btnCancel) btnCancel.classList.remove('hidden');
@@ -699,8 +845,8 @@
             const btn = document.getElementById('btn-agregar-incluye');
             if (btn) {
                 btn.innerText = '+ Añadir a INCLUYE';
-                btn.classList.remove('bg-amber-600', 'hover:bg-amber-700');
-                btn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+                btn.classList.remove('bg-[#ED813C]', 'hover:bg-[#d96e2b]');
+                btn.classList.add('bg-[#0E859F]', 'hover:bg-[#0b6e84]');
             }
             const btnCancel = document.getElementById('btn-cancelar-incluye');
             if (btnCancel) btnCancel.classList.add('hidden');
@@ -740,15 +886,15 @@
             document.getElementById('btn-toggle-incluye').innerText = `➕ INCLUYE (${tempIncluye.length})`;
             const cont = document.getElementById('lista-incluye-temp');
             cont.innerHTML = tempIncluye.map((inc, i) => `
-                <div class="p-1.5 rounded border flex justify-between items-center ${incluyeEditandoIndex === i ? 'bg-amber-100 border-amber-400' : 'bg-white'}">
+                <div class="p-1.5 rounded border flex justify-between items-center ${incluyeEditandoIndex === i ? 'bg-orange-100 border-[#ED813C]' : 'bg-white'}">
                     <div class="truncate pr-2">
-                        <b>${esc(inc.prefijo)}</b> <span class="text-blue-700 font-bold">${esc(inc.descCorta)}</span> 
+                        <b>${esc(inc.prefijo)}</b> <span class="text-[#0E5DF0] font-bold">${esc(inc.descCorta)}</span> 
                         <span class="text-gray-600">${inc.descNormal ? esc(inc.descNormal.substring(0,25)) + '...' : ''}</span>
                         <span class="text-red-600 font-bold">${esc(inc.modelo)} ${esc(inc.marca)}</span>
                         <b>${esc(inc.tiempo)}</b>
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
-                        <button type="button" onclick="editarItemIncluye(${i})" title="Editar este artículo" class="text-blue-600 hover:text-blue-800 font-bold px-1">✏️</button>
+                        <button type="button" onclick="editarItemIncluye(${i})" title="Editar este artículo" class="text-[#0E859F] hover:text-blue-800 font-bold px-1">✏️</button>
                         <button type="button" onclick="eliminarItemIncluye(${i})" title="Eliminar" class="text-red-500 hover:text-red-700 font-bold px-1">X</button>
                     </div>
                 </div>
@@ -807,7 +953,7 @@
                     <div class="truncate pr-2">
                         ${n.tipo === 'nota' 
                             ? `<b>${esc(n.titulo)}</b> <span>${esc(n.texto)}</span>` 
-                            : `<b>•</b> <span class="text-blue-700 font-bold">${esc(n.azul)}</span> <span class="text-red-600 font-bold">${esc(n.rojo)}</span>`}
+                            : `<b>•</b> <span class="text-[#0E5DF0] font-bold">${esc(n.azul)}</span> <span class="text-red-600 font-bold">${esc(n.rojo)}</span>`}
                     </div>
                     <button type="button" onclick="eliminarNotaPartida(${i})" class="text-red-500 font-bold px-1">X</button>
                 </div>
@@ -918,9 +1064,9 @@
         window.renderUsuarios = function() {
             const lista = document.getElementById('lista-cuentas');
             lista.innerHTML = dbUsuarios.map((u, i) => `
-                <div class="bg-gray-100 p-3 border rounded shadow flex justify-between items-center">
+                <div class="bg-white/90 p-3 border rounded-lg shadow-sm flex justify-between items-center">
                     <div>
-                        <span class="font-bold">${esc(u.email)}</span> <span class="text-xs bg-slate-200 px-1 rounded">${esc(u.role)}</span>
+                        <span class="font-bold text-[#0B192C]">${esc(u.email)}</span> <span class="text-xs bg-cyan-100 text-[#0E859F] font-bold px-1.5 py-0.5 rounded">${esc(u.role)}</span>
                     </div>
                     <button onclick="eliminarUsuario('${u.email}')" class="text-red-500 font-bold">X</button>
                 </div>
@@ -988,8 +1134,8 @@
         window.renderVendedores = function() {
             const lista = document.getElementById('lista-vendedores');
             lista.innerHTML = vendedores.map(v => `
-                <div class="bg-white p-4 border rounded shadow flex justify-between items-center">
-                    <span class="font-bold">${esc(v.nombre)}</span>
+                <div class="az-card p-4 rounded-xl shadow flex justify-between items-center">
+                    <span class="font-bold text-[#0B192C]">${esc(v.nombre)}</span>
                     <button onclick="eliminarVendedor('${v.id}')" class="text-red-500 font-bold">X</button>
                 </div>
             `).join('');
@@ -1072,18 +1218,18 @@
             );
 
             lista.innerHTML = filtrados.map(c => `
-                <div class="border-b py-2 flex justify-between items-center hover:bg-gray-50">
+                <div class="border-b py-2 flex justify-between items-center hover:bg-cyan-50/40 px-2 rounded">
                     <div>
-                        <p class="font-bold text-blue-800">${esc(c.descCorta) || 'Sin desc. corta'}</p>
+                        <p class="font-bold text-[#0E5DF0]">${esc(c.descCorta) || 'Sin desc. corta'}</p>
                         <p class="text-sm">${esc((c.desc || '').substring(0, 60))}...</p>
                         <p class="text-xs text-red-600 font-bold">Mod: ${esc(c.modelo)} | Marca: ${esc(c.marca)} | U.M.: ${esc(c.um)}</p>
                     </div>
                     <div class="flex items-center">
                         ${c.pdf ? `
-                            <a href="${esc(c.pdf)}" target="_blank" class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded text-xs font-bold mr-1 transition shadow-sm">📄 Ver Ficha</a>
-                            <a href="${esc(obtenerEnlaceDescarga(c.pdf))}" target="_blank" download class="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded text-xs font-bold mr-4 transition shadow-sm">⬇️ Descargar</a>
+                            <a href="${esc(c.pdf)}" target="_blank" class="bg-orange-100 text-[#ED813C] hover:bg-orange-200 px-3 py-1 rounded text-xs font-bold mr-1 transition shadow-sm">📄 Ver Ficha</a>
+                            <a href="${esc(obtenerEnlaceDescarga(c.pdf))}" target="_blank" download class="bg-cyan-100 text-[#0E859F] hover:bg-cyan-200 px-3 py-1 rounded text-xs font-bold mr-4 transition shadow-sm">⬇️ Descargar</a>
                         ` : ''}
-                        <button onclick="editarEquipo('${c.id}')" class="text-blue-500 font-bold mr-3">Editar</button>
+                        <button onclick="editarEquipo('${c.id}')" class="text-[#0E859F] font-bold mr-3">Editar</button>
                         <button onclick="eliminarEquipo('${c.id}')" class="text-red-500 font-bold">Eliminar</button>
                     </div>
                 </div>
@@ -1245,13 +1391,13 @@
             );
 
             ul.innerHTML = filtrados.map(c => `
-                <li class="p-3 border-b cursor-pointer hover:bg-blue-100 flex justify-between items-center" onclick="seleccionarEquipoPorId('${c.id}')">
+                <li class="p-3 border-b cursor-pointer hover:bg-cyan-50 flex justify-between items-center" onclick="seleccionarEquipoPorId('${c.id}')">
                     <div>
                         <span class="text-red-600 font-bold">${esc(c.modelo)}</span> 
-                        <span class="text-blue-800 font-bold">${esc(c.descCorta)}</span> 
+                        <span class="text-[#0E5DF0] font-bold">${esc(c.descCorta)}</span> 
                         - <span class="text-sm">${esc((c.desc || '').substring(0,50))}...</span>
                     </div>
-                    ${c.pdf ? '<span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold ml-2 shrink-0">📄 PDF</span>' : ''}
+                    ${c.pdf ? '<span class="text-xs bg-orange-100 text-[#ED813C] px-2 py-0.5 rounded font-bold ml-2 shrink-0">📄 PDF</span>' : ''}
                 </li>
             `).join('');
             ul.classList.remove('hidden');
@@ -1297,8 +1443,8 @@
 
             const btnGuardar = document.getElementById('btn-guardar-partida');
             btnGuardar.innerText = '💾 Actualizar Partida';
-            btnGuardar.classList.remove('bg-blue-600', 'hover:bg-blue-800');
-            btnGuardar.classList.add('bg-amber-600', 'hover:bg-amber-700');
+            btnGuardar.classList.remove('az-gradient-btn');
+            btnGuardar.classList.add('az-orange-btn');
 
             document.getElementById('btn-cancelar-edicion').classList.remove('hidden');
             window.renderPartidas();
@@ -1327,8 +1473,8 @@
             const btnGuardar = document.getElementById('btn-guardar-partida');
             if (btnGuardar) {
                 btnGuardar.innerText = 'Añadir Partida';
-                btnGuardar.classList.remove('bg-amber-600', 'hover:bg-amber-700');
-                btnGuardar.classList.add('bg-blue-600', 'hover:bg-blue-800');
+                btnGuardar.classList.remove('az-orange-btn');
+                btnGuardar.classList.add('az-gradient-btn');
             }
 
             const btnCancelar = document.getElementById('btn-cancelar-edicion');
@@ -1372,7 +1518,6 @@
                 cot.partidas.push(partidaObj);
             }
 
-            // Ordena automáticamente para mantener numeración consecutiva (1, 2, 3, 4, 8...)
             ordenarPartidasConsecutivas(cot.partidas);
 
             window.cancelarEdicionPartida();
@@ -1404,24 +1549,24 @@
                 const numInc = p.incluyeList ? p.incluyeList.length : 0;
                 const numNot = p.notasList ? p.notasList.length : 0;
                 return `
-                <div class="border-b py-2 flex justify-between items-center ${partidaEditandoIndex === i ? 'bg-amber-50' : ''}">
+                <div class="border-b py-2 flex justify-between items-center ${partidaEditandoIndex === i ? 'bg-orange-50' : ''}">
                     <div>
-                        <span class="font-bold mr-2 bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded text-xs">Pda. ${esc(p.pda || (i+1))}</span>
+                        <span class="font-bold mr-2 bg-[#0B192C] text-white px-2 py-0.5 rounded text-xs">Pda. ${esc(p.pda || (i+1))}</span>
                         <span class="text-xs text-gray-500 font-bold block mt-0.5">${esc(p.notaArriba)}</span>
-                        <span class="text-xs font-bold text-blue-700">${esc(p.descCorta)}</span>
+                        <span class="text-xs font-bold text-[#0E5DF0]">${esc(p.descCorta)}</span>
                         <span class="text-xs text-red-600 font-bold ml-2">${esc(p.modelo)}</span><br>
                         <span class="text-gray-500 text-xs">${p.cantidad} ${esc(p.um)} x $${p.precio.toLocaleString('en-US', {minimumFractionDigits:2})} ${mon}</span>
-                        ${numInc > 0 ? `<span class="ml-1 text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded font-bold">+${numInc} Incluye</span>` : ''}
-                        ${numNot > 0 ? `<span class="ml-1 text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">+${numNot} Notas</span>` : ''}
+                        ${numInc > 0 ? `<span class="ml-1 text-[10px] bg-cyan-100 text-[#0E859F] px-1.5 py-0.5 rounded font-bold">+${numInc} Incluye</span>` : ''}
+                        ${numNot > 0 ? `<span class="ml-1 text-[10px] bg-orange-100 text-[#CE8550] px-1.5 py-0.5 rounded font-bold">+${numNot} Notas</span>` : ''}
                         ${p.pdf ? `
-                            <a href="${esc(p.pdf)}" target="_blank" class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold hover:bg-red-200 inline-block transition">📄 Ver Ficha</a>
-                            <a href="${esc(obtenerEnlaceDescarga(p.pdf))}" target="_blank" download class="ml-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold hover:bg-green-200 inline-block transition">⬇️ Descargar</a>
+                            <a href="${esc(p.pdf)}" target="_blank" class="ml-2 text-xs bg-orange-100 text-[#ED813C] px-2 py-0.5 rounded font-bold hover:bg-orange-200 inline-block transition">📄 Ver Ficha</a>
+                            <a href="${esc(obtenerEnlaceDescarga(p.pdf))}" target="_blank" download class="ml-1 text-xs bg-cyan-100 text-[#0E859F] px-2 py-0.5 rounded font-bold hover:bg-cyan-200 inline-block transition">⬇️ Descargar</a>
                         ` : ''}
                     </div>
                     <div class="flex flex-col items-end shrink-0 ml-2">
-                        <span class="font-bold">$${p.total.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                        <span class="font-bold text-[#0B192C]">$${p.total.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
                         <div class="flex gap-2 mt-1">
-                            <button onclick="editarPartida(${i})" class="text-blue-600 hover:text-blue-800 font-bold text-xs">✏️ Editar</button>
+                            <button onclick="editarPartida(${i})" class="text-[#0E859F] hover:text-blue-800 font-bold text-xs">✏️ Editar</button>
                             <button onclick="eliminarPartida(${i})" class="text-red-500 hover:text-red-700 font-bold text-xs">Quitar</button>
                         </div>
                     </div>
@@ -1538,7 +1683,6 @@
                                 if (dRojo && inc.tiempo) dRojo += " ";
                                 const dTe = inc.tiempo ? inc.tiempo.toUpperCase().trim() + "\t\n" : "\t\n";
 
-                                // Paso 1: Imprime Prefijo en Negrita + Descripción Corta en Azul
                                 extras.push({
                                     EX_NEGRITA: pref,
                                     EX_NORMAL: "",
@@ -1547,7 +1691,6 @@
                                     EX_TE: ""
                                 });
 
-                                // Paso 2: En la misma línea, imprime Descripción Detallada en Negro + Modelo/Marca en Rojo + T.E.
                                 extras.push({
                                     EX_NEGRITA: "",
                                     EX_NORMAL: dNorm,
@@ -1586,7 +1729,6 @@
                             });
                         }
 
-                        // Si hay INCLUYE o NOTAS y la partida tiene Tiempo de Entrega general, se agrega hasta abajo de todo
                         let tiempoPrincipalTag = "";
                         if (tieneExtras) {
                             tiempoPrincipalTag = "\n";
@@ -1649,7 +1791,6 @@
         };
 
         if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('sidebar-collapsed');
-        // --- Mejoras: errores, selección por id, cierre de búsquedas, Enter ---
         window.seleccionarEquipoPorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipo(c); };
         window.seleccionarIncluyePorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipoIncluye(c); };
         ['guardarEquipo','eliminarEquipo','eliminarVendedor','eliminarUsuario','nuevaCotizacion','duplicarCotizacion',
