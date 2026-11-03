@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlphaZero</title>
-    <!-- Favicon de AlphaZero en la pestaña del navegador -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='azg' x1='0%25' y1='50%25' x2='100%25' y2='50%25'%3E%3Cstop offset='0%25' stop-color='%23ED813C'/%3E%3Cstop offset='40%25' stop-color='%23CE8550'/%3E%3Cstop offset='75%25' stop-color='%230E859F'/%3E%3Cstop offset='100%25' stop-color='%230E5DF0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='100' cy='100' r='92' fill='%230F1E36' stroke='url(%23azg)' stroke-width='10'/%3E%3Ccircle cx='100' cy='100' r='72' fill='none' stroke='url(%23azg)' stroke-width='4' stroke-dasharray='18 8'/%3E%3Cpath d='M100 32 L100 135 M60 85 L140 85 M60 85 L60 125 M140 85 L140 125 M78 145 L122 145' stroke='url(%23azg)' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='100' cy='135' r='16' fill='%230F1E36' stroke='url(%23azg)' stroke-width='6'/%3E%3Ccircle cx='75' cy='62' r='9' fill='url(%23azg)'/%3E%3Ccircle cx='125' cy='62' r='9' fill='url(%23azg)'/%3E%3C/svg%3E">
+    <!-- Favicon luminoso de alto contraste (Fondo blanco + Degradado Naranja/Azul intenso) -->
+    <link id="dynamic-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='50%25' x2='100%25' y2='50%25'%3E%3Cstop offset='0%25' stop-color='%23ED813C'/%3E%3Cstop offset='50%25' stop-color='%230E859F'/%3E%3Cstop offset='100%25' stop-color='%230E5DF0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='60' cy='60' r='56' fill='%23FFFFFF' stroke='url(%23g)' stroke-width='8'/%3E%3Cpolygon points='60,10 95,25 110,60 95,95 60,110 25,95 10,60 25,25' fill='none' stroke='url(%23g)' stroke-width='4'/%3E%3Cpath d='M60 22 L60 72 M34 52 L86 52 M34 52 L34 78 M86 52 L86 78 M42 90 L78 90' stroke='url(%23g)' stroke-width='6' stroke-linecap='round'/%3E%3Ccircle cx='60' cy='78' r='12' fill='%23FFFFFF' stroke='url(%23g)' stroke-width='6'/%3E%3Ccircle cx='44' cy='36' r='6' fill='%23ED813C'/%3E%3Ccircle cx='76' cy='36' r='6' fill='%230E859F'/%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -31,9 +31,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .az-gradient-bg {
-            background: linear-gradient(135deg, #ED813C 0%, #CE8550 30%, #0E859F 75%, #0E5DF0 100%);
-        }
         .az-gradient-btn {
             background: linear-gradient(90deg, #0E859F 0%, #0E5DF0 100%);
         }
@@ -47,9 +44,9 @@
             background: linear-gradient(90deg, #d96e2b 0%, #b87341 100%);
         }
         .az-card {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(14, 133, 159, 0.16);
+            background: rgba(255, 255, 255, 0.84);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(14, 133, 159, 0.18);
         }
         .az-top-border {
             border-top: 4px solid transparent;
@@ -62,84 +59,77 @@
 </head>
 <body class="text-gray-800 relative selection:bg-[#0E859F] selection:text-white">
 
-    <!-- DEFINICIÓN VECTORIAL DEL EMBLEMA ALPHAZERO PARA REUTILIZAR EN MARCAS DE AGUA Y CABECERAS -->
-    <svg class="hidden" aria-hidden="true">
+    <!-- IMPORTANTE: Sin display:none para que el navegador sí dibuje los degradados del logo -->
+    <svg style="position:absolute; width:0; height:0; overflow:hidden;" aria-hidden="true">
+        <defs>
+            <linearGradient id="azGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+                <stop offset="0%" stop-color="#ED813C"/>
+                <stop offset="35%" stop-color="#CE8550"/>
+                <stop offset="70%" stop-color="#0E859F"/>
+                <stop offset="100%" stop-color="#0E5DF0"/>
+            </linearGradient>
+        </defs>
         <symbol id="alphazero-emblem" viewBox="0 0 400 400">
-            <defs>
-                <linearGradient id="azGrad" x1="0%" y1="50%" x2="100%" y2="50%">
-                    <stop offset="0%" stop-color="#ED813C"/>
-                    <stop offset="35%" stop-color="#CE8550"/>
-                    <stop offset="70%" stop-color="#0E859F"/>
-                    <stop offset="100%" stop-color="#0E5DF0"/>
-                </linearGradient>
-            </defs>
-            <!-- Anillo Geométrico Exterior (Iris de Ingeniería) -->
-            <circle cx="200" cy="200" r="185" fill="none" stroke="url(#azGrad)" stroke-width="5"/>
-            <circle cx="200" cy="200" r="138" fill="none" stroke="url(#azGrad)" stroke-width="4"/>
-            <g stroke="url(#azGrad)" stroke-width="2.5" fill="none">
-                <path d="M200 15 L295 45 L105 45 Z"/>
+            <circle cx="200" cy="200" r="186" fill="none" stroke="url(#azGrad)" stroke-width="6"/>
+            <circle cx="200" cy="200" r="138" fill="none" stroke="url(#azGrad)" stroke-width="4.5"/>
+            <g stroke="url(#azGrad)" stroke-width="3" fill="none">
+                <path d="M200 14 L295 45 L105 45 Z"/>
                 <path d="M295 45 L360 120 L200 62 Z"/>
-                <path d="M360 120 L385 200 L295 95 Z"/>
-                <path d="M385 200 L360 280 L338 200 Z"/>
+                <path d="M360 120 L386 200 L295 95 Z"/>
+                <path d="M386 200 L360 280 L338 200 Z"/>
                 <path d="M360 280 L295 355 L315 265 Z"/>
-                <path d="M295 355 L200 385 L270 320 Z"/>
-                <path d="M200 385 L105 355 L200 338 Z"/>
+                <path d="M295 355 L200 386 L270 320 Z"/>
+                <path d="M200 386 L105 355 L200 338 Z"/>
                 <path d="M105 355 L40 280 L105 305 Z"/>
-                <path d="M40 280 L15 200 L62 200 Z"/>
-                <path d="M15 200 L40 120 L85 135 Z"/>
+                <path d="M40 280 L14 200 L62 200 Z"/>
+                <path d="M14 200 L40 120 L85 135 Z"/>
                 <path d="M40 120 L105 45 L130 80 Z"/>
-                <!-- Líneas envolventes del iris -->
                 <path d="M62 200 L130 80 L270 80 L338 200 L270 320 L130 320 Z"/>
                 <path d="M95 110 L200 62 L305 110 L338 225 L260 330 L140 330 L62 225 Z"/>
             </g>
-            <!-- Sistema Contraincendios Interno (Tuberías, Bomba, Rociadores, Alarmas y Paneles) -->
-            <g stroke="url(#azGrad)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <!-- Columna central -->
+            <g stroke="url(#azGrad)" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="194" y1="64" x2="194" y2="215"/>
                 <line x1="206" y1="64" x2="206" y2="215"/>
-                <!-- Alarmas superiores (Campanas) -->
                 <circle cx="152" cy="112" r="18"/>
                 <circle cx="152" cy="112" r="4" fill="url(#azGrad)"/>
                 <path d="M140 134 L164 134"/>
                 <circle cx="248" cy="112" r="18"/>
                 <circle cx="248" cy="112" r="4" fill="url(#azGrad)"/>
                 <path d="M236 134 L260 134"/>
-                <!-- Ramales superiores y rociadores (Sprinklers) -->
                 <path d="M72 152 L175 152 L175 190"/>
                 <path d="M328 152 L225 152 L225 190"/>
-                <!-- Rociador Izquierdo -->
                 <circle cx="115" cy="172" r="10"/>
-                <path d="M102 184 L92 194 M110 186 L104 198 M120 186 L126 198 M128 184 L138 194" stroke-width="2.5"/>
-                <!-- Rociador Derecho -->
+                <path d="M102 184 L92 194 M110 186 L104 198 M120 186 L126 198 M128 184 L138 194" stroke-width="3"/>
                 <circle cx="285" cy="172" r="10"/>
-                <path d="M272 184 L262 194 M280 186 L274 198 M290 186 L296 198 M298 184 L308 194" stroke-width="2.5"/>
-                <!-- Paneles de Control Laterales -->
+                <path d="M272 184 L262 194 M280 186 L274 198 M290 186 L296 198 M298 184 L308 194" stroke-width="3"/>
                 <rect x="88" y="218" width="32" height="32" rx="3"/>
-                <rect x="94" y="224" width="20" height="18" rx="1" stroke-width="2.5"/>
+                <rect x="94" y="224" width="20" height="18" rx="1" stroke-width="3"/>
                 <rect x="280" y="218" width="32" height="32" rx="3"/>
-                <circle cx="296" cy="234" r="9" stroke-width="2.5"/>
-                <!-- Tuberías principales e interconexiones -->
+                <circle cx="296" cy="234" r="9" stroke-width="3"/>
                 <path d="M68 200 L332 200"/>
                 <path d="M104 250 L104 295 L155 295"/>
                 <path d="M296 250 L296 295 L245 295"/>
                 <path d="M142 190 L142 295"/>
                 <path d="M258 190 L258 295"/>
-                <!-- Bomba Central y Motor -->
                 <rect x="180" y="218" width="40" height="42" rx="4"/>
-                <line x1="188" y1="226" x2="188" y2="252" stroke-width="2.5"/>
-                <line x1="196" y1="226" x2="196" y2="252" stroke-width="2.5"/>
-                <line x1="204" y1="226" x2="204" y2="252" stroke-width="2.5"/>
-                <line x1="212" y1="226" x2="212" y2="252" stroke-width="2.5"/>
+                <line x1="188" y1="226" x2="188" y2="252" stroke-width="3"/>
+                <line x1="196" y1="226" x2="196" y2="252" stroke-width="3"/>
+                <line x1="204" y1="226" x2="204" y2="252" stroke-width="3"/>
+                <line x1="212" y1="226" x2="212" y2="252" stroke-width="3"/>
                 <circle cx="200" cy="288" r="22"/>
-                <path d="M185 273 L215 303 M215 273 L185 303" stroke-width="2.5"/>
+                <path d="M185 273 L215 303 M215 273 L185 303" stroke-width="3"/>
                 <path d="M168 318 L232 318"/>
             </g>
         </symbol>
     </svg>
 
+    <!-- Input oculto para subir el archivo de imagen del logo oficial a Firebase -->
+    <input type="file" id="input-logo-oficial" accept="image/*" class="hidden" onchange="procesarLogoOficial(event)">
+
     <!-- PANTALLA DE CARGA GLOBAL -->
     <div id="loading-screen" class="fixed inset-0 flex flex-col items-center justify-center hidden">
-        <svg class="w-20 h-20 animate-spin mb-4" style="animation-duration: 6s;"><use href="#alphazero-emblem"></use></svg>
+        <img id="loading-custom-img" class="w-24 h-24 object-contain mb-4 animate-pulse hidden" alt="AlphaZero">
+        <svg id="loading-default-svg" class="w-20 h-20 animate-spin mb-4" style="animation-duration: 6s;"><use href="#alphazero-emblem"></use></svg>
         <div class="text-white text-xl font-bold tracking-wider animate-pulse">Sincronizando con AlphaZero...</div>
     </div>
 
@@ -147,20 +137,23 @@
     <div id="login-container" class="flex h-screen bg-[#0B192C] items-center justify-center relative overflow-hidden hidden">
         <!-- Marca de agua gigante en el fondo del Login -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-            <svg class="w-[780px] h-[780px] opacity-[0.10] transform scale-110"><use href="#alphazero-emblem"></use></svg>
+            <img id="login-watermark-img" class="w-[850px] max-w-[92vw] max-h-[90vh] object-contain opacity-25 hidden" alt="Marca de agua AlphaZero">
+            <svg id="login-watermark-svg" class="w-[680px] h-[680px] opacity-20"><use href="#alphazero-emblem"></use></svg>
         </div>
-        <!-- Resplandor ambiental con los colores del logo -->
         <div class="absolute -left-24 -bottom-24 w-96 h-96 rounded-full bg-[#ED813C] opacity-15 blur-3xl pointer-events-none"></div>
         <div class="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-[#0E859F] opacity-20 blur-3xl pointer-events-none"></div>
 
         <!-- Tarjeta de Login -->
         <div class="bg-white/95 backdrop-blur-md p-8 rounded-xl shadow-2xl w-96 max-w-[92vw] relative z-10 az-top-border">
             <div class="flex flex-col items-center text-center mb-6">
-                <svg class="w-24 h-24 mb-2 drop-shadow-sm"><use href="#alphazero-emblem"></use></svg>
-                <h2 class="text-3xl font-extrabold tracking-wider leading-none">
-                    <span class="text-[#0B192C]">ALPHA</span><span class="az-gradient-text">ZERO</span>
-                </h2>
-                <p class="text-[11px] font-semibold tracking-[0.22em] text-gray-500 mt-1">SISTEMAS CONTRAINCENDIOS</p>
+                <img id="login-card-img" class="h-24 object-contain mb-2 hidden" alt="Logo AlphaZero">
+                <div id="login-card-svg-wrap" class="flex flex-col items-center">
+                    <svg class="w-24 h-24 mb-2 drop-shadow-sm"><use href="#alphazero-emblem"></use></svg>
+                    <h2 class="text-3xl font-extrabold tracking-wider leading-none">
+                        <span class="text-[#0B192C]">ALPHA</span><span class="az-gradient-text">ZERO</span>
+                    </h2>
+                    <p class="text-[11px] font-semibold tracking-[0.22em] text-gray-500 mt-1">SISTEMAS CONTRAINCENDIOS</p>
+                </div>
                 <p class="text-gray-400 text-[11px] mt-3">CONTACTA A UN ADMINISTRADOR PARA SER DADO DE ALTA</p>
             </div>
             <input type="email" id="login-user" placeholder="Correo electrónico" class="border border-gray-300 focus:border-[#0E859F] focus:outline-none p-3 w-full mb-3 rounded-lg bg-gray-50/90 text-sm">
@@ -172,11 +165,12 @@
     <!-- APLICACIÓN PRINCIPAL -->
     <div id="app-container" class="flex h-screen hidden relative overflow-hidden">
         
-        <!-- Menú Lateral Contraíble con colores AlphaZero -->
+        <!-- Menú Lateral Contraíble -->
         <div id="sidebar" class="w-64 bg-[#0B192C] text-white p-4 flex flex-col transition-all duration-300 shrink-0 relative z-20 border-r border-[#0E859F]/30 shadow-xl">
-            <div class="flex items-center justify-between mb-8 sidebar-header w-full border-b border-slate-700/80 pb-4">
+            <div class="flex items-center justify-between mb-6 sidebar-header w-full border-b border-slate-700/80 pb-4">
                 <div class="flex items-center gap-2.5 sidebar-text">
-                    <svg class="w-11 h-11 shrink-0"><use href="#alphazero-emblem"></use></svg>
+                    <img id="sidebar-logo-img" class="w-11 h-11 object-contain bg-white rounded-full p-0.5 shrink-0 hidden" alt="AlphaZero">
+                    <svg id="sidebar-logo-svg" class="w-11 h-11 shrink-0"><use href="#alphazero-emblem"></use></svg>
                     <div class="leading-tight">
                         <h2 class="text-lg font-extrabold tracking-wider">
                             <span class="text-white">ALPHA</span><span class="az-gradient-text">ZERO</span>
@@ -199,11 +193,15 @@
                 <span class="text-xl">👥</span> <span class="sidebar-text">Vendedores</span>
             </button>
             
-            <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" title="Gestión de Usuarios" class="text-left mb-3 py-2 px-2.5 rounded-lg text-[#ED813C] hover:bg-white/10 font-bold hidden border-t border-slate-700 pt-4 mt-2 flex items-center gap-3 w-full justify-center md:justify-start transition">
+            <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" title="Gestión de Usuarios" class="text-left mb-2 py-2 px-2.5 rounded-lg text-[#ED813C] hover:bg-white/10 font-bold hidden border-t border-slate-700 pt-4 mt-2 flex items-center gap-3 w-full justify-center md:justify-start transition">
                 <span class="text-xl">⚙️</span> <span class="sidebar-text">Gestión de Usuarios</span>
             </button>
+
+            <!-- Botón para subir la imagen exacta del logo de AlphaZero y guardarla en la nube -->
+            <button id="btn-subir-logo" onclick="document.getElementById('input-logo-oficial').click()" title="Subir imagen del logo AlphaZero para marca de agua y pestaña" class="text-left mb-3 py-2 px-2.5 rounded-lg text-cyan-300 hover:bg-white/10 font-bold hidden flex items-center gap-3 w-full justify-center md:justify-start transition text-xs">
+                <span class="text-lg">🖼️</span> <span class="sidebar-text">Subir Logo Oficial</span>
+            </button>
             
-            <!-- Paleta decorativa de identidad AlphaZero en la barra lateral -->
             <div class="mt-auto border-t border-slate-700 pt-4 w-full">
                 <div class="flex gap-1.5 mb-3 sidebar-text">
                     <span class="h-1.5 flex-1 rounded-full bg-[#CE8550]"></span>
@@ -221,31 +219,45 @@
         <!-- Contenedor Principal con Marca de Agua Fija en Toda la Página -->
         <div class="flex-1 p-4 overflow-y-auto relative" id="main-content">
             
-            <!-- MARCA DE AGUA FIJA EN EL FONDO DEL PROGRAMA -->
+            <!-- MARCA DE AGUA FIJA EN EL FONDO DEL PROGRAMA (Siempre visible detrás de todas las secciones) -->
             <div class="fixed inset-0 pointer-events-none select-none flex flex-col items-center justify-center z-0 md:pl-56">
-                <svg class="w-[540px] h-[540px] max-w-[85vw] max-h-[85vh] opacity-[0.07]"><use href="#alphazero-emblem"></use></svg>
-                <div class="text-4xl font-black tracking-[0.25em] opacity-[0.05] mt-2 text-[#0B192C]">ALPHAZERO</div>
-                <div class="text-xs font-bold tracking-[0.35em] opacity-[0.05] text-[#0E859F]">SISTEMAS CONTRAINCENDIOS</div>
+                <!-- Si subes tu archivo JPG/PNG se muestra esta imagen sin fondo blanco -->
+                <img id="app-watermark-img" class="w-[680px] max-w-[85vw] max-h-[80vh] object-contain opacity-[0.18] hidden" alt="Marca de agua AlphaZero">
+                <!-- Mientras no se haya subido archivo externo, se muestra el emblema vectorial completo -->
+                <div id="app-watermark-svg-wrap" class="flex flex-col items-center justify-center">
+                    <svg class="w-[480px] h-[480px] max-w-[80vw] max-h-[70vh] opacity-[0.16]"><use href="#alphazero-emblem"></use></svg>
+                    <div class="text-4xl font-black tracking-[0.25em] opacity-[0.12] mt-2 text-[#0B192C]">ALPHAZERO</div>
+                    <div class="text-xs font-bold tracking-[0.35em] opacity-[0.14] text-[#0E859F]">SISTEMAS CONTRAINCENDIOS</div>
+                </div>
             </div>
 
             <!-- SECCIÓN: GESTIÓN DE USUARIOS (Solo Master) -->
             <div id="sec-usuarios" class="hidden relative z-10">
-                <h3 class="text-2xl font-extrabold border-b-2 border-[#0E859F]/30 pb-2 mb-4 text-[#0B192C]">Gestión de Accesos</h3>
+                <div class="flex flex-wrap justify-between items-center border-b-2 border-[#0E859F]/30 pb-2 mb-4 gap-2">
+                    <h3 class="text-2xl font-extrabold text-[#0B192C]">Gestión de Accesos</h3>
+                    <button onclick=" document.getElementById('input-logo-oficial').click() " class="bg-white hover:bg-cyan-50 text-[#0E859F] border border-[#0E859F]/40 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition">
+                        🖼️ Cargar Imagen de Logo AlphaZero
+                    </button>
+                </div>
                 <div class="az-card p-6 rounded-xl shadow mb-6 border-l-4 border-l-[#ED813C]">
-                    <h4 class="font-bold mb-3 text-[#0B192C]">Dar de alta nuevo vendedor</h4>
+                    <h4 class="font-bold mb-1 text-[#0B192C]">Dar de alta o sincronizar vendedor</h4>
+                    <p class="text-xs text-gray-500 mb-3">Si un vendedor ya había sido creado antes y no aparece abajo, ingresa su correo y contraseña aquí para reactivarlo en la lista.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input type="email" id="new-user" placeholder="Correo Electrónico" class="border p-2 rounded bg-white/90">
-                        <input type="text" id="new-pass" placeholder="Contraseña de acceso" class="border p-2 rounded bg-white/90">
-                        <button onclick="crearUsuario()" class="az-gradient-btn text-white px-4 py-2 rounded-lg shadow font-bold md:col-span-2 transition">Crear Cuenta</button>
+                        <input type="text" id="new-pass" placeholder="Contraseña de acceso (mín. 6 caracteres)" class="border p-2 rounded bg-white/90">
+                        <button onclick="crearUsuario()" class="az-gradient-btn text-white px-4 py-2 rounded-lg shadow font-bold md:col-span-2 transition">Crear / Sincronizar Cuenta</button>
                     </div>
                 </div>
-                <h4 class="font-bold mb-3 text-[#0B192C]">Vendedores Activos</h4>
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-bold text-[#0B192C]">Vendedores Activos</h4>
+                    <button onclick="cargarUsuariosNube()" class="text-xs font-bold text-[#0E859F] hover:underline">🔄 Actualizar lista</button>
+                </div>
                 <div id="lista-cuentas" class="az-card rounded-xl shadow p-4 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
             <!-- SECCIÓN: VENDEDORES -->
             <div id="sec-vendedores" class="hidden relative z-10">
-                <h3 class="text-2xl font-extrabold border-b-2 border-[#0E859F]/30 pb-2 mb-4 text-[#0B192C]">Administrar Vendedores</h3>
+                <h3 class="text-2xl font-extrabold border-b-2 border-[#0E859F]/30 pb-2 mb-4 text-[#0B192C]">Administrar Vendedores (Formatos Word)</h3>
                 <div class="az-card p-6 rounded-xl shadow mb-6 az-top-border">
                     <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor" class="border p-2 w-full mb-3 rounded bg-white/90">
                     <label class="block mb-2 text-sm font-bold text-[#0B192C]">Subir formato (.docx):</label>
@@ -279,7 +291,8 @@
             <div id="sec-cotizaciones" class="hidden relative z-10">
                 <div class="flex flex-wrap justify-between items-center mb-3 border-b-2 border-[#0E859F]/25 pb-2 gap-2">
                     <div class="flex items-center gap-2">
-                        <svg class="w-7 h-7"><use href="#alphazero-emblem"></use></svg>
+                        <img id="header-cot-img" class="w-8 h-8 object-contain hidden" alt="AlphaZero">
+                        <svg id="header-cot-svg" class="w-7 h-7"><use href="#alphazero-emblem"></use></svg>
                         <h3 class="text-xl font-extrabold text-[#0B192C]">Cotizaciones <span class="az-gradient-text">AlphaZero</span></h3>
                     </div>
                     <div class="flex flex-wrap gap-2 items-center">
@@ -488,6 +501,153 @@
         let tempIncluye = [];
         let tempNotasPartida = [];
 
+        // --- SISTEMA DE LOGO OFICIAL (REMUEVE FONDO BLANCO, ACTUALIZA PESTAÑA Y MARCA DE AGUA EN TODA LA PÁGINA) ---
+        function aplicarLogoPersonalizado(logoDataUrl, faviconDataUrl) {
+            if (!logoDataUrl) return;
+            localStorage.setItem('az_logo_cache', logoDataUrl);
+            if (faviconDataUrl) localStorage.setItem('az_fav_cache', faviconDataUrl);
+
+            // 1. Marca de agua en Login
+            const loginWmImg = document.getElementById('login-watermark-img');
+            const loginWmSvg = document.getElementById('login-watermark-svg');
+            if (loginWmImg && loginWmSvg) {
+                loginWmImg.src = logoDataUrl;
+                loginWmImg.classList.remove('hidden');
+                loginWmSvg.classList.add('hidden');
+            }
+
+            // 2. Tarjeta de Login
+            const loginCardImg = document.getElementById('login-card-img');
+            const loginCardSvg = document.getElementById('login-card-svg-wrap');
+            if (loginCardImg && loginCardSvg) {
+                loginCardImg.src = logoDataUrl;
+                loginCardImg.classList.remove('hidden');
+                loginCardSvg.classList.add('hidden');
+            }
+
+            // 3. Marca de agua fija en toda la aplicación
+            const appWmImg = document.getElementById('app-watermark-img');
+            const appWmSvg = document.getElementById('app-watermark-svg-wrap');
+            if (appWmImg && appWmSvg) {
+                appWmImg.src = logoDataUrl;
+                appWmImg.classList.remove('hidden');
+                appWmSvg.classList.add('hidden');
+            }
+
+            // 4. Iconos de barra lateral, cabecera y carga
+            const iconSrc = faviconDataUrl || logoDataUrl;
+            [['sidebar-logo-img','sidebar-logo-svg'], ['header-cot-img','header-cot-svg'], ['loading-custom-img','loading-default-svg']].forEach(([imgId, svgId]) => {
+                const imgEl = document.getElementById(imgId);
+                const svgEl = document.getElementById(svgId);
+                if (imgEl && svgEl) {
+                    imgEl.src = iconSrc;
+                    imgEl.classList.remove('hidden');
+                    svgEl.classList.add('hidden');
+                }
+            });
+
+            // 5. Pestaña del navegador (Favicon)
+            const favLink = document.getElementById('dynamic-favicon');
+            if (favLink && iconSrc) {
+                favLink.type = 'image/png';
+                favLink.href = iconSrc;
+            }
+        }
+
+        async function cargarLogoDesdeNube() {
+            const cacheLogo = localStorage.getItem('az_logo_cache');
+            const cacheFav = localStorage.getItem('az_fav_cache');
+            if (cacheLogo) aplicarLogoPersonalizado(cacheLogo, cacheFav);
+
+            try {
+                const snap = await getDoc(doc(db, 'config', 'branding'));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.logo) aplicarLogoPersonalizado(data.logo, data.favicon);
+                }
+            } catch (e) {
+                console.warn('Cargando marca de agua predeterminada.');
+            }
+        }
+        cargarLogoDesdeNube();
+
+        window.procesarLogoOficial = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            document.getElementById('loading-screen').classList.remove('hidden');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = async function() {
+                    try {
+                        // 1. Lienzo principal: Quita el fondo blanco automáticamente para que luzca perfecto como marca de agua
+                        const maxW = 900;
+                        const scale = Math.min(1, maxW / img.width);
+                        const w = Math.round(img.width * scale);
+                        const h = Math.round(img.height * scale);
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+
+                        const imgData = ctx.getImageData(0, 0, w, h);
+                        const d = imgData.data;
+                        for (let i = 0; i < d.length; i += 4) {
+                            const r = d[i], g = d[i+1], b = d[i+2];
+                            // Elimina píxeles blancos y casi blancos del fondo
+                            if (r > 240 && g > 240 && b > 240) {
+                                d[i+3] = 0;
+                            } else if (r > 220 && g > 220 && b > 220) {
+                                const prom = (r + g + b) / 3;
+                                d[i+3] = Math.round(((255 - prom) / 35) * 255);
+                            }
+                        }
+                        ctx.putImageData(imgData, 0, 0);
+                        const logoTransparente = canvas.toDataURL('image/png');
+
+                        // 2. Lienzo para el ícono de la pestaña (recorta el círculo izquierdo del emblema sobre círculo blanco)
+                        const favCanvas = document.createElement('canvas');
+                        favCanvas.width = 128;
+                        favCanvas.height = 128;
+                        const fctx = favCanvas.getContext('2d');
+
+                        fctx.beginPath();
+                        fctx.arc(64, 64, 62, 0, Math.PI * 2);
+                        fctx.fillStyle = '#FFFFFF';
+                        fctx.fill();
+
+                        // Si la imagen es horizontal (como el logo completo de AlphaZero), toma la mitad izquierda donde está el círculo
+                        const cropSize = img.width > img.height * 1.25 ? img.height : Math.min(img.width, img.height);
+                        const sx = img.width > img.height * 1.25 ? Math.max(0, (img.width * 0.52 - cropSize) / 2) : (img.width - cropSize) / 2;
+                        const sy = (img.height - cropSize) / 2;
+
+                        fctx.drawImage(img, sx, sy, cropSize, cropSize, 6, 6, 116, 116);
+                        const faviconDataUrl = favCanvas.toDataURL('image/png');
+
+                        await setDoc(doc(db, 'config', 'branding'), {
+                            logo: logoTransparente,
+                            favicon: faviconDataUrl,
+                            updatedAt: Date.now()
+                        });
+
+                        aplicarLogoPersonalizado(logoTransparente, faviconDataUrl);
+                        alert('✅ ¡Logo oficial de AlphaZero aplicado como marca de agua y en la pestaña!');
+                    } catch (err) {
+                        console.error(err);
+                        alert('❌ Error al guardar el logo: ' + err.message);
+                    } finally {
+                        document.getElementById('loading-screen').classList.add('hidden');
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // --- FUNCIONES AUXILIARES DE DATOS Y ORDENAMIENTO DE PARTIDAS ---
         function crearDatosMonedaVacios() {
             return { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', notas: '', vendedorId: '' };
         }
@@ -777,7 +937,7 @@
             document.getElementById(idPanel).classList.toggle('hidden');
         };
 
-        // --- MANEJO DE SUB-PARTIDAS (INCLUYE) CON OPCIÓN DE EDITAR ---
+        // --- MANEJO DE SUB-PARTIDAS (INCLUYE) ---
         window.buscarEquipoParaIncluye = function() {
             const f = document.getElementById('buscador-incluye').value.toLowerCase();
             const ul = document.getElementById('resultados-busqueda-incluye');
@@ -984,12 +1144,16 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user.email;
-                if (user.email === 'master@alphazero.com') {
+                if (user.email.toLowerCase() === 'master@alphazero.com') {
                     currentRole = 'master';
                 } else {
-                    const userDoc = await getDoc(doc(db, 'usuarios', user.email.toLowerCase()));
+                    const emailLower = user.email.toLowerCase();
+                    let userDoc = await getDoc(doc(db, 'usuarios', emailLower));
+                    if (!userDoc.exists()) {
+                        userDoc = await getDoc(doc(db, 'usuarios', user.email));
+                    }
                     if (userDoc.exists()) {
-                        currentRole = userDoc.data().role;
+                        currentRole = userDoc.data().role || 'vendedor';
                     } else {
                         alert("Tu cuenta ha sido deshabilitada del sistema.");
                         await signOut(auth);
@@ -1001,8 +1165,13 @@
                 document.getElementById('app-container').classList.remove('hidden');
                 document.getElementById('lbl-usuario-actual').innerText = currentUser;
                 
-                if (currentRole === 'master') document.getElementById('btn-admin-usuarios').classList.remove('hidden');
-                else document.getElementById('btn-admin-usuarios').classList.add('hidden');
+                if (currentRole === 'master') {
+                    document.getElementById('btn-admin-usuarios').classList.remove('hidden');
+                    document.getElementById('btn-subir-logo').classList.remove('hidden');
+                } else {
+                    document.getElementById('btn-admin-usuarios').classList.add('hidden');
+                    document.getElementById('btn-subir-logo').classList.add('hidden');
+                }
 
                 try { await cargarDatosDesdeNube(); } catch (e) { console.error(e); alert('❌ No se pudieron cargar los datos: ' + e.message); }
                 document.getElementById('loading-screen').classList.add('hidden');
@@ -1015,11 +1184,30 @@
             }
         });
 
-        async function cargarDatosDesdeNube() {
-            if(currentRole === 'master'){
+        window.cargarUsuariosNube = async function() {
+            if (currentRole !== 'master') return;
+            try {
                 const usSnap = await getDocs(collection(db, 'usuarios'));
-                dbUsuarios = usSnap.docs.map(d => d.data());
+                dbUsuarios = usSnap.docs.map(d => {
+                    const data = d.data() || {};
+                    return {
+                        id: d.id,
+                        email: data.email || d.id,
+                        role: data.role || 'vendedor',
+                        pass: data.pass || ''
+                    };
+                });
                 window.renderUsuarios();
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        async function cargarDatosDesdeNube() {
+            await cargarLogoDesdeNube();
+
+            if(currentRole === 'master'){
+                await window.cargarUsuariosNube();
             }
 
             const catSnap = await getDocs(collection(db, 'catalogo'));
@@ -1053,6 +1241,8 @@
             document.getElementById(`sec-${sec}`).classList.remove('hidden');
             
             if (sec === 'vendedores') window.renderVendedores();
+            if (sec === 'catalogo') window.renderCatalogo();
+            if (sec === 'usuarios') window.cargarUsuariosNube();
             if (sec === 'cotizaciones') {
                 window.renderSelectVendedores();
                 if(cotizaciones[cotIndexActiva]) {
@@ -1061,47 +1251,86 @@
             }
         };
 
+        // --- RENDERIZADO Y ALTA DE VENDEDORES ACTIVOS CORREGIDO ---
         window.renderUsuarios = function() {
             const lista = document.getElementById('lista-cuentas');
-            lista.innerHTML = dbUsuarios.map((u, i) => `
-                <div class="bg-white/90 p-3 border rounded-lg shadow-sm flex justify-between items-center">
+            if (!lista) return;
+
+            const tarjetaMaster = `
+                <div class="bg-slate-900 text-white p-3.5 border border-[#0E859F] rounded-lg shadow-sm flex justify-between items-center">
                     <div>
-                        <span class="font-bold text-[#0B192C]">${esc(u.email)}</span> <span class="text-xs bg-cyan-100 text-[#0E859F] font-bold px-1.5 py-0.5 rounded">${esc(u.role)}</span>
+                        <span class="font-bold">master@alphazero.com</span>
+                        <span class="text-[10px] bg-[#ED813C] text-white font-bold px-2 py-0.5 rounded ml-1">MASTER</span>
+                        <p class="text-xs text-gray-300 mt-0.5">Cuenta Administradora Principal</p>
                     </div>
-                    <button onclick="eliminarUsuario('${u.email}')" class="text-red-500 font-bold">X</button>
+                    <span class="text-xs text-emerald-400 font-bold">Activo 🟢</span>
+                </div>
+            `;
+
+            const vendedoresFiltrados = dbUsuarios.filter(u => (u.email || '').toLowerCase() !== 'master@alphazero.com');
+
+            const tarjetasVendedores = vendedoresFiltrados.map(u => `
+                <div class="bg-white/95 p-3.5 border border-gray-200 rounded-lg shadow-sm flex justify-between items-center">
+                    <div>
+                        <span class="font-bold text-[#0B192C]">${esc(u.email)}</span>
+                        <span class="text-xs bg-cyan-100 text-[#0E859F] font-bold px-1.5 py-0.5 rounded ml-1">${esc(u.role || 'vendedor')}</span>
+                        ${u.pass ? `<p class="text-xs text-gray-500 mt-0.5">Contraseña: <b>${esc(u.pass)}</b></p>` : `<p class="text-xs text-emerald-600 font-semibold mt-0.5">Acceso habilitado</p>`}
+                    </div>
+                    <button onclick="eliminarUsuario('${esc(u.id || u.email)}')" title="Revocar acceso" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 py-1 rounded text-xs transition">Eliminar</button>
                 </div>
             `).join('');
+
+            lista.innerHTML = tarjetaMaster + (tarjetasVendedores || `
+                <div class="bg-amber-50/90 p-3.5 border border-amber-200 rounded-lg text-xs text-amber-900 flex items-center">
+                    No hay vendedores adicionales registrados en la lista. Ingresa arriba el correo y contraseña de tu vendedor y presiona "Crear / Sincronizar Cuenta".
+                </div>
+            `);
         };
 
         window.crearUsuario = async function() {
             const email = document.getElementById('new-user').value.trim();
             const pass = document.getElementById('new-pass').value.trim();
             if(!email || !pass) return alert("Ingresa correo y contraseña");
+            if(pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
             
             document.getElementById('loading-screen').classList.remove('hidden');
             try {
-                await createUserWithEmailAndPassword(secondaryAuth, email, pass);
-                await secondaryAuth.signOut();
-                
                 const emailKey = email.toLowerCase();
-                const newUser = { email: emailKey, role: 'vendedor' };
+                let yaExistiaEnAuth = false;
+
+                try {
+                    await createUserWithEmailAndPassword(secondaryAuth, emailKey, pass);
+                    await secondaryAuth.signOut();
+                } catch (authError) {
+                    // Si el correo ya existía en Firebase Authentication, lo sincronizamos en Firestore para que aparezca activo
+                    if (authError.code === 'auth/email-already-in-use') {
+                        yaExistiaEnAuth = true;
+                    } else {
+                        throw authError;
+                    }
+                }
+                
+                const newUser = { id: emailKey, email: emailKey, pass: pass, role: 'vendedor' };
                 await setDoc(doc(db, 'usuarios', emailKey), newUser);
-                dbUsuarios.push(newUser);
                 
                 document.getElementById('new-user').value = '';
                 document.getElementById('new-pass').value = '';
-                window.renderUsuarios();
-                alert("Vendedor creado en la nube.");
+                await window.cargarUsuariosNube();
+                alert(yaExistiaEnAuth
+                    ? "✅ El correo ya existía en Firebase y ha sido reactivado y agregado a Vendedores Activos."
+                    : "✅ Vendedor creado y activado en la nube.");
             } catch (e) { alert("Error: " + e.message); }
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        window.eliminarUsuario = async function(email) {
+        window.eliminarUsuario = async function(idOrEmail) {
             if(!confirm("¿Revocar acceso a este vendedor?")) return;
             document.getElementById('loading-screen').classList.remove('hidden');
-            await deleteDoc(doc(db, 'usuarios', email));
-            dbUsuarios = dbUsuarios.filter(u => u.email !== email);
-            window.renderUsuarios();
+            await deleteDoc(doc(db, 'usuarios', idOrEmail));
+            if (idOrEmail.toLowerCase() !== idOrEmail) {
+                await deleteDoc(doc(db, 'usuarios', idOrEmail.toLowerCase()));
+            }
+            await window.cargarUsuariosNube();
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
