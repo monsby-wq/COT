@@ -18,7 +18,9 @@
         .hidden { display: none !important; }
         body {
             font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #F8FAFC;
+            background: radial-gradient(circle at 8% 18%, rgba(237, 129, 60, 0.08) 0%, transparent 42%),
+                        radial-gradient(circle at 14% 85%, rgba(14, 133, 159, 0.10) 0%, transparent 48%),
+                        #F8FAFC;
         }
         #loading-screen { background: rgba(11, 25, 44, 0.92); z-index: 9999; }
         .sidebar-collapsed { width: 4.5rem !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; align-items: center; }
@@ -46,7 +48,7 @@
             background: linear-gradient(90deg, #d96e2b 0%, #b87341 100%);
         }
 
-        /* DISEÑO 100% TRANSPARENTE Y SIN BORDES */
+        /* DISEÑO 100% TRANSPARENTE Y SIN BORDES EN EL ÁREA DE TRABAJO */
         .az-card,
         .az-transparent-box,
         .az-login-card,
@@ -59,7 +61,6 @@
         #lista-notas-temp,
         #panel-incluye,
         #panel-notas-partida,
-        #sidebar,
         #app-container .border,
         #app-container .border-2,
         #app-container .border-b,
@@ -75,9 +76,47 @@
             box-shadow: none !important;
         }
 
-        /* Mantener fondo oscuro únicamente en la barra de navegación izquierda */
+        /* BARRA LATERAL ESTILO APPLE LIQUID GLASS */
         #sidebar {
-            background-color: #0B192C !important;
+            background: linear-gradient(
+                145deg,
+                rgba(255, 255, 255, 0.52) 0%,
+                rgba(240, 248, 255, 0.28) 45%,
+                rgba(14, 133, 159, 0.14) 85%,
+                rgba(237, 129, 60, 0.10) 100%
+            ) !important;
+            backdrop-filter: blur(28px) saturate(200%) brightness(1.04) !important;
+            -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.04) !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.75) !important;
+            box-shadow:
+                inset 1.5px 1.5px 1px rgba(255, 255, 255, 0.85),
+                inset -1px -1px 1px rgba(14, 133, 159, 0.18),
+                12px 0 36px -8px rgba(11, 25, 44, 0.08) !important;
+        }
+
+        /* Botones interactivos dentro del Liquid Glass */
+        .liquid-nav-btn {
+            color: #0B192C;
+            border-radius: 0.85rem;
+            transition: all 0.22s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .liquid-nav-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0.32) 100%) !important;
+            box-shadow:
+                inset 1px 1px 0.5px rgba(255, 255, 255, 0.95),
+                0 4px 14px -3px rgba(14, 133, 159, 0.16) !important;
+            transform: translateY(-1px);
+        }
+        .liquid-icon-btn {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.28) 100%) !important;
+            box-shadow:
+                inset 1px 1px 0.5px rgba(255, 255, 255, 0.9),
+                0 2px 10px -2px rgba(11, 25, 44, 0.10) !important;
+            color: #0B192C;
+        }
+        .liquid-icon-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(14, 133, 159, 0.22) 100%) !important;
+            color: #0E859F;
         }
 
         /* Menús desplegables flotantes de búsqueda */
@@ -245,68 +284,68 @@
     <!-- APLICACIÓN PRINCIPAL -->
     <div id="app-container" class="flex h-screen hidden relative overflow-hidden">
         
-        <!-- Menú Lateral Contraíble -->
-        <div id="sidebar" class="w-64 bg-[#0B192C] text-white p-4 flex flex-col transition-all duration-300 shrink-0 relative z-20">
+        <!-- MARCA DE AGUA TENUE EN EL FONDO (Visible también detrás del Liquid Glass de la barra lateral) -->
+        <div class="fixed inset-0 pointer-events-none select-none flex flex-col items-center justify-center z-0">
+            <img id="app-watermark-img" class="w-[700px] max-w-[86vw] max-h-[82vh] object-contain opacity-[0.07] hidden" alt="Marca de agua AlphaZero">
+            <div id="app-watermark-svg-wrap" class="flex flex-col items-center justify-center">
+                <svg class="w-[500px] h-[500px] max-w-[80vw] max-h-[72vh] opacity-[0.07]"><use href="#alphazero-emblem"></use></svg>
+                <div class="text-4xl font-black tracking-[0.25em] opacity-[0.06] mt-2 text-[#0B192C]">ALPHAZERO</div>
+                <div class="text-xs font-bold tracking-[0.35em] opacity-[0.07] text-[#0E859F]">SISTEMAS CONTRAINCENDIOS</div>
+            </div>
+        </div>
+
+        <!-- Menú Lateral Contraíble estilo Apple Liquid Glass -->
+        <div id="sidebar" class="w-64 text-[#0B192C] p-4 flex flex-col transition-all duration-300 shrink-0 relative z-20 rounded-r-2xl">
             <div class="flex items-center justify-between mb-6 sidebar-header w-full pb-2">
                 <div class="flex items-center gap-2.5 sidebar-text">
-                    <img id="sidebar-logo-img" class="w-11 h-11 object-contain bg-white rounded-full p-0.5 shrink-0 hidden" alt="AlphaZero">
+                    <img id="sidebar-logo-img" class="w-11 h-11 object-contain bg-white/80 rounded-full p-0.5 shrink-0 shadow-sm hidden" alt="AlphaZero">
                     <svg id="sidebar-logo-svg" class="w-11 h-11 shrink-0"><use href="#alphazero-emblem"></use></svg>
                     <div class="leading-tight">
                         <h2 class="text-lg font-extrabold tracking-wider">
-                            <span class="text-white">ALPHA</span><span class="az-gradient-text">ZERO</span>
+                            <span class="text-[#0B192C]">ALPHA</span><span class="az-gradient-text">ZERO</span>
                         </h2>
                         <span class="text-[10px] text-[#0E859F] font-bold tracking-widest block">CONTRAINCENDIOS 🟢</span>
                     </div>
                 </div>
-                <button onclick="toggleSidebar()" title="Contraer / Expandir barra lateral" class="bg-slate-800 hover:bg-[#0E859F] text-white px-2.5 py-1.5 rounded text-lg font-bold transition">
+                <button onclick="toggleSidebar()" title="Contraer / Expandir barra lateral" class="liquid-icon-btn px-2.5 py-1.5 rounded-xl text-lg font-bold transition">
                     ☰
                 </button>
             </div>
             
-            <button onclick="mostrarSeccion('cotizaciones')" title="Crear Cotización" class="text-left mb-3 py-2 px-2.5 rounded-lg hover:bg-white/10 hover:text-[#ED813C] font-bold flex items-center gap-3 w-full justify-center md:justify-start transition">
+            <button onclick="mostrarSeccion('cotizaciones')" title="Crear Cotización" class="liquid-nav-btn text-left mb-2.5 py-2.5 px-3 hover:text-[#0E859F] font-bold flex items-center gap-3 w-full justify-center md:justify-start">
                 <span class="text-xl">📄</span> <span class="sidebar-text">Crear Cotización</span>
             </button>
-            <button onclick="mostrarSeccion('catalogo')" title="Catálogo" class="text-left mb-3 py-2 px-2.5 rounded-lg hover:bg-white/10 hover:text-[#ED813C] font-bold flex items-center gap-3 w-full justify-center md:justify-start transition">
+            <button onclick="mostrarSeccion('catalogo')" title="Catálogo" class="liquid-nav-btn text-left mb-2.5 py-2.5 px-3 hover:text-[#0E859F] font-bold flex items-center gap-3 w-full justify-center md:justify-start">
                 <span class="text-xl">📦</span> <span class="sidebar-text">Catálogo</span>
             </button>
-            <button onclick="mostrarSeccion('vendedores')" title="Vendedores" class="text-left mb-3 py-2 px-2.5 rounded-lg hover:bg-white/10 hover:text-[#ED813C] font-bold flex items-center gap-3 w-full justify-center md:justify-start transition">
+            <button onclick="mostrarSeccion('vendedores')" title="Vendedores" class="liquid-nav-btn text-left mb-2.5 py-2.5 px-3 hover:text-[#0E859F] font-bold flex items-center gap-3 w-full justify-center md:justify-start">
                 <span class="text-xl">👥</span> <span class="sidebar-text">Vendedores</span>
             </button>
             
-            <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" title="Gestión de Usuarios" class="text-left mb-2 py-2 px-2.5 rounded-lg text-[#ED813C] hover:bg-white/10 font-bold hidden pt-4 mt-2 flex items-center gap-3 w-full justify-center md:justify-start transition">
+            <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" title="Gestión de Usuarios" class="liquid-nav-btn text-left mb-2 py-2.5 px-3 text-[#ED813C] hover:text-[#d96e2b] font-bold hidden mt-2 flex items-center gap-3 w-full justify-center md:justify-start">
                 <span class="text-xl">⚙️</span> <span class="sidebar-text">Gestión de Usuarios</span>
             </button>
 
-            <button id="btn-subir-logo" onclick="document.getElementById('input-logo-oficial').click()" title="Subir imagen del logo AlphaZero para marca de agua y pestaña" class="text-left mb-3 py-2 px-2.5 rounded-lg text-cyan-300 hover:bg-white/10 font-bold hidden flex items-center gap-3 w-full justify-center md:justify-start transition text-xs">
+            <button id="btn-subir-logo" onclick="document.getElementById('input-logo-oficial').click()" title="Subir imagen del logo AlphaZero para marca de agua y pestaña" class="liquid-nav-btn text-left mb-3 py-2 px-3 text-[#0E859F] font-bold hidden flex items-center gap-3 w-full justify-center md:justify-start text-xs">
                 <span class="text-lg">🖼️</span> <span class="sidebar-text">Subir Logo Oficial</span>
             </button>
             
             <div class="mt-auto pt-4 w-full">
-                <div class="flex gap-1.5 mb-3 sidebar-text">
+                <div class="flex gap-1.5 mb-3 sidebar-text opacity-85">
                     <span class="h-1.5 flex-1 rounded-full bg-[#CE8550]"></span>
                     <span class="h-1.5 flex-1 rounded-full bg-[#ED813C]"></span>
                     <span class="h-1.5 flex-1 rounded-full bg-[#0E859F]"></span>
                     <span class="h-1.5 flex-1 rounded-full bg-[#0E5DF0]"></span>
                 </div>
-                <p class="text-xs text-gray-400 mb-2 sidebar-text">Conectado como:<br><span id="lbl-usuario-actual" class="font-bold text-white text-sm break-words"></span></p>
-                <button onclick="cerrarSesion()" title="Cerrar Sesión" class="az-orange-btn w-full text-white px-3 py-2 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2">
+                <p class="text-xs text-slate-600 mb-2 sidebar-text font-medium">Conectado como:<br><span id="lbl-usuario-actual" class="font-extrabold text-[#0B192C] text-sm break-words"></span></p>
+                <button onclick="cerrarSesion()" title="Cerrar Sesión" class="az-orange-btn w-full text-white px-3 py-2.5 rounded-xl text-sm font-bold transition shadow-md flex items-center justify-center gap-2">
                     <span>🚪</span> <span class="sidebar-text">Cerrar Sesión</span>
                 </button>
             </div>
         </div>
 
-        <!-- Contenedor Principal Sin Bordes con Marca de Agua Tenue -->
-        <div class="flex-1 p-4 overflow-y-auto relative" id="main-content">
-            
-            <!-- MARCA DE AGUA TENUE EN EL FONDO -->
-            <div class="fixed inset-0 pointer-events-none select-none flex flex-col items-center justify-center z-0 md:pl-56">
-                <img id="app-watermark-img" class="w-[700px] max-w-[86vw] max-h-[82vh] object-contain opacity-[0.07] hidden" alt="Marca de agua AlphaZero">
-                <div id="app-watermark-svg-wrap" class="flex flex-col items-center justify-center">
-                    <svg class="w-[500px] h-[500px] max-w-[80vw] max-h-[72vh] opacity-[0.07]"><use href="#alphazero-emblem"></use></svg>
-                    <div class="text-4xl font-black tracking-[0.25em] opacity-[0.06] mt-2 text-[#0B192C]">ALPHAZERO</div>
-                    <div class="text-xs font-bold tracking-[0.35em] opacity-[0.07] text-[#0E859F]">SISTEMAS CONTRAINCENDIOS</div>
-                </div>
-            </div>
+        <!-- Contenedor Principal Sin Bordes -->
+        <div class="flex-1 p-4 overflow-y-auto relative z-10" id="main-content">
 
             <!-- SECCIÓN: GESTIÓN DE USUARIOS (Solo Master) -->
             <div id="sec-usuarios" class="hidden relative z-10">
@@ -375,12 +414,6 @@
                     <div class="flex flex-wrap gap-2 items-center">
                         <button onclick="toggleColumnasCotizacion()" title="Cambiar entre 1 y 2 columnas para pantalla dividida" class="bg-transparent hover:bg-[#0E859F]/10 text-[#0B192C] px-2.5 py-1.5 rounded-lg text-xs font-bold transition">📐 1 Col / 2 Col</button>
                         <select id="cotizacion-activa" onchange="cambiarCotizacionTab()" class="p-1.5 rounded-lg font-bold text-[#0B192C] text-sm max-w-xs"></select>
-                        <!-- Selector de Versiones / Revisiones con Fecha y Hora -->
-                        <div class="flex items-center gap-1">
-                            <select id="cot-version-activa" onchange="cambiarVersionCotizacion(this.value)" title="Consultar historial de versiones con fecha y hora" class="p-1.5 rounded-lg font-bold !text-[#0E859F] text-xs max-w-xs"></select>
-                            <button type="button" onclick="crearNuevaRevision()" title="Guardar versión actual con fecha/hora e iniciar una nueva Revisión (Ej. REV 1, REV 2)" class="bg-[#0E859F] hover:bg-[#0b6e84] text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">+ Nueva Rev.</button>
-                            <button type="button" id="btn-eliminar-version" onclick="eliminarVersionActual()" title="Eliminar únicamente esta revisión" class="text-red-500 hover:bg-red-500/10 px-2 py-1.5 rounded-lg text-xs font-bold transition hidden">✕</button>
-                        </div>
                         <button onclick="nuevaCotizacion()" class="bg-[#0B192C] hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-sm font-bold transition">+ Nueva</button>
                         <button onclick="duplicarCotizacion()" title="Crear una copia de esta cotización con todas sus partidas" class="bg-[#0E859F] hover:bg-[#0b6e84] text-white px-3 py-1.5 rounded-lg text-sm font-bold transition">📋 Duplicar</button>
                         <button onclick="eliminarCotizacionActual()" class="bg-[#ED813C] hover:bg-[#d96e2b] text-white px-3 py-1.5 rounded-lg text-sm font-bold transition">🗑️ Eliminar</button>
@@ -404,9 +437,12 @@
 
                         <div class="flex flex-wrap justify-between items-center mb-1.5 gap-1">
                             <h4 class="font-bold text-[#0B192C]">Estructura del Folio</h4>
-                            <span id="badge-version-actual" class="text-[11px] font-bold text-[#ED813C]">📜 Versión 1 (Original)</span>
+                            <div class="flex items-center gap-1.5">
+                                <span id="badge-version-actual" class="text-[11px] font-bold text-[#ED813C]">📜 Versión 1 (Original)</span>
+                                <button type="button" id="btn-eliminar-version" onclick="eliminarVersionActual()" title="Eliminar únicamente esta revisión" class="text-red-500 hover:bg-red-500/10 px-1.5 py-0.5 rounded text-[11px] font-bold transition hidden">✕</button>
+                            </div>
                         </div>
-                        <!-- Botones directos para cambiar entre versiones (V1: Original, V2: REV 1...) con un clic -->
+                        <!-- Botones directos para cambiar entre versiones (V1: Original, V2: REV 1...) en Estructura del Folio -->
                         <div id="barra-botones-versiones" class="flex flex-wrap gap-1.5 mb-2.5"></div>
 
                         <div class="flex flex-wrap items-center gap-2 mb-4">
@@ -594,7 +630,6 @@
         let tempIncluye = [];
         let tempNotasPartida = [];
 
-        // Respaldo en memoria de la versión cuando se abre, para proteger la Original si el usuario cambia "Rev" después de editar
         let respaldoVersionAlAbrir = null;
 
         // --- FORMATEADOR DE FECHA Y HORA PARA VERSIONES ---
@@ -860,7 +895,6 @@
             };
         }
 
-        // Sincroniza los datos de la versión solicitada hacia las propiedades principales de la cotización
         function cargarVersionEnCotizacion(cot, indexVer) {
             if (!cot || !Array.isArray(cot.versiones) || cot.versiones.length === 0) return;
             const idx = Math.max(0, Math.min(indexVer, cot.versiones.length - 1));
@@ -882,7 +916,6 @@
             cot.partidas = mon === 'USD' ? cot.partidasUSD : cot.partidasMXN;
         }
 
-        // Guarda el estado activo de la cotización dentro de su ranura en cot.versiones[cot.versionActiva]
         function guardarCotizacionEnVersionActiva(cot) {
             if (!cot) return;
             if (!Array.isArray(cot.versiones) || cot.versiones.length === 0) {
@@ -977,19 +1010,12 @@
 
         function renderSelectVersiones() {
             const cot = cotizaciones[cotIndexActiva];
-            const selectVer = document.getElementById('cot-version-activa');
             const badgeVer = document.getElementById('badge-version-actual');
             const btnDelVer = document.getElementById('btn-eliminar-version');
             const barraBotones = document.getElementById('barra-botones-versiones');
-            if (!cot || !selectVer) return;
+            if (!cot) return;
 
             normalizarCotizacion(cot);
-            selectVer.innerHTML = cot.versiones.map((v, idx) => {
-                const etq = obtenerEtiquetaVersion(v, idx);
-                const fh = v.fechaHora ? ` | 📅 ${v.fechaHora}` : '';
-                return `<option value="${idx}">📜 V${idx + 1}: ${esc(etq)}${esc(fh)}</option>`;
-            }).join('');
-            selectVer.value = String(cot.versionActiva);
 
             if (badgeVer) {
                 const vAct = cot.versiones[cot.versionActiva] || {};
@@ -998,7 +1024,6 @@
                 badgeVer.textContent = `📜 V${cot.versionActiva + 1} de ${cot.versiones.length}: ${etqActiva}${fhActiva}`;
             }
 
-            // Renderiza pestañas/botones directos para cambiar entre versiones con un clic
             if (barraBotones) {
                 if (cot.versiones.length > 1) {
                     barraBotones.innerHTML = cot.versiones.map((v, idx) => {
@@ -1021,31 +1046,23 @@
             }
         }
 
-        // --- CAMBIAR ENTRE VERSIONES CORREGIDO (LEE EL ÍNDICE ANTES DE LIMPIAR FORMULARIO) ---
+        // --- CAMBIAR ENTRE VERSIONES ---
         window.cambiarVersionCotizacion = async function(indexExplicito) {
             const cot = cotizaciones[cotIndexActiva];
             if (!cot) return;
 
-            // 1. IMPORTANTE: Capturar primero el índice elegido antes de cualquier renderizado
-            const selectEl = document.getElementById('cot-version-activa');
-            const nuevoVerIndex = (indexExplicito !== undefined && indexExplicito !== null)
-                ? parseInt(indexExplicito, 10)
-                : parseInt(selectEl.value, 10);
-
+            const nuevoVerIndex = parseInt(indexExplicito, 10);
             if (isNaN(nuevoVerIndex) || nuevoVerIndex === cot.versionActiva) return;
 
             document.getElementById('loading-screen').classList.remove('hidden');
 
-            // 2. Guardar estado de la versión que estamos dejando
             await window.guardarEstadoCotizaciones();
 
-            // 3. Limpiar variables de edición de partida sin tocar el selector de versiones
             partidaEditandoIndex = null;
             incluyeEditandoIndex = null;
             tempIncluye = [];
             tempNotasPartida = [];
 
-            // 4. Cargar la versión seleccionada (ej. V1 = 0) y reflejarla en la interfaz
             cargarVersionEnCotizacion(cot, nuevoVerIndex);
             await setDoc(doc(db, "cotizaciones", cot.id), cot);
 
@@ -1079,7 +1096,6 @@
                 tieneInformacionCapturada(snap.datosUSD)
             );
 
-            // Si la versión ya tenía datos y el usuario cambió el código de Revisión (ej. de vacío "" a "REV 1")
             if (teniaDatosPrevios && nuevoRev !== '' && nuevoRev !== revAnterior) {
                 const etqAnt = revAnterior || (cot.versionActiva === 0 ? 'Original (Sin Rev)' : `V${cot.versionActiva + 1}`);
                 const crearNueva = confirm(
@@ -1092,7 +1108,6 @@
                 if (crearNueva) {
                     document.getElementById('loading-screen').classList.remove('hidden');
 
-                    // 1. Capturamos todos los datos y partidas actuales en pantalla para la nueva revisión
                     const datosNuevosUI = leerFormularioDatosUI();
                     datosNuevosUI.folioEnd = nuevoRev;
 
@@ -1112,11 +1127,9 @@
                     nuevaVer.datosUSD.folioEnd = nuevoRev;
                     nuevaVer.etiqueta = nuevoRev;
 
-                    // 2. Restauramos intacta la versión anterior desde el respaldo tomado al abrirla
                     cot.versiones[cot.versionActiva] = JSON.parse(JSON.stringify(snap));
                     cot.versiones[cot.versionActiva].etiqueta = obtenerEtiquetaVersion(cot.versiones[cot.versionActiva], cot.versionActiva);
 
-                    // 3. Agregamos la nueva revisión y la activamos
                     cot.versiones.push(nuevaVer);
                     cargarVersionEnCotizacion(cot, cot.versiones.length - 1);
 
@@ -1152,7 +1165,6 @@
 
             document.getElementById('loading-screen').classList.remove('hidden');
 
-            // Leemos el estado actual en pantalla para la nueva versión
             const mon = document.getElementById('cot-moneda').value || cot.monedaActiva || 'MXN';
             const datosCapturados = leerFormularioDatosUI();
 
@@ -1172,7 +1184,6 @@
                 partidasUSD: JSON.parse(JSON.stringify(cot.partidasUSD || []))
             };
 
-            // Si la versión anterior tenía respaldo al abrirse y el usuario la había modificado antes de presionar "+ Nueva Rev.", restauramos la versión anterior a su estado original
             if (respaldoVersionAlAbrir && respaldoVersionAlAbrir.cotId === cot.id && respaldoVersionAlAbrir.versionIndex === cot.versionActiva) {
                 const snap = respaldoVersionAlAbrir.snapshot;
                 const teniaPartidasSnap = (Array.isArray(snap.partidasMXN) && snap.partidasMXN.length > 0) || (Array.isArray(snap.partidasUSD) && snap.partidasUSD.length > 0);
@@ -2062,7 +2073,6 @@
 
                 guardarCotizacionEnVersionActiva(cot);
 
-                // Si la versión recién creada aún estaba vacía en el respaldo inicial, actualiza el respaldo
                 if (!respaldoVersionAlAbrir || respaldoVersionAlAbrir.cotId !== cot.id || respaldoVersionAlAbrir.versionIndex !== cot.versionActiva) {
                     tomarRespaldoVersionActual();
                 } else {
