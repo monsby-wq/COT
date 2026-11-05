@@ -173,12 +173,40 @@
         #login-container input:focus {
             background-color: rgba(255, 255, 255, 0.12) !important;
         }
+
+        /* Contenedor oculto para renderizado fiel de DOCX a PDF */
+        #pdf-render-wrapper {
+            position: fixed;
+            left: -10000px;
+            top: 0;
+            width: 816px;
+            background: #FFFFFF;
+            z-index: -1;
+        }
+        #pdf-render-container .docx-wrapper {
+            background: #FFFFFF !important;
+            padding: 0 !important;
+            display: block !important;
+        }
+        #pdf-render-container section.docx {
+            box-shadow: none !important;
+            margin: 0 auto !important;
+            page-break-after: always;
+        }
     </style>
-    <!-- Librerías de Word -->
+    <!-- Librerías de Word y conversión a PDF / ZIP -->
     <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.4/dist/pizzip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.37.11/build/docxtemplater.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.1.20/dist/docx-preview.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="text-gray-800 relative selection:bg-[#0E859F] selection:text-white">
+
+    <!-- Contenedor auxiliar para exportación directa a PDF -->
+    <div id="pdf-render-wrapper" aria-hidden="true">
+        <div id="pdf-render-container"></div>
+    </div>
 
     <!-- Símbolo vectorial del emblema AlphaZero -->
     <svg style="position:absolute; width:0; height:0; overflow:hidden;" aria-hidden="true">
@@ -251,7 +279,7 @@
     <div id="loading-screen" class="fixed inset-0 flex flex-col items-center justify-center hidden">
         <img id="loading-custom-img" class="w-24 h-24 object-contain mb-4 animate-pulse hidden" alt="AlphaZero">
         <svg id="loading-default-svg" class="w-20 h-20 animate-spin mb-4" style="animation-duration: 6s;"><use href="#alphazero-emblem"></use></svg>
-        <div class="text-white text-xl font-bold tracking-wider animate-pulse">Sincronizando con AlphaZero...</div>
+        <div id="loading-text" class="text-white text-xl font-bold tracking-wider animate-pulse text-center px-4">Sincronizando con AlphaZero...</div>
     </div>
 
     <!-- PANTALLA DE INICIO DE SESIÓN SIN BORDES CON MARCA DE AGUA TENUE -->
@@ -516,7 +544,7 @@
                             </button>
                         </div>
 
-                        <!-- PANEL 1: SECCIÓN INCLUYE -->
+                        <!-- PANEL 1: SECCIÓN INCLUYE (CON SOPORTE DE FICHA TÉCNICA) -->
                         <div id="panel-incluye" class="hidden p-2 rounded-lg mb-3">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-xs font-bold text-[#0B192C]">Agregar sub-partida a "INCLUYE:"</span>
@@ -531,11 +559,12 @@
                                 <input type="text" id="inc-desc-corta" placeholder="Descripción Azul (Ej: BASE PARA DETECTOR)" class="p-1.5 rounded text-xs font-bold !text-[#0E5DF0] col-span-2">
                             </div>
                             <input type="text" id="inc-desc-normal" placeholder="Descripción adicional en negro (Opcional)" class="p-1.5 w-full rounded text-xs mb-1.5">
-                            <div class="grid grid-cols-3 gap-1.5 mb-2">
+                            <div class="grid grid-cols-3 gap-1.5 mb-1.5">
                                 <input type="text" id="inc-modelo" placeholder="Modelo o NP: 123" class="p-1.5 rounded text-xs font-bold !text-red-600 uppercase">
                                 <input type="text" id="inc-marca" placeholder="Marca" class="p-1.5 rounded text-xs font-bold !text-red-600 uppercase">
                                 <input type="text" id="inc-tiempo" placeholder="T.E. (Opcional)" class="p-1.5 rounded text-xs font-bold">
                             </div>
+                            <input type="url" id="inc-pdf" placeholder="🔗 Enlace de Ficha Técnica del accesorio (Automático)" class="p-1.5 w-full rounded text-xs !text-[#0E859F] mb-2">
                             <div class="flex gap-1.5 mb-2">
                                 <button type="button" id="btn-agregar-incluye" onclick="agregarItemIncluye()" class="bg-[#0E859F] hover:bg-[#0b6e84] text-white font-bold py-1 px-3 rounded text-xs w-full transition">
                                     + Añadir a INCLUYE
@@ -583,11 +612,30 @@
                             <button id="btn-cancelar-edicion" onclick="cancelarEdicionPartida()" class="text-gray-700 font-bold px-3 py-2.5 rounded-lg transition text-sm hidden">Cancelar</button>
                         </div>
 
-                        <h4 class="font-bold mt-5 mb-2 text-[#0B192C]">Partidas Agregadas</h4>
-                        <div id="lista-partidas" class="text-sm p-1 rounded-lg h-40 overflow-y-auto"></div>
+                        <div class="flex flex-wrap justify-between items-center mt-5 mb-2 gap-1">
+                            <h4 class="font-bold text-[#0B192C]">Partidas Agregadas</h4>
+                            <!-- Botones de descarga masiva de Fichas Técnicas con prefijo PDA X. -->
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" onclick="descargarTodasLasFichas('sueltas')" title="Descargar todos los PDFs sueltos renombrados con PDA 1., PDA 2..." class="bg-[#0B192C]/10 hover:bg-[#0E859F] text-[#0B192C] hover:text-white px-2.5 py-1 rounded-lg text-[11px] font-bold transition">
+                                    📥 Fichas Sueltas (PDA 1, 2...)
+                                </button>
+                                <button type="button" onclick="descargarTodasLasFichas('zip')" title="Descargar un archivo .ZIP con todas las fichas técnicas renombradas con PDA 1., PDA 2..." class="bg-[#0E859F]/15 hover:bg-[#0E859F] text-[#0E859F] hover:text-white px-2.5 py-1 rounded-lg text-[11px] font-bold transition">
+                                    🗜️ Fichas en .ZIP (PDA 1, 2...)
+                                </button>
+                            </div>
+                        </div>
+                        <div id="lista-partidas" class="text-sm p-1 rounded-lg h-44 overflow-y-auto"></div>
                         <div class="text-right font-extrabold text-lg mt-2 text-[#0B192C]" id="cot-total-label">Total: $0.00</div>
                         
-                        <button onclick="generarDocumentoWord()" class="az-orange-btn text-white text-base font-extrabold tracking-wide px-4 py-3 rounded-lg w-full mt-3 transition">DESCARGAR COTIZACIÓN</button>
+                        <!-- Botones de descarga en Word (.DOCX) y en PDF (.PDF) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">
+                            <button onclick="generarDocumentoWord()" class="az-gradient-btn text-white text-sm font-extrabold tracking-wide px-4 py-3 rounded-lg w-full transition shadow-md">
+                                📘 DESCARGAR WORD (.DOCX)
+                            </button>
+                            <button onclick="generarDocumentoPDF()" class="az-orange-btn text-white text-sm font-extrabold tracking-wide px-4 py-3 rounded-lg w-full transition shadow-md">
+                                📕 DESCARGAR PDF (.PDF)
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1428,7 +1476,248 @@
             document.getElementById(idPanel).classList.toggle('hidden');
         };
 
-        // --- MANEJO DE SUB-PARTIDAS (INCLUYE) ---
+        // --- MANEJO DE SUB-PARTIDAS (INCLUYE) CON FICHA TÉCNICA ---
+        function obtenerPdfIncluye(inc) {
+            if (!inc) return '';
+            if (inc.pdf) return inc.pdf;
+            const modBuscado = (inc.modelo || '').trim().toUpperCase();
+            const descBuscada = (inc.descCorta || '').trim().toUpperCase();
+            if (!modBuscado && !descBuscada) return '';
+            const encontrado = catalogo.find(c => {
+                if (!c.pdf) return false;
+                const cMod = (c.modelo || '').trim().toUpperCase();
+                const cDesc = (c.descCorta || '').trim().toUpperCase();
+                return (modBuscado && cMod && (cMod === modBuscado || modBuscado.includes(cMod))) ||
+                       (descBuscada && cDesc && cDesc === descBuscada);
+            });
+            return encontrado ? encontrado.pdf : '';
+        }
+
+        // --- SISTEMA DE DESCARGA DE FICHAS TÉCNICAS RENOMBRADAS CON "PDA X." ---
+        function generarNombreArchivoFicha(pda, modelo, descCorta) {
+            const pdaLimpia = String(pda || '1').trim().toUpperCase();
+            const modLimpio = String(modelo || '').trim().toUpperCase().replace(/^(MODELO:|NP:|N\/P:|MOD:)\s*/i, '');
+            const descLimpia = String(descCorta || '').trim().toUpperCase().replace(/[,.;:]+$/, '');
+
+            let cuerpo = '';
+            if (modLimpio && descLimpia) cuerpo = `${modLimpio} - ${descLimpia}`;
+            else if (modLimpio) cuerpo = modLimpio;
+            else if (descLimpia) cuerpo = descLimpia;
+            else cuerpo = 'FICHA TECNICA';
+
+            // Limpia caracteres no permitidos en nombres de archivos de Windows
+            const nombreSeguro = `PDA ${pdaLimpia}. ${cuerpo}`
+                .replace(/[/\\?%*:|"<>]/g, '-')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .substring(0, 110);
+
+            return `${nombreSeguro}.pdf`;
+        }
+
+        async function obtenerBlobFicha(url) {
+            const urlDescarga = obtenerEnlaceDescarga(url);
+            const matchDrive = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            const driveId = matchDrive ? matchDrive[1] : null;
+
+            const candidatos = [];
+            if (driveId) {
+                const driveDirect1 = `https://drive.usercontent.google.com/download?id=${driveId}&export=download&confirm=t`;
+                const driveDirect2 = `https://drive.google.com/uc?export=download&id=${driveId}`;
+                candidatos.push(`https://corsproxy.io/?${encodeURIComponent(driveDirect1)}`);
+                candidatos.push(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(driveDirect2)}`);
+                candidatos.push(`https://api.allorigins.win/raw?url=${encodeURIComponent(driveDirect2)}`);
+            } else {
+                candidatos.push(urlDescarga);
+                candidatos.push(`https://corsproxy.io/?${encodeURIComponent(urlDescarga)}`);
+                candidatos.push(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(urlDescarga)}`);
+            }
+
+            for (const intentoUrl of candidatos) {
+                try {
+                    const resp = await fetch(intentoUrl);
+                    if (!resp.ok) continue;
+                    const buffer = await resp.arrayBuffer();
+                    if (buffer.byteLength < 200) continue;
+
+                    const bytes = new Uint8Array(buffer.slice(0, 5));
+                    const header = String.fromCharCode(...bytes);
+                    if (header.startsWith('%PDF')) {
+                        return new Blob([buffer], { type: 'application/pdf' });
+                    }
+                    const contentType = (resp.headers.get('content-type') || '').toLowerCase();
+                    if (!contentType.includes('text/html') && buffer.byteLength > 1000) {
+                        return new Blob([buffer], { type: contentType || 'application/pdf' });
+                    }
+                } catch (e) {}
+            }
+            return null;
+        }
+
+        function dispararDescargaBlob(blob, nombreArchivo) {
+            const blobUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = nombreArchivo;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => window.URL.revokeObjectURL(blobUrl), 2000);
+        }
+
+        window.descargarFichaConNombre = async function(url, pda, modelo, descCorta) {
+            if (!url) return;
+            const nombreArchivo = generarNombreArchivoFicha(pda, modelo, descCorta);
+
+            document.getElementById('loading-text').innerText = `Descargando: ${nombreArchivo}...`;
+            document.getElementById('loading-screen').classList.remove('hidden');
+
+            try {
+                const blob = await obtenerBlobFicha(url);
+                if (blob) {
+                    dispararDescargaBlob(blob, nombreArchivo);
+                } else {
+                    // Respaldo si el archivo en Drive es privado y requiere sesión de Google
+                    try { await navigator.clipboard.writeText(nombreArchivo.replace(/\.pdf$/i, '')); } catch (e) {}
+                    const a = document.createElement('a');
+                    a.href = obtenerEnlaceDescarga(url);
+                    a.target = '_blank';
+                    a.download = nombreArchivo;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+            } finally {
+                document.getElementById('loading-text').innerText = 'Sincronizando con AlphaZero...';
+                document.getElementById('loading-screen').classList.add('hidden');
+            }
+        };
+
+        window.descargarFichaPartida = function(pIdx, incIdx = -1) {
+            const cot = cotizaciones[cotIndexActiva];
+            if (!cot || !cot.partidas || !cot.partidas[pIdx]) return;
+            const p = cot.partidas[pIdx];
+            const pdaActual = p.pda || (pIdx + 1);
+
+            if (incIdx === -1) {
+                window.descargarFichaConNombre(p.pdf, pdaActual, p.modelo, p.descCorta);
+            } else if (p.incluyeList && p.incluyeList[incIdx]) {
+                const inc = p.incluyeList[incIdx];
+                const pdfInc = obtenerPdfIncluye(inc);
+                window.descargarFichaConNombre(pdfInc, pdaActual, inc.modelo, inc.descCorta || inc.descNormal);
+            }
+        };
+
+        window.descargarFichaTempIncluye = function(incIdx) {
+            const inc = tempIncluye[incIdx];
+            if (!inc) return;
+            const pdfInc = obtenerPdfIncluye(inc);
+            const cot = cotizaciones[cotIndexActiva];
+            const pdaForm = document.getElementById('part-pda').value.trim() || obtenerSiguientePdaDisponible(cot?.partidas || []);
+            window.descargarFichaConNombre(pdfInc, pdaForm, inc.modelo, inc.descCorta || inc.descNormal);
+        };
+
+        // --- DESCARGA MASIVA DE TODAS LAS FICHAS TÉCNICAS DE LA COTIZACIÓN (CON PREFIJO PDA X.) ---
+        window.descargarTodasLasFichas = async function(modo = 'sueltas') {
+            const cot = cotizaciones[cotIndexActiva];
+            if (!cot || !Array.isArray(cot.partidas) || cot.partidas.length === 0) {
+                return alert('⚠️ No hay partidas agregadas en esta cotización.');
+            }
+
+            const colaFichas = [];
+            const nombresUsados = new Map();
+
+            function asegurarNombreUnico(nombreBase) {
+                if (!nombresUsados.has(nombreBase)) {
+                    nombresUsados.set(nombreBase, 1);
+                    return nombreBase;
+                }
+                const cuenta = nombresUsados.get(nombreBase) + 1;
+                nombresUsados.set(nombreBase, cuenta);
+                return nombreBase.replace(/\.pdf$/i, ` (${cuenta}).pdf`);
+            }
+
+            cot.partidas.forEach((p, i) => {
+                const pdaActual = p.pda || (i + 1);
+                if (p.pdf) {
+                    const nom = asegurarNombreUnico(generarNombreArchivoFicha(pdaActual, p.modelo, p.descCorta));
+                    colaFichas.push({ url: p.pdf, nombreArchivo: nom, pda: pdaActual });
+                }
+                if (Array.isArray(p.incluyeList)) {
+                    p.incluyeList.forEach(inc => {
+                        const pdfInc = obtenerPdfIncluye(inc);
+                        if (pdfInc) {
+                            const nomInc = asegurarNombreUnico(generarNombreArchivoFicha(pdaActual, inc.modelo, inc.descCorta || inc.descNormal));
+                            colaFichas.push({ url: pdfInc, nombreArchivo: nomInc, pda: pdaActual });
+                        }
+                    });
+                }
+            });
+
+            if (colaFichas.length === 0) {
+                return alert('⚠️ Ninguna de las partidas o artículos incluidos en esta cotización tiene enlace de Ficha Técnica.');
+            }
+
+            document.getElementById('loading-screen').classList.remove('hidden');
+
+            try {
+                if (modo === 'zip') {
+                    if (typeof JSZip === 'undefined') {
+                        return alert('⚠️ La librería ZIP aún está cargando. Intenta de nuevo.');
+                    }
+                    const zip = new JSZip();
+                    let agregadas = 0;
+                    const fallidas = [];
+
+                    for (let idx = 0; idx < colaFichas.length; idx++) {
+                        const item = colaFichas[idx];
+                        document.getElementById('loading-text').innerText = `Empaquetando ficha (${idx + 1}/${colaFichas.length}):\n${item.nombreArchivo}`;
+                        const blob = await obtenerBlobFicha(item.url);
+                        if (blob) {
+                            zip.file(item.nombreArchivo, blob);
+                            agregadas++;
+                        } else {
+                            fallidas.push(item);
+                        }
+                    }
+
+                    if (agregadas > 0) {
+                        document.getElementById('loading-text').innerText = 'Generando archivo .ZIP...';
+                        const d = cot.datos || {};
+                        const folioFinal = `NO-${(d.folioMid || 'XXX').toUpperCase()}-${ANIO}${d.folioEnd ? '-' + d.folioEnd.toUpperCase() : ''}`;
+                        const zipBlob = await zip.generateAsync({ type: 'blob' });
+                        dispararDescargaBlob(zipBlob, `FICHAS TECNICAS - ${folioFinal}.zip`);
+                    }
+
+                    if (fallidas.length > 0) {
+                        alert(`⚠️ Se empaquetaron ${agregadas} ficha(s). ${fallidas.length} enlace(s) de Drive requieren permisos públicos ("Cualquier persona con el enlace") para descargarse automáticamente.`);
+                    }
+                } else {
+                    // Modo sueltas: descarga cada PDF directamente con su nombre "PDA X. ..."
+                    for (let idx = 0; idx < colaFichas.length; idx++) {
+                        const item = colaFichas[idx];
+                        document.getElementById('loading-text').innerText = `Descargando ficha (${idx + 1}/${colaFichas.length}):\n${item.nombreArchivo}`;
+                        const blob = await obtenerBlobFicha(item.url);
+                        if (blob) {
+                            dispararDescargaBlob(blob, item.nombreArchivo);
+                        } else {
+                            const a = document.createElement('a');
+                            a.href = obtenerEnlaceDescarga(item.url);
+                            a.target = '_blank';
+                            a.download = item.nombreArchivo;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                        }
+                        await new Promise(r => setTimeout(r, 450));
+                    }
+                }
+            } finally {
+                document.getElementById('loading-text').innerText = 'Sincronizando con AlphaZero...';
+                document.getElementById('loading-screen').classList.add('hidden');
+            }
+        };
+
         window.buscarEquipoParaIncluye = function() {
             const f = document.getElementById('buscador-incluye').value.toLowerCase();
             const ul = document.getElementById('resultados-busqueda-incluye');
@@ -1442,9 +1731,12 @@
             );
 
             ul.innerHTML = filtrados.map(c => `
-                <li class="p-2 cursor-pointer hover:bg-cyan-50 text-xs" onclick="seleccionarIncluyePorId('${c.id}')">
-                    <span class="text-red-600 font-bold">${esc(c.modelo)}</span> 
-                    <span class="text-[#0E5DF0] font-bold">${esc(c.descCorta)}</span>
+                <li class="p-2 cursor-pointer hover:bg-cyan-50 text-xs flex justify-between items-center" onclick="seleccionarIncluyePorId('${c.id}')">
+                    <div>
+                        <span class="text-red-600 font-bold">${esc(c.modelo)}</span> 
+                        <span class="text-[#0E5DF0] font-bold">${esc(c.descCorta)}</span>
+                    </div>
+                    ${c.pdf ? '<span class="text-[10px] text-[#ED813C] font-bold ml-2 shrink-0">📄 PDF</span>' : ''}
                 </li>
             `).join('');
             ul.classList.remove('hidden');
@@ -1455,6 +1747,7 @@
             document.getElementById('inc-desc-normal').value = c.desc || '';
             document.getElementById('inc-marca').value = c.marca || '';
             document.getElementById('inc-modelo').value = c.modelo || '';
+            document.getElementById('inc-pdf').value = c.pdf || '';
             document.getElementById('buscador-incluye').value = '';
             document.getElementById('resultados-busqueda-incluye').classList.add('hidden');
         };
@@ -1470,6 +1763,7 @@
             document.getElementById('inc-modelo').value = inc.modelo || '';
             document.getElementById('inc-marca').value = inc.marca || '';
             document.getElementById('inc-tiempo').value = inc.tiempo || '';
+            document.getElementById('inc-pdf').value = obtenerPdfIncluye(inc) || '';
 
             const btn = document.getElementById('btn-agregar-incluye');
             if (btn) {
@@ -1492,6 +1786,7 @@
             document.getElementById('inc-modelo').value = '';
             document.getElementById('inc-marca').value = '';
             document.getElementById('inc-tiempo').value = '';
+            document.getElementById('inc-pdf').value = '';
 
             const btn = document.getElementById('btn-agregar-incluye');
             if (btn) {
@@ -1512,10 +1807,11 @@
             const modelo = document.getElementById('inc-modelo').value.trim();
             const marca = document.getElementById('inc-marca').value.trim();
             const tiempo = document.getElementById('inc-tiempo').value.trim();
+            const pdf = normalizarEnlace(document.getElementById('inc-pdf').value.trim());
 
             if (!descCorta && !descNormal) return alert("⚠️ Ingresa al menos la descripción del accesorio a incluir.");
 
-            const itemObj = { prefijo, descCorta, descNormal, modelo, marca, tiempo };
+            const itemObj = { prefijo, descCorta, descNormal, modelo, marca, tiempo, pdf };
 
             if (incluyeEditandoIndex !== null) {
                 tempIncluye[incluyeEditandoIndex] = itemObj;
@@ -1536,20 +1832,26 @@
         window.renderTempIncluye = function() {
             document.getElementById('btn-toggle-incluye').innerText = `➕ INCLUYE (${tempIncluye.length})`;
             const cont = document.getElementById('lista-incluye-temp');
-            cont.innerHTML = tempIncluye.map((inc, i) => `
+            cont.innerHTML = tempIncluye.map((inc, i) => {
+                const pdfInc = obtenerPdfIncluye(inc);
+                return `
                 <div class="p-1.5 rounded flex justify-between items-center bg-transparent">
                     <div class="truncate pr-2">
                         <b>${esc(inc.prefijo)}</b> <span class="text-[#0E5DF0] font-bold">${esc(inc.descCorta)}</span> 
                         <span class="text-gray-700">${inc.descNormal ? esc(inc.descNormal.substring(0,25)) + '...' : ''}</span>
                         <span class="text-red-600 font-bold">${esc(inc.modelo)} ${esc(inc.marca)}</span>
                         <b>${esc(inc.tiempo)}</b>
+                        ${pdfInc ? `
+                            <a href="${esc(pdfInc)}" target="_blank" class="ml-1 text-[10px] text-[#ED813C] font-bold hover:underline">📄 Ver</a>
+                            <button type="button" onclick="descargarFichaTempIncluye(${i})" class="ml-1 text-[10px] text-[#0E859F] font-bold hover:underline">⬇️ Descargar</button>
+                        ` : ''}
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
                         <button type="button" onclick="editarItemIncluye(${i})" title="Editar este artículo" class="text-[#0E859F] hover:text-blue-800 font-bold px-1">✏️</button>
                         <button type="button" onclick="eliminarItemIncluye(${i})" title="Eliminar" class="text-red-500 hover:text-red-700 font-bold px-1">X</button>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         };
 
         // --- MANEJO DE NOTAS DE LA PARTIDA ---
@@ -2298,6 +2600,7 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
+        // --- RENDERIZADO DE PARTIDAS AGREGADAS CON DESCARGA RENOMBRADA "PDA X." EN PRINCIPAL E "INCLUYE" ---
         window.renderPartidas = function() {
             const cot = cotizaciones[cotIndexActiva];
             const lista = document.getElementById('lista-partidas');
@@ -2316,12 +2619,33 @@
 
             lista.innerHTML = cot.partidas.map((p, i) => {
                 granTotal += p.total;
+                const pdaActual = p.pda || (i + 1);
                 const numInc = p.incluyeList ? p.incluyeList.length : 0;
                 const numNot = p.notasList ? p.notasList.length : 0;
+
+                const htmlIncluye = numInc > 0 ? `
+                    <div class="mt-1.5 pl-3 space-y-1">
+                        <span class="text-[10px] font-extrabold text-[#0B192C] tracking-wider block">INCLUYE:</span>
+                        ${p.incluyeList.map((inc, incIdx) => {
+                            const pdfInc = obtenerPdfIncluye(inc);
+                            return `
+                            <div class="text-[11px] flex flex-wrap items-center gap-1 leading-tight">
+                                <span class="font-bold text-gray-700">${esc(inc.prefijo || '•')}</span>
+                                <span class="font-bold text-[#0E5DF0]">${esc(inc.descCorta || inc.descNormal || 'Accesorio')}</span>
+                                ${inc.modelo ? `<span class="font-bold text-red-600">${esc(inc.modelo)}</span>` : ''}
+                                ${pdfInc ? `
+                                    <a href="${esc(pdfInc)}" target="_blank" class="ml-1 text-[10px] text-[#ED813C] px-1.5 py-0.5 rounded font-bold hover:bg-[#ED813C]/10 inline-block transition">📄 Ver Ficha</a>
+                                    <button type="button" onclick="descargarFichaPartida(${i}, ${incIdx})" title="Descargar como PDA ${esc(pdaActual)}." class="text-[10px] text-[#0E859F] px-1.5 py-0.5 rounded font-bold hover:bg-[#0E859F]/10 inline-block transition">⬇️ Descargar (PDA ${esc(pdaActual)}.)</button>
+                                ` : ''}
+                            </div>`;
+                        }).join('')}
+                    </div>
+                ` : '';
+
                 return `
-                <div class="py-2 flex justify-between items-center px-1 rounded bg-transparent">
-                    <div>
-                        <span class="font-bold mr-2 bg-[#0B192C] text-white px-2 py-0.5 rounded text-xs">Pda. ${esc(p.pda || (i+1))}</span>
+                <div class="py-2 flex justify-between items-start px-1 rounded bg-transparent">
+                    <div class="pr-2">
+                        <span class="font-bold mr-2 bg-[#0B192C] text-white px-2 py-0.5 rounded text-xs">Pda. ${esc(pdaActual)}</span>
                         <span class="text-xs text-gray-700 font-bold block mt-0.5">${esc(p.notaArriba)}</span>
                         <span class="text-xs font-bold text-[#0E5DF0]">${esc(p.descCorta)}</span>
                         <span class="text-xs text-red-600 font-bold ml-2">${esc(p.modelo)}</span><br>
@@ -2330,8 +2654,9 @@
                         ${numNot > 0 ? `<span class="ml-1 text-[10px] text-[#CE8550] px-1.5 py-0.5 rounded font-bold">+${numNot} Notas</span>` : ''}
                         ${p.pdf ? `
                             <a href="${esc(p.pdf)}" target="_blank" class="ml-2 text-xs text-[#ED813C] px-2 py-0.5 rounded font-bold hover:bg-[#ED813C]/10 inline-block transition">📄 Ver Ficha</a>
-                            <a href="${esc(obtenerEnlaceDescarga(p.pdf))}" target="_blank" download class="ml-1 text-xs text-[#0E859F] px-2 py-0.5 rounded font-bold hover:bg-[#0E859F]/10 inline-block transition">⬇️ Descargar</a>
+                            <button type="button" onclick="descargarFichaPartida(${i}, -1)" title="Descargar como PDA ${esc(pdaActual)}." class="ml-1 text-xs text-[#0E859F] px-2 py-0.5 rounded font-bold hover:bg-[#0E859F]/10 inline-block transition">⬇️ Descargar (PDA ${esc(pdaActual)}.)</button>
                         ` : ''}
+                        ${htmlIncluye}
                     </div>
                     <div class="flex flex-col items-end shrink-0 ml-2">
                         <span class="font-bold text-[#0B192C]">$${p.total.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
@@ -2378,170 +2703,252 @@
             return `${textMar}.`;
         }
 
-        window.generarDocumentoWord = async function() {
-            try {
-                if (typeof PizZip === 'undefined') return alert("⚠ No se cargó la librería Word. Refresca la página.");
-                
-                document.getElementById('loading-screen').classList.remove('hidden');
-                await window.guardarEstadoCotizaciones();
-                
-                const cot = cotizaciones[cotIndexActiva];
-                const d = cot.datos;
+        // --- MOTOR CENTRAL DE CONSTRUCCIÓN DEL DOCUMENTO (COMPARTIDO POR DOCX Y PDF) ---
+        async function construirBlobCotizacion() {
+            if (typeof PizZip === 'undefined') {
+                alert("⚠ No se cargó la librería Word. Refresca la página.");
+                return null;
+            }
+            await window.guardarEstadoCotizaciones();
 
-                if (!d.vendedorId) { document.getElementById('loading-screen').classList.add('hidden'); return alert('⚠️ Selecciona un Vendedor en la Configuración Inicial.'); }
-                const vend = vendedores.find(v => v.id.toString() === d.vendedorId.toString());
-                if (!vend) { document.getElementById('loading-screen').classList.add('hidden'); return alert('⚠️ Vendedor inválido.'); }
-                
-                ordenarPartidasConsecutivas(cot.partidas);
+            const cot = cotizaciones[cotIndexActiva];
+            const d = cot.datos;
 
-                let totalSuma = cot.partidas.reduce((acc, curr) => acc + curr.total, 0);
-                const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-                const hoy = new Date();
-                const fechaString = `Coatzacoalcos, Ver. a ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
-                
-                const folioFinal = `NO-${(d.folioMid||'XXX').toUpperCase()}-${ANIO}${d.folioEnd ? '-' + d.folioEnd.toUpperCase() : ''}`;
-                const monedaDocName = d.moneda === 'MXN' ? 'PESOS' : 'DÓLARES';
-                const nombreArchivo = `${folioFinal} - ${monedaDocName}.docx`;
-                const textoMonedaFormato = d.moneda === 'MXN' ? 'PESOS MEXICANOS (MXN)' : 'DÓLARES (USD)';
+            if (!d.vendedorId) {
+                alert('⚠️ Selecciona un Vendedor en la Configuración Inicial.');
+                return null;
+            }
+            const vend = vendedores.find(v => v.id.toString() === d.vendedorId.toString());
+            if (!vend) {
+                alert('⚠️ Vendedor inválido.');
+                return null;
+            }
 
-                const content = base64ToUint8Array(vend.template);
-                const zip = new PizZip(content);
-                const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+            ordenarPartidasConsecutivas(cot.partidas);
 
-                doc.render({
-                    FECHA: fechaString, FOLIO: folioFinal, CLIENTE: d.cliente || '', REFERENCIA: d.referencia || '',
-                    LUGAR_ENTREGA: d.lugar || '', MONEDA: textoMonedaFormato, DATOS_CONTACTO: d.contacto || '',
-                    CONDICIONES_PAGO: d.pago || '', VIGENCIA: d.vigencia || '', PLAZO_ENTREGA: d.plazo || '',
-                    NOTAS: d.notas || '',
-                    MONTO_NUMERO: "$" + totalSuma.toLocaleString('en-US', {minimumFractionDigits: 2}),
-                    MONTO_LETRA: NumeroALetras(totalSuma, d.moneda),
-                    partidas: cot.partidas.map((p, i) => {
-                        
-                        let strModMarca = "";
-                        const modMarcaBase = formatearModeloMarca(p.modelo, p.marca);
-                        if (modMarcaBase) strModMarca = " " + modMarcaBase;
-                        strModMarca += "\t";
+            let totalSuma = cot.partidas.reduce((acc, curr) => acc + curr.total, 0);
+            const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+            const hoy = new Date();
+            const fechaString = `Coatzacoalcos, Ver. a ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+            
+            const folioFinal = `NO-${(d.folioMid||'XXX').toUpperCase()}-${ANIO}${d.folioEnd ? '-' + d.folioEnd.toUpperCase() : ''}`;
+            const monedaDocName = d.moneda === 'MXN' ? 'PESOS' : 'DÓLARES';
+            const nombreBase = `${folioFinal} - ${monedaDocName}`;
+            const textoMonedaFormato = d.moneda === 'MXN' ? 'PESOS MEXICANOS (MXN)' : 'DÓLARES (USD)';
 
-                        let notaArribaFinal = "";
-                        let descCortaFinal = "";
+            const content = base64ToUint8Array(vend.template);
+            const zip = new PizZip(content);
+            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
-                        if (p.notaArriba) {
-                            notaArribaFinal = "\n" + p.notaArriba.toUpperCase() + "\t\n";
-                            descCortaFinal = p.descCorta ? p.descCorta.toUpperCase() + " " : "";
-                        } else {
-                            notaArribaFinal = "";
-                            descCortaFinal = p.descCorta ? "\n" + p.descCorta.toUpperCase() + " " : "\n";
-                        }
+            doc.render({
+                FECHA: fechaString, FOLIO: folioFinal, CLIENTE: d.cliente || '', REFERENCIA: d.referencia || '',
+                LUGAR_ENTREGA: d.lugar || '', MONEDA: textoMonedaFormato, DATOS_CONTACTO: d.contacto || '',
+                CONDICIONES_PAGO: d.pago || '', VIGENCIA: d.vigencia || '', PLAZO_ENTREGA: d.plazo || '',
+                NOTAS: d.notas || '',
+                MONTO_NUMERO: "$" + totalSuma.toLocaleString('en-US', {minimumFractionDigits: 2}),
+                MONTO_LETRA: NumeroALetras(totalSuma, d.moneda),
+                partidas: cot.partidas.map((p, i) => {
+                    
+                    let strModMarca = "";
+                    const modMarcaBase = formatearModeloMarca(p.modelo, p.marca);
+                    if (modMarcaBase) strModMarca = " " + modMarcaBase;
+                    strModMarca += "\t";
 
-                        const tieneExtras = (p.incluyeList && p.incluyeList.length > 0) || (p.notasList && p.notasList.length > 0);
-                        let extras = [];
+                    let notaArribaFinal = "";
+                    let descCortaFinal = "";
 
-                        if (p.incluyeList && p.incluyeList.length > 0) {
+                    if (p.notaArriba) {
+                        notaArribaFinal = "\n" + p.notaArriba.toUpperCase() + "\t\n";
+                        descCortaFinal = p.descCorta ? p.descCorta.toUpperCase() + " " : "";
+                    } else {
+                        notaArribaFinal = "";
+                        descCortaFinal = p.descCorta ? "\n" + p.descCorta.toUpperCase() + " " : "\n";
+                    }
+
+                    const tieneExtras = (p.incluyeList && p.incluyeList.length > 0) || (p.notasList && p.notasList.length > 0);
+                    let extras = [];
+
+                    if (p.incluyeList && p.incluyeList.length > 0) {
+                        extras.push({
+                            EX_NEGRITA: "\nINCLUYE:\t\n\n",
+                            EX_NORMAL: "",
+                            EX_AZUL: "",
+                            EX_ROJO: "",
+                            EX_TE: ""
+                        });
+
+                        p.incluyeList.forEach(inc => {
+                            const pref = inc.prefijo ? inc.prefijo.trim() + " " : "• ";
+                            const dAzul = inc.descCorta ? inc.descCorta.toUpperCase().trim() + " " : "";
+                            const dNorm = inc.descNormal ? inc.descNormal.trim() + " " : "";
+                            let dRojo = formatearModeloMarca(inc.modelo, inc.marca);
+                            if (dRojo && inc.tiempo) dRojo += " ";
+                            const dTe = inc.tiempo ? inc.tiempo.toUpperCase().trim() + "\t\n" : "\t\n";
+
                             extras.push({
-                                EX_NEGRITA: "\nINCLUYE:\t\n\n",
+                                EX_NEGRITA: pref,
                                 EX_NORMAL: "",
-                                EX_AZUL: "",
+                                EX_AZUL: dAzul,
                                 EX_ROJO: "",
                                 EX_TE: ""
                             });
 
-                            p.incluyeList.forEach(inc => {
-                                const pref = inc.prefijo ? inc.prefijo.trim() + " " : "• ";
-                                const dAzul = inc.descCorta ? inc.descCorta.toUpperCase().trim() + " " : "";
-                                const dNorm = inc.descNormal ? inc.descNormal.trim() + " " : "";
-                                let dRojo = formatearModeloMarca(inc.modelo, inc.marca);
-                                if (dRojo && inc.tiempo) dRojo += " ";
-                                const dTe = inc.tiempo ? inc.tiempo.toUpperCase().trim() + "\t\n" : "\t\n";
+                            extras.push({
+                                EX_NEGRITA: "",
+                                EX_NORMAL: dNorm,
+                                EX_AZUL: "",
+                                EX_ROJO: dRojo,
+                                EX_TE: dTe
+                            });
+                        });
+                    }
 
+                    if (p.notasList && p.notasList.length > 0) {
+                        p.notasList.forEach((n, idx) => {
+                            if (n.tipo === 'nota') {
+                                const tit = n.titulo ? n.titulo.toUpperCase().trim() + " " : "NOTA: ";
                                 extras.push({
-                                    EX_NEGRITA: pref,
-                                    EX_NORMAL: "",
-                                    EX_AZUL: dAzul,
+                                    EX_NEGRITA: "\n" + tit,
+                                    EX_NORMAL: (n.texto || "").trim() + "\t\n",
+                                    EX_AZUL: "",
                                     EX_ROJO: "",
                                     EX_TE: ""
                                 });
+                            } else {
+                                const prevIsNota = idx > 0 && p.notasList[idx - 1].tipo === 'nota';
+                                const prefVineta = prevIsNota ? "\n•" : "•";
+                                const vAzul = (n.azul || "").toUpperCase().trim() + (n.rojo ? " " : "");
+                                const vRojo = (n.rojo || "").toUpperCase().trim();
 
                                 extras.push({
-                                    EX_NEGRITA: "",
-                                    EX_NORMAL: dNorm,
-                                    EX_AZUL: "",
-                                    EX_ROJO: dRojo,
-                                    EX_TE: dTe
-                                });
-                            });
-                        }
-
-                        if (p.notasList && p.notasList.length > 0) {
-                            p.notasList.forEach((n, idx) => {
-                                if (n.tipo === 'nota') {
-                                    const tit = n.titulo ? n.titulo.toUpperCase().trim() + " " : "NOTA: ";
-                                    extras.push({
-                                        EX_NEGRITA: "\n" + tit,
-                                        EX_NORMAL: (n.texto || "").trim() + "\t\n",
-                                        EX_AZUL: "",
-                                        EX_ROJO: "",
-                                        EX_TE: ""
-                                    });
-                                } else {
-                                    const prevIsNota = idx > 0 && p.notasList[idx - 1].tipo === 'nota';
-                                    const prefVineta = prevIsNota ? "\n•" : "•";
-                                    const vAzul = (n.azul || "").toUpperCase().trim() + (n.rojo ? " " : "");
-                                    const vRojo = (n.rojo || "").toUpperCase().trim();
-
-                                    extras.push({
-                                        EX_NEGRITA: prefVineta,
-                                        EX_NORMAL: "",
-                                        EX_AZUL: vAzul,
-                                        EX_ROJO: vRojo,
-                                        EX_TE: "\t\n"
-                                    });
-                                }
-                            });
-                        }
-
-                        let tiempoPrincipalTag = "";
-                        if (tieneExtras) {
-                            tiempoPrincipalTag = "\n";
-                            if (p.tiempo) {
-                                extras.push({
-                                    EX_NEGRITA: "",
+                                    EX_NEGRITA: prefVineta,
                                     EX_NORMAL: "",
-                                    EX_AZUL: "",
-                                    EX_ROJO: "",
-                                    EX_TE: "\n" + p.tiempo.toUpperCase().trim() + "\t\n"
+                                    EX_AZUL: vAzul,
+                                    EX_ROJO: vRojo,
+                                    EX_TE: "\t\n"
                                 });
                             }
-                        } else {
-                            tiempoPrincipalTag = p.tiempo ? "\n\n" + p.tiempo + "\t\n" : "\n";
-                        }
+                        });
+                    }
 
-                        return {
-                            PDA: p.pda || (i+1),
-                            NOTA_ARRIBA: notaArribaFinal,
-                            DESC_CORTA: descCortaFinal,
-                            DESCRIPCION: p.descripcion || "", 
-                            MODELO_MARCA: strModMarca,
-                            TIEMPO_ENTREGA: tiempoPrincipalTag,
-                            extras: extras,
-                            UM: p.um || "", 
-                            CANTIDAD: p.cantidad || "",
-                            PRECIO: "$" + (p.precio || 0).toLocaleString('en-US', {minimumFractionDigits: 2}),
-                            TOTAL: "$" + (p.total || 0).toLocaleString('en-US', {minimumFractionDigits: 2})
+                    let tiempoPrincipalTag = "";
+                    if (tieneExtras) {
+                        tiempoPrincipalTag = "\n";
+                        if (p.tiempo) {
+                            extras.push({
+                                EX_NEGRITA: "",
+                                EX_NORMAL: "",
+                                EX_AZUL: "",
+                                EX_ROJO: "",
+                                EX_TE: "\n" + p.tiempo.toUpperCase().trim() + "\t\n"
+                            });
                         }
-                    })
-                });
+                    } else {
+                        tiempoPrincipalTag = p.tiempo ? "\n\n" + p.tiempo + "\t\n" : "\n";
+                    }
 
-                const out = doc.getZip().generate({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-                const url = window.URL.createObjectURL(out);
+                    return {
+                        PDA: p.pda || (i+1),
+                        NOTA_ARRIBA: notaArribaFinal,
+                        DESC_CORTA: descCortaFinal,
+                        DESCRIPCION: p.descripcion || "", 
+                        MODELO_MARCA: strModMarca,
+                        TIEMPO_ENTREGA: tiempoPrincipalTag,
+                        extras: extras,
+                        UM: p.um || "", 
+                        CANTIDAD: p.cantidad || "",
+                        PRECIO: "$" + (p.precio || 0).toLocaleString('en-US', {minimumFractionDigits: 2}),
+                        TOTAL: "$" + (p.total || 0).toLocaleString('en-US', {minimumFractionDigits: 2})
+                    }
+                })
+            });
+
+            const outBlob = doc.getZip().generate({
+                type: "blob",
+                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            });
+
+            return { blob: outBlob, nombreBase };
+        }
+
+        // --- DESCARGAR EN WORD (.DOCX) ---
+        window.generarDocumentoWord = async function() {
+            try {
+                document.getElementById('loading-text').innerText = 'Generando archivo Word (.docx)...';
+                document.getElementById('loading-screen').classList.remove('hidden');
+
+                const res = await construirBlobCotizacion();
+                if (!res) {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                    return;
+                }
+
+                const url = window.URL.createObjectURL(res.blob);
                 const a = document.createElement("a");
-                a.href = url; a.download = nombreArchivo;
-                document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(url);
-                
-                document.getElementById('loading-screen').classList.add('hidden');
+                a.href = url;
+                a.download = `${res.nombreBase}.docx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
             } catch (error) {
                 console.error(error);
-                document.getElementById('loading-screen').classList.add('hidden');
                 alert("❌ Ocurrió un error al procesar el Word. Asegúrate de tener las etiquetas correctas en el archivo de Word.");
+            } finally {
+                document.getElementById('loading-text').innerText = 'Sincronizando con AlphaZero...';
+                document.getElementById('loading-screen').classList.add('hidden');
+            }
+        };
+
+        // --- DESCARGAR EN PDF (.PDF) A PARTIR DE LA PLANTILLA WORD ---
+        window.generarDocumentoPDF = async function() {
+            try {
+                if (typeof window.docx === 'undefined' || typeof window.html2pdf === 'undefined') {
+                    return alert("⚠ Las librerías de conversión a PDF aún están cargando. Intenta de nuevo en unos segundos.");
+                }
+
+                document.getElementById('loading-text').innerText = 'Generando documento PDF...';
+                document.getElementById('loading-screen').classList.remove('hidden');
+
+                const res = await construirBlobCotizacion();
+                if (!res) {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                    return;
+                }
+
+                const container = document.getElementById('pdf-render-container');
+                container.innerHTML = '';
+
+                await window.docx.renderAsync(res.blob, container, null, {
+                    className: "docx",
+                    inWrapper: true,
+                    ignoreWidth: false,
+                    ignoreHeight: false,
+                    ignoreFonts: false,
+                    breakPages: true,
+                    useBase64URL: true
+                });
+
+                await new Promise(r => setTimeout(r, 350));
+
+                const targetEl = container.querySelector('.docx-wrapper') || container;
+                const opt = {
+                    margin: 0,
+                    filename: `${res.nombreBase}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false, letterRendering: true },
+                    jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' },
+                    pagebreak: { mode: ['css', 'legacy'] }
+                };
+
+                await window.html2pdf().set(opt).from(targetEl).save();
+                container.innerHTML = '';
+            } catch (error) {
+                console.error(error);
+                alert("❌ Ocurrió un error al generar el PDF: " + (error.message || error));
+            } finally {
+                document.getElementById('loading-text').innerText = 'Sincronizando con AlphaZero...';
+                document.getElementById('loading-screen').classList.add('hidden');
             }
         };
     
@@ -2567,7 +2974,8 @@
         window.seleccionarIncluyePorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipoIncluye(c); };
         ['guardarEquipo','eliminarEquipo','eliminarVendedor','eliminarUsuario','nuevaCotizacion','duplicarCotizacion',
          'eliminarCotizacionActual','cambiarCotizacionTab','cambiarVersionCotizacion','crearNuevaRevision','eliminarVersionActual','manejarCambioCampoRev',
-         'cambiarMonedaCotizacion','copiarPartidasOtraMoneda','agregarPartida','eliminarPartida'].forEach(n => {
+         'cambiarMonedaCotizacion','copiarPartidasOtraMoneda','agregarPartida','eliminarPartida','generarDocumentoWord','generarDocumentoPDF',
+         'descargarFichaConNombre','descargarTodasLasFichas'].forEach(n => {
             const f = window[n];
             window[n] = async (...a) => {
                 try { return await f(...a); }
