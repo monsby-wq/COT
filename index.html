@@ -194,7 +194,7 @@
             page-break-after: always;
         }
     </style>
-    <!-- Librerías de Word y conversión a PDF / ZIP -->
+    <!-- Librerías de Word y conversión a PDF -->
     <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.4/dist/pizzip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.37.11/build/docxtemplater.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -279,7 +279,7 @@
     <div id="loading-screen" class="fixed inset-0 flex flex-col items-center justify-center hidden">
         <img id="loading-custom-img" class="w-24 h-24 object-contain mb-4 animate-pulse hidden" alt="AlphaZero">
         <svg id="loading-default-svg" class="w-20 h-20 animate-spin mb-4" style="animation-duration: 6s;"><use href="#alphazero-emblem"></use></svg>
-        <div id="loading-text" class="text-white text-xl font-bold tracking-wider animate-pulse text-center px-4">Sincronizando con AlphaZero...</div>
+        <div id="loading-text" class="text-white text-xl font-bold tracking-wider animate-pulse">Sincronizando con AlphaZero...</div>
     </div>
 
     <!-- PANTALLA DE INICIO DE SESIÓN SIN BORDES CON MARCA DE AGUA TENUE -->
@@ -612,18 +612,7 @@
                             <button id="btn-cancelar-edicion" onclick="cancelarEdicionPartida()" class="text-gray-700 font-bold px-3 py-2.5 rounded-lg transition text-sm hidden">Cancelar</button>
                         </div>
 
-                        <div class="flex flex-wrap justify-between items-center mt-5 mb-2 gap-1">
-                            <h4 class="font-bold text-[#0B192C]">Partidas Agregadas</h4>
-                            <!-- Botones de descarga masiva de Fichas Técnicas con prefijo PDA X. -->
-                            <div class="flex flex-wrap gap-1.5">
-                                <button type="button" onclick="descargarTodasLasFichas('sueltas')" title="Descargar todos los PDFs sueltos renombrados con PDA 1., PDA 2..." class="bg-[#0B192C]/10 hover:bg-[#0E859F] text-[#0B192C] hover:text-white px-2.5 py-1 rounded-lg text-[11px] font-bold transition">
-                                    📥 Fichas Sueltas (PDA 1, 2...)
-                                </button>
-                                <button type="button" onclick="descargarTodasLasFichas('zip')" title="Descargar un archivo .ZIP con todas las fichas técnicas renombradas con PDA 1., PDA 2..." class="bg-[#0E859F]/15 hover:bg-[#0E859F] text-[#0E859F] hover:text-white px-2.5 py-1 rounded-lg text-[11px] font-bold transition">
-                                    🗜️ Fichas en .ZIP (PDA 1, 2...)
-                                </button>
-                            </div>
-                        </div>
+                        <h4 class="font-bold mt-5 mb-2 text-[#0B192C]">Partidas Agregadas</h4>
                         <div id="lista-partidas" class="text-sm p-1 rounded-lg h-44 overflow-y-auto"></div>
                         <div class="text-right font-extrabold text-lg mt-2 text-[#0B192C]" id="cot-total-label">Total: $0.00</div>
                         
@@ -1493,231 +1482,6 @@
             return encontrado ? encontrado.pdf : '';
         }
 
-        // --- SISTEMA DE DESCARGA DE FICHAS TÉCNICAS RENOMBRADAS CON "PDA X." ---
-        function generarNombreArchivoFicha(pda, modelo, descCorta) {
-            const pdaLimpia = String(pda || '1').trim().toUpperCase();
-            const modLimpio = String(modelo || '').trim().toUpperCase().replace(/^(MODELO:|NP:|N\/P:|MOD:)\s*/i, '');
-            const descLimpia = String(descCorta || '').trim().toUpperCase().replace(/[,.;:]+$/, '');
-
-            let cuerpo = '';
-            if (modLimpio && descLimpia) cuerpo = `${modLimpio} - ${descLimpia}`;
-            else if (modLimpio) cuerpo = modLimpio;
-            else if (descLimpia) cuerpo = descLimpia;
-            else cuerpo = 'FICHA TECNICA';
-
-            // Limpia caracteres no permitidos en nombres de archivos de Windows
-            const nombreSeguro = `PDA ${pdaLimpia}. ${cuerpo}`
-                .replace(/[/\\?%*:|"<>]/g, '-')
-                .replace(/\s+/g, ' ')
-                .trim()
-                .substring(0, 110);
-
-            return `${nombreSeguro}.pdf`;
-        }
-
-        async function obtenerBlobFicha(url) {
-            const urlDescarga = obtenerEnlaceDescarga(url);
-            const matchDrive = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-            const driveId = matchDrive ? matchDrive[1] : null;
-
-            const candidatos = [];
-            if (driveId) {
-                const driveDirect1 = `https://drive.usercontent.google.com/download?id=${driveId}&export=download&confirm=t`;
-                const driveDirect2 = `https://drive.google.com/uc?export=download&id=${driveId}`;
-                candidatos.push(`https://corsproxy.io/?${encodeURIComponent(driveDirect1)}`);
-                candidatos.push(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(driveDirect2)}`);
-                candidatos.push(`https://api.allorigins.win/raw?url=${encodeURIComponent(driveDirect2)}`);
-            } else {
-                candidatos.push(urlDescarga);
-                candidatos.push(`https://corsproxy.io/?${encodeURIComponent(urlDescarga)}`);
-                candidatos.push(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(urlDescarga)}`);
-            }
-
-            for (const intentoUrl of candidatos) {
-                try {
-                    const resp = await fetch(intentoUrl);
-                    if (!resp.ok) continue;
-                    const buffer = await resp.arrayBuffer();
-                    if (buffer.byteLength < 200) continue;
-
-                    const bytes = new Uint8Array(buffer.slice(0, 5));
-                    const header = String.fromCharCode(...bytes);
-                    if (header.startsWith('%PDF')) {
-                        return new Blob([buffer], { type: 'application/pdf' });
-                    }
-                    const contentType = (resp.headers.get('content-type') || '').toLowerCase();
-                    if (!contentType.includes('text/html') && buffer.byteLength > 1000) {
-                        return new Blob([buffer], { type: contentType || 'application/pdf' });
-                    }
-                } catch (e) {}
-            }
-            return null;
-        }
-
-        function dispararDescargaBlob(blob, nombreArchivo) {
-            const blobUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = nombreArchivo;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(() => window.URL.revokeObjectURL(blobUrl), 2000);
-        }
-
-        window.descargarFichaConNombre = async function(url, pda, modelo, descCorta) {
-            if (!url) return;
-            const nombreArchivo = generarNombreArchivoFicha(pda, modelo, descCorta);
-
-            document.getElementById('loading-text').innerText = `Descargando: ${nombreArchivo}...`;
-            document.getElementById('loading-screen').classList.remove('hidden');
-
-            try {
-                const blob = await obtenerBlobFicha(url);
-                if (blob) {
-                    dispararDescargaBlob(blob, nombreArchivo);
-                } else {
-                    // Respaldo si el archivo en Drive es privado y requiere sesión de Google
-                    try { await navigator.clipboard.writeText(nombreArchivo.replace(/\.pdf$/i, '')); } catch (e) {}
-                    const a = document.createElement('a');
-                    a.href = obtenerEnlaceDescarga(url);
-                    a.target = '_blank';
-                    a.download = nombreArchivo;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                }
-            } finally {
-                document.getElementById('loading-text').innerText = 'Sincronizando con AlphaZero...';
-                document.getElementById('loading-screen').classList.add('hidden');
-            }
-        };
-
-        window.descargarFichaPartida = function(pIdx, incIdx = -1) {
-            const cot = cotizaciones[cotIndexActiva];
-            if (!cot || !cot.partidas || !cot.partidas[pIdx]) return;
-            const p = cot.partidas[pIdx];
-            const pdaActual = p.pda || (pIdx + 1);
-
-            if (incIdx === -1) {
-                window.descargarFichaConNombre(p.pdf, pdaActual, p.modelo, p.descCorta);
-            } else if (p.incluyeList && p.incluyeList[incIdx]) {
-                const inc = p.incluyeList[incIdx];
-                const pdfInc = obtenerPdfIncluye(inc);
-                window.descargarFichaConNombre(pdfInc, pdaActual, inc.modelo, inc.descCorta || inc.descNormal);
-            }
-        };
-
-        window.descargarFichaTempIncluye = function(incIdx) {
-            const inc = tempIncluye[incIdx];
-            if (!inc) return;
-            const pdfInc = obtenerPdfIncluye(inc);
-            const cot = cotizaciones[cotIndexActiva];
-            const pdaForm = document.getElementById('part-pda').value.trim() || obtenerSiguientePdaDisponible(cot?.partidas || []);
-            window.descargarFichaConNombre(pdfInc, pdaForm, inc.modelo, inc.descCorta || inc.descNormal);
-        };
-
-        // --- DESCARGA MASIVA DE TODAS LAS FICHAS TÉCNICAS DE LA COTIZACIÓN (CON PREFIJO PDA X.) ---
-        window.descargarTodasLasFichas = async function(modo = 'sueltas') {
-            const cot = cotizaciones[cotIndexActiva];
-            if (!cot || !Array.isArray(cot.partidas) || cot.partidas.length === 0) {
-                return alert('⚠️ No hay partidas agregadas en esta cotización.');
-            }
-
-            const colaFichas = [];
-            const nombresUsados = new Map();
-
-            function asegurarNombreUnico(nombreBase) {
-                if (!nombresUsados.has(nombreBase)) {
-                    nombresUsados.set(nombreBase, 1);
-                    return nombreBase;
-                }
-                const cuenta = nombresUsados.get(nombreBase) + 1;
-                nombresUsados.set(nombreBase, cuenta);
-                return nombreBase.replace(/\.pdf$/i, ` (${cuenta}).pdf`);
-            }
-
-            cot.partidas.forEach((p, i) => {
-                const pdaActual = p.pda || (i + 1);
-                if (p.pdf) {
-                    const nom = asegurarNombreUnico(generarNombreArchivoFicha(pdaActual, p.modelo, p.descCorta));
-                    colaFichas.push({ url: p.pdf, nombreArchivo: nom, pda: pdaActual });
-                }
-                if (Array.isArray(p.incluyeList)) {
-                    p.incluyeList.forEach(inc => {
-                        const pdfInc = obtenerPdfIncluye(inc);
-                        if (pdfInc) {
-                            const nomInc = asegurarNombreUnico(generarNombreArchivoFicha(pdaActual, inc.modelo, inc.descCorta || inc.descNormal));
-                            colaFichas.push({ url: pdfInc, nombreArchivo: nomInc, pda: pdaActual });
-                        }
-                    });
-                }
-            });
-
-            if (colaFichas.length === 0) {
-                return alert('⚠️ Ninguna de las partidas o artículos incluidos en esta cotización tiene enlace de Ficha Técnica.');
-            }
-
-            document.getElementById('loading-screen').classList.remove('hidden');
-
-            try {
-                if (modo === 'zip') {
-                    if (typeof JSZip === 'undefined') {
-                        return alert('⚠️ La librería ZIP aún está cargando. Intenta de nuevo.');
-                    }
-                    const zip = new JSZip();
-                    let agregadas = 0;
-                    const fallidas = [];
-
-                    for (let idx = 0; idx < colaFichas.length; idx++) {
-                        const item = colaFichas[idx];
-                        document.getElementById('loading-text').innerText = `Empaquetando ficha (${idx + 1}/${colaFichas.length}):\n${item.nombreArchivo}`;
-                        const blob = await obtenerBlobFicha(item.url);
-                        if (blob) {
-                            zip.file(item.nombreArchivo, blob);
-                            agregadas++;
-                        } else {
-                            fallidas.push(item);
-                        }
-                    }
-
-                    if (agregadas > 0) {
-                        document.getElementById('loading-text').innerText = 'Generando archivo .ZIP...';
-                        const d = cot.datos || {};
-                        const folioFinal = `NO-${(d.folioMid || 'XXX').toUpperCase()}-${ANIO}${d.folioEnd ? '-' + d.folioEnd.toUpperCase() : ''}`;
-                        const zipBlob = await zip.generateAsync({ type: 'blob' });
-                        dispararDescargaBlob(zipBlob, `FICHAS TECNICAS - ${folioFinal}.zip`);
-                    }
-
-                    if (fallidas.length > 0) {
-                        alert(`⚠️ Se empaquetaron ${agregadas} ficha(s). ${fallidas.length} enlace(s) de Drive requieren permisos públicos ("Cualquier persona con el enlace") para descargarse automáticamente.`);
-                    }
-                } else {
-                    // Modo sueltas: descarga cada PDF directamente con su nombre "PDA X. ..."
-                    for (let idx = 0; idx < colaFichas.length; idx++) {
-                        const item = colaFichas[idx];
-                        document.getElementById('loading-text').innerText = `Descargando ficha (${idx + 1}/${colaFichas.length}):\n${item.nombreArchivo}`;
-                        const blob = await obtenerBlobFicha(item.url);
-                        if (blob) {
-                            dispararDescargaBlob(blob, item.nombreArchivo);
-                        } else {
-                            const a = document.createElement('a');
-                            a.href = obtenerEnlaceDescarga(item.url);
-                            a.target = '_blank';
-                            a.download = item.nombreArchivo;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                        }
-                        await new Promise(r => setTimeout(r, 450));
-                    }
-                }
-            } finally {
-                document.getElementById('loading-text').innerText = 'Sincronizando con AlphaZero...';
-                document.getElementById('loading-screen').classList.add('hidden');
-            }
-        };
-
         window.buscarEquipoParaIncluye = function() {
             const f = document.getElementById('buscador-incluye').value.toLowerCase();
             const ul = document.getElementById('resultados-busqueda-incluye');
@@ -1843,7 +1607,7 @@
                         <b>${esc(inc.tiempo)}</b>
                         ${pdfInc ? `
                             <a href="${esc(pdfInc)}" target="_blank" class="ml-1 text-[10px] text-[#ED813C] font-bold hover:underline">📄 Ver</a>
-                            <button type="button" onclick="descargarFichaTempIncluye(${i})" class="ml-1 text-[10px] text-[#0E859F] font-bold hover:underline">⬇️ Descargar</button>
+                            <a href="${esc(obtenerEnlaceDescarga(pdfInc))}" target="_blank" download class="ml-1 text-[10px] text-[#0E859F] font-bold hover:underline">⬇️ Descargar</a>
                         ` : ''}
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
@@ -2600,7 +2364,7 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        // --- RENDERIZADO DE PARTIDAS AGREGADAS CON DESCARGA RENOMBRADA "PDA X." EN PRINCIPAL E "INCLUYE" ---
+        // --- RENDERIZADO DE PARTIDAS AGREGADAS CON FICHAS TÉCNICAS TAMBIÉN EN "INCLUYE" ---
         window.renderPartidas = function() {
             const cot = cotizaciones[cotIndexActiva];
             const lista = document.getElementById('lista-partidas');
@@ -2619,14 +2383,13 @@
 
             lista.innerHTML = cot.partidas.map((p, i) => {
                 granTotal += p.total;
-                const pdaActual = p.pda || (i + 1);
                 const numInc = p.incluyeList ? p.incluyeList.length : 0;
                 const numNot = p.notasList ? p.notasList.length : 0;
 
                 const htmlIncluye = numInc > 0 ? `
                     <div class="mt-1.5 pl-3 space-y-1">
                         <span class="text-[10px] font-extrabold text-[#0B192C] tracking-wider block">INCLUYE:</span>
-                        ${p.incluyeList.map((inc, incIdx) => {
+                        ${p.incluyeList.map(inc => {
                             const pdfInc = obtenerPdfIncluye(inc);
                             return `
                             <div class="text-[11px] flex flex-wrap items-center gap-1 leading-tight">
@@ -2635,7 +2398,7 @@
                                 ${inc.modelo ? `<span class="font-bold text-red-600">${esc(inc.modelo)}</span>` : ''}
                                 ${pdfInc ? `
                                     <a href="${esc(pdfInc)}" target="_blank" class="ml-1 text-[10px] text-[#ED813C] px-1.5 py-0.5 rounded font-bold hover:bg-[#ED813C]/10 inline-block transition">📄 Ver Ficha</a>
-                                    <button type="button" onclick="descargarFichaPartida(${i}, ${incIdx})" title="Descargar como PDA ${esc(pdaActual)}." class="text-[10px] text-[#0E859F] px-1.5 py-0.5 rounded font-bold hover:bg-[#0E859F]/10 inline-block transition">⬇️ Descargar (PDA ${esc(pdaActual)}.)</button>
+                                    <a href="${esc(obtenerEnlaceDescarga(pdfInc))}" target="_blank" download class="text-[10px] text-[#0E859F] px-1.5 py-0.5 rounded font-bold hover:bg-[#0E859F]/10 inline-block transition">⬇️ Descargar</a>
                                 ` : ''}
                             </div>`;
                         }).join('')}
@@ -2645,7 +2408,7 @@
                 return `
                 <div class="py-2 flex justify-between items-start px-1 rounded bg-transparent">
                     <div class="pr-2">
-                        <span class="font-bold mr-2 bg-[#0B192C] text-white px-2 py-0.5 rounded text-xs">Pda. ${esc(pdaActual)}</span>
+                        <span class="font-bold mr-2 bg-[#0B192C] text-white px-2 py-0.5 rounded text-xs">Pda. ${esc(p.pda || (i+1))}</span>
                         <span class="text-xs text-gray-700 font-bold block mt-0.5">${esc(p.notaArriba)}</span>
                         <span class="text-xs font-bold text-[#0E5DF0]">${esc(p.descCorta)}</span>
                         <span class="text-xs text-red-600 font-bold ml-2">${esc(p.modelo)}</span><br>
@@ -2654,7 +2417,7 @@
                         ${numNot > 0 ? `<span class="ml-1 text-[10px] text-[#CE8550] px-1.5 py-0.5 rounded font-bold">+${numNot} Notas</span>` : ''}
                         ${p.pdf ? `
                             <a href="${esc(p.pdf)}" target="_blank" class="ml-2 text-xs text-[#ED813C] px-2 py-0.5 rounded font-bold hover:bg-[#ED813C]/10 inline-block transition">📄 Ver Ficha</a>
-                            <button type="button" onclick="descargarFichaPartida(${i}, -1)" title="Descargar como PDA ${esc(pdaActual)}." class="ml-1 text-xs text-[#0E859F] px-2 py-0.5 rounded font-bold hover:bg-[#0E859F]/10 inline-block transition">⬇️ Descargar (PDA ${esc(pdaActual)}.)</button>
+                            <a href="${esc(obtenerEnlaceDescarga(p.pdf))}" target="_blank" download class="ml-1 text-xs text-[#0E859F] px-2 py-0.5 rounded font-bold hover:bg-[#0E859F]/10 inline-block transition">⬇️ Descargar</a>
                         ` : ''}
                         ${htmlIncluye}
                     </div>
@@ -2919,6 +2682,7 @@
                 const container = document.getElementById('pdf-render-container');
                 container.innerHTML = '';
 
+                // Renderiza el .docx con fidelidad completa (encabezados, tablas, firmas, colores)
                 await window.docx.renderAsync(res.blob, container, null, {
                     className: "docx",
                     inWrapper: true,
@@ -2929,6 +2693,7 @@
                     useBase64URL: true
                 });
 
+                // Espera breve para asegurar que las imágenes y firmas del formato estén listas
                 await new Promise(r => setTimeout(r, 350));
 
                 const targetEl = container.querySelector('.docx-wrapper') || container;
@@ -2974,8 +2739,7 @@
         window.seleccionarIncluyePorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipoIncluye(c); };
         ['guardarEquipo','eliminarEquipo','eliminarVendedor','eliminarUsuario','nuevaCotizacion','duplicarCotizacion',
          'eliminarCotizacionActual','cambiarCotizacionTab','cambiarVersionCotizacion','crearNuevaRevision','eliminarVersionActual','manejarCambioCampoRev',
-         'cambiarMonedaCotizacion','copiarPartidasOtraMoneda','agregarPartida','eliminarPartida','generarDocumentoWord','generarDocumentoPDF',
-         'descargarFichaConNombre','descargarTodasLasFichas'].forEach(n => {
+         'cambiarMonedaCotizacion','copiarPartidasOtraMoneda','agregarPartida','eliminarPartida','generarDocumentoWord','generarDocumentoPDF'].forEach(n => {
             const f = window[n];
             window[n] = async (...a) => {
                 try { return await f(...a); }
