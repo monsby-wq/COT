@@ -401,10 +401,10 @@
 
             <!-- SECCIÓN: VENDEDORES -->
             <div id="sec-vendedores" class="hidden relative z-10">
-                <h3 class="text-2xl font-extrabold pb-2 mb-4 text-[#0B192C]">Administrar Vendedores (Formatos Word)</h3>
+                <h3 class="text-2xl font-extrabold pb-2 mb-4 text-[#0B192C]">Administrar Vendedores</h3>
                 <div class="az-card p-6 rounded-xl mb-6">
                     <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor" class="p-2.5 w-full mb-3 rounded-lg">
-                    <label class="block mb-2 text-sm font-bold text-[#0B192C]">Subir formato (.docx):</label>
+                    <label class="block mb-2 text-sm font-bold text-[#0B192C]">Subir formato:</label>
                     <input type="file" id="vend-file" accept=".docx" class="mb-4 block">
                     <button onclick="guardarVendedor()" class="az-gradient-btn text-white px-5 py-2.5 rounded-lg font-bold transition">Guardar Cambios</button>
                 </div>
@@ -421,7 +421,7 @@
                     <input type="text" id="cat-um" placeholder="UNIDAD DE MEDIDA" class="p-2.5 rounded-lg uppercase">
                     <input type="text" id="cat-marca" placeholder="Marca" class="p-2.5 rounded-lg uppercase">
                     <input type="text" id="cat-modelo" placeholder="Modelo" class="p-2.5 rounded-lg uppercase">
-                    <input type="url" id="cat-pdf" placeholder="🔗 Enlace de Ficha Técnica (Drive / Web)" class="p-2.5 rounded-lg !text-[#0E859F]">
+                    <input type="url" id="cat-pdf" placeholder="🔗 Enlace de Ficha Técnica" class="p-2.5 rounded-lg !text-[#0E859F]">
                     <div class="md:col-span-2 flex gap-2 mt-2">
                         <button onclick="guardarEquipo()" class="az-gradient-btn text-white px-5 py-2 rounded-lg font-bold transition">GUARDAR</button>
                         <button onclick="limpiarFormCatalogo()" class="text-gray-700 hover:bg-gray-500/10 px-5 py-2 rounded-lg font-bold transition">LIMPIAR</button>
@@ -517,9 +517,9 @@
                         
                         <!-- Pda. acepta números, letras y caracteres (Ej: 1, 2, M1, M2, A-1) -->
                         <div class="grid grid-cols-4 gap-1.5 mb-2">
-                            <input type="text" id="part-pda" placeholder="Pda. (Ej: 1 o M1)" class="p-2 rounded-lg uppercase text-sm">
-                            <input type="number" id="part-cant" placeholder="Cant." class="p-2 rounded-lg text-sm">
-                            <input type="text" id="part-um" placeholder="U.M." class="p-2 rounded-lg uppercase text-sm">
+                            <input type="text" id="part-pda" placeholder="Partida" class="p-2 rounded-lg uppercase text-sm">
+                            <input type="number" id="part-cant" placeholder="Cantidad" class="p-2 rounded-lg text-sm">
+                            <input type="text" id="part-um" placeholder="Unidad de Medida" class="p-2 rounded-lg uppercase text-sm">
                             <input type="number" id="part-precio" placeholder="Precio" class="p-2 rounded-lg text-sm">
                         </div>
                         
@@ -531,8 +531,8 @@
                             <input type="text" id="part-marca" placeholder="Marca" class="p-2 w-full rounded-lg font-bold !text-red-600 uppercase text-sm">
                         </div>
 
-                        <input type="url" id="part-pdf" placeholder="🔗 Enlace de Ficha Técnica (Automático)" class="p-2 w-full mb-2 rounded-lg !text-[#0E859F] text-xs">
-                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega (Se colocará al final de la partida)" class="p-2 w-full mb-3 rounded-lg font-bold text-sm">
+                        <input type="url" id="part-pdf" placeholder="🔗 Enlace de Ficha Técnica" class="p-2 w-full mb-2 rounded-lg !text-[#0E859F] text-xs">
+                        <input type="text" id="part-tiempo" placeholder="Tiempo de entrega" class="p-2 w-full mb-3 rounded-lg font-bold text-sm">
 
                         <!-- BOTONES DESPLEGABLES PARA INCLUYE Y NOTAS DE PARTIDA -->
                         <div class="grid grid-cols-2 gap-2 mb-3">
@@ -551,20 +551,20 @@
                                 <span class="text-[10px] text-gray-700">Se imprimirá debajo del equipo</span>
                             </div>
                             <div class="mb-2 relative">
-                                <input type="text" id="buscador-incluye" oninput="buscarEquipoParaIncluye()" placeholder="🔍 Buscar accesorio en catálogo (opcional)..." class="p-1.5 w-full rounded text-xs">
+                                <input type="text" id="buscador-incluye" oninput="buscarEquipoParaIncluye()" placeholder="🔍 Buscar en catálogo" class="p-1.5 w-full rounded text-xs">
                                 <ul id="resultados-busqueda-incluye" class="rounded max-h-32 overflow-y-auto hidden absolute z-50 w-full left-0 mt-1"></ul>
                             </div>
                             <div class="grid grid-cols-3 gap-1.5 mb-1.5">
                                 <input type="text" id="inc-prefijo" placeholder="Ej: • o (1 PZA)." value="•" class="p-1.5 rounded text-xs font-bold">
-                                <input type="text" id="inc-desc-corta" placeholder="Descripción Azul (Ej: BASE PARA DETECTOR)" class="p-1.5 rounded text-xs font-bold !text-[#0E5DF0] col-span-2">
+                                <input type="text" id="inc-desc-corta" placeholder="Descripción" class="p-1.5 rounded text-xs font-bold !text-[#0E5DF0] col-span-2">
                             </div>
-                            <input type="text" id="inc-desc-normal" placeholder="Descripción adicional en negro (Opcional)" class="p-1.5 w-full rounded text-xs mb-1.5">
+                            <input type="text" id="inc-desc-normal" placeholder="Descripción adicional" class="p-1.5 w-full rounded text-xs mb-1.5">
                             <div class="grid grid-cols-3 gap-1.5 mb-1.5">
-                                <input type="text" id="inc-modelo" placeholder="Modelo o NP: 123" class="p-1.5 rounded text-xs font-bold !text-red-600 uppercase">
+                                <input type="text" id="inc-modelo" placeholder="Modelo" class="p-1.5 rounded text-xs font-bold !text-red-600 uppercase">
                                 <input type="text" id="inc-marca" placeholder="Marca" class="p-1.5 rounded text-xs font-bold !text-red-600 uppercase">
                                 <input type="text" id="inc-tiempo" placeholder="T.E. (Opcional)" class="p-1.5 rounded text-xs font-bold">
                             </div>
-                            <input type="url" id="inc-pdf" placeholder="🔗 Enlace de Ficha Técnica del accesorio (Automático)" class="p-1.5 w-full rounded text-xs !text-[#0E859F] mb-2">
+                            <input type="url" id="inc-pdf" placeholder="🔗 Enlace de Ficha Técnica" class="p-1.5 w-full rounded text-xs !text-[#0E859F] mb-2">
                             <div class="flex gap-1.5 mb-2">
                                 <button type="button" id="btn-agregar-incluye" onclick="agregarItemIncluye()" class="bg-[#0E859F] hover:bg-[#0b6e84] text-white font-bold py-1 px-3 rounded text-xs w-full transition">
                                     + Añadir a INCLUYE
@@ -579,10 +579,10 @@
                         <!-- PANEL 2: NOTAS DE LA PARTIDA -->
                         <div id="panel-notas-partida" class="hidden p-2 rounded-lg mb-3">
                             <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-[#0B192C]">Agregar Notas o Viñetas a la Partida</span>
+                                <span class="text-xs font-bold text-[#0B192C]">Agregar Notas</span>
                                 <select id="nota-tipo" onchange="cambiarTipoNotaUI()" class="rounded p-1 text-xs font-bold">
-                                    <option value="nota">Nota de Texto (NOTA 1, NOTA 2...)</option>
-                                    <option value="vineta">Viñeta de Opción (• Azul + Rojo)</option>
+                                    <option value="nota">Nota de Texto</option>
+                                    <option value="vineta">Viñeta de Opción</option>
                                 </select>
                             </div>
                             
@@ -595,8 +595,8 @@
 
                             <div id="form-nota-vineta" class="hidden">
                                 <div class="grid grid-cols-2 gap-1.5 mb-1.5">
-                                    <input type="text" id="nota-vineta-azul" placeholder="Texto en Azul (Ej: PLACA DE ORIFICIO...)" class="p-1.5 rounded text-xs font-bold !text-[#0E5DF0]">
-                                    <input type="text" id="nota-vineta-rojo" placeholder="Marca/Mod en Rojo (Ej: MCA CHEMGUARD)" class="p-1.5 rounded text-xs font-bold !text-red-600 uppercase">
+                                    <input type="text" id="nota-vineta-azul" placeholder="Texto" class="p-1.5 rounded text-xs font-bold !text-[#0E5DF0]">
+                                    <input type="text" id="nota-vineta-rojo" placeholder="Marca/Mod" class="p-1.5 rounded text-xs font-bold !text-red-600 uppercase">
                                 </div>
                             </div>
 
@@ -619,10 +619,10 @@
                         <!-- Botones de descarga en Word (.DOCX) y en PDF (.PDF) -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">
                             <button onclick="generarDocumentoWord()" class="az-gradient-btn text-white text-sm font-extrabold tracking-wide px-4 py-3 rounded-lg w-full transition shadow-md">
-                                📘 DESCARGAR WORD (.DOCX)
+                                📘 DESCARGAR COTIZACIÓN EDITABLE
                             </button>
                             <button onclick="generarDocumentoPDF()" class="az-orange-btn text-white text-sm font-extrabold tracking-wide px-4 py-3 rounded-lg w-full transition shadow-md">
-                                📕 DESCARGAR PDF (.PDF)
+                                📕 DESCARGAR COTIZACIÓN PDF
                             </button>
                         </div>
                     </div>
