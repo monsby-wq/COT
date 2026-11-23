@@ -660,7 +660,7 @@
                         </div>
 
                         <input type="hidden" id="cot-empresa" value="US FIRE">
-                        <input type="hidden" id="cot-tipo-propuesta" value="tecnica">
+                        <input type="hidden" id="cot-tipo-propuesta" value="economica">
 
                         <!-- Fila 1: Empresa (US FIRE / USIICSA) + Moneda -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
@@ -1080,7 +1080,7 @@
             return {
                 folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '',
                 lugar: '', pago: '', vigencia: '', plazo: '', notas: '',
-                empresa: 'US FIRE', vendedorId: '', tipoPropuesta: 'tecnica'
+                empresa: 'US FIRE', vendedorId: '', tipoPropuesta: 'economica'
             };
         }
 
@@ -1099,7 +1099,7 @@
                 notas: d.notas || '',
                 empresa: d.empresa || 'US FIRE',
                 vendedorId: vendEspecifico !== undefined ? vendEspecifico : (d.vendedorId || ''),
-                tipoPropuesta: d.tipoPropuesta || 'tecnica'
+                tipoPropuesta: d.tipoPropuesta || 'economica'
             };
         }
 
@@ -1539,7 +1539,7 @@
         }
 
         function pintarBotonesTipoPropuestaCot(tipo) {
-            const t = tipo === 'economica' ? 'economica' : 'tecnica';
+            const t = tipo === 'tecnica' ? 'tecnica' : 'economica';
             document.getElementById('cot-tipo-propuesta').value = t;
             const bTec = document.getElementById('btn-cot-tipo-tecnica');
             const bEco = document.getElementById('btn-cot-tipo-economica');
@@ -1553,7 +1553,7 @@
             const lbl = document.getElementById('lbl-estado-formato-cot');
             if (!lbl) return;
             const emp = document.getElementById('cot-empresa').value || 'US FIRE';
-            const tipo = document.getElementById('cot-tipo-propuesta').value || 'tecnica';
+            const tipo = document.getElementById('cot-tipo-propuesta').value || 'economica';
             const vendVal = document.getElementById('cot-vendedor').value;
 
             if (!vendVal) {
@@ -1625,7 +1625,7 @@
                 notas: document.getElementById('cot-notas').value,
                 empresa: document.getElementById('cot-empresa').value || 'US FIRE',
                 vendedorId: document.getElementById('cot-vendedor').value,
-                tipoPropuesta: document.getElementById('cot-tipo-propuesta').value || 'tecnica'
+                tipoPropuesta: document.getElementById('cot-tipo-propuesta').value || 'economica'
             };
         }
 
@@ -1643,7 +1643,7 @@
             document.getElementById('cot-moneda').value = moneda || 'MXN';
 
             let empresaFinal = d.empresa || 'US FIRE';
-            let tipoFinal = d.tipoPropuesta || 'tecnica';
+            let tipoFinal = d.tipoPropuesta || 'economica';
             let vendKeyFinal = d.vendedorId || '';
 
             // Compatibilidad automática con cotizaciones que tenían un ID de vendedor anterior (ej. "US FIRE - ROXANA - TÉCNICA")
@@ -3260,7 +3260,7 @@
             const cot = cotizaciones[cotIndexActiva];
             const d = cot.datos;
             const empresa = d.empresa || 'US FIRE';
-            const tipoPropuesta = d.tipoPropuesta || 'tecnica';
+            const tipoPropuesta = d.tipoPropuesta || 'economica';
             const tipoTexto = tipoPropuesta === 'economica' ? 'Económica' : 'Técnica';
 
             if (!d.vendedorId) {
@@ -3495,4 +3495,5 @@
     </script>
 </body>
 </html>
+
 
