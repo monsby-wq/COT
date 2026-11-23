@@ -547,7 +547,7 @@
                 <div id="lista-cuentas" class="az-card rounded-xl p-2 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
-            <!-- SECCIÓN: VENDEDORES (CON EMPRESA + DRAG & DROP TÉCNICA / ECONÓMICA) -->
+            <!-- SECCIÓN: VENDEDORES (CON EMPRESA + DRAG & DROP ECONÓMICA / TÉCNICA) -->
             <div id="sec-vendedores" class="hidden relative z-10">
                 <h3 class="text-2xl font-extrabold pb-2 mb-4 text-[#0B192C]">Administrar Vendedores</h3>
                 <div class="az-card p-6 rounded-xl mb-6">
@@ -570,24 +570,8 @@
 
                     <label class="block mb-2 text-xs font-bold uppercase tracking-wider text-gray-700">Formatos Word (.docx) — Arrastra y suelta cada archivo:</label>
 
-                    <!-- Zonas Drag & Drop independientes -->
+                    <!-- Zonas Drag & Drop independientes (Económica primero, Técnica después) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-                        <!-- Dropzone Técnica -->
-                        <div>
-                            <input type="file" id="vend-file-tecnica" accept=".docx" class="hidden" onchange="manejarArchivoInput(event, 'tecnica')">
-                            <div id="drop-tecnica"
-                                 class="az-dropzone"
-                                 onclick="document.getElementById('vend-file-tecnica').click()"
-                                 ondragover="manejarDragOver(event, 'tecnica')"
-                                 ondragleave="manejarDragLeave(event, 'tecnica')"
-                                 ondrop="manejarArchivoDrop(event, 'tecnica')">
-                                <div class="text-2xl mb-1">📋</div>
-                                <div class="font-extrabold text-sm text-[#0B192C]">Propuesta Técnica (.docx)</div>
-                                <div id="lbl-drop-tecnica" class="text-xs text-gray-600 mt-1">Arrastra el archivo aquí o haz clic para buscar</div>
-                                <button type="button" id="btn-clear-tecnica" onclick="quitarArchivoStaged(event, 'tecnica')" class="hidden mt-2 text-xs font-bold text-red-500 hover:underline">✕ Quitar archivo seleccionado</button>
-                            </div>
-                        </div>
-
                         <!-- Dropzone Económica -->
                         <div>
                             <input type="file" id="vend-file-economica" accept=".docx" class="hidden" onchange="manejarArchivoInput(event, 'economica')">
@@ -601,6 +585,22 @@
                                 <div class="font-extrabold text-sm text-[#0B192C]">Propuesta Económica (.docx)</div>
                                 <div id="lbl-drop-economica" class="text-xs text-gray-600 mt-1">Arrastra el archivo aquí o haz clic para buscar</div>
                                 <button type="button" id="btn-clear-economica" onclick="quitarArchivoStaged(event, 'economica')" class="hidden mt-2 text-xs font-bold text-red-500 hover:underline">✕ Quitar archivo seleccionado</button>
+                            </div>
+                        </div>
+
+                        <!-- Dropzone Técnica -->
+                        <div>
+                            <input type="file" id="vend-file-tecnica" accept=".docx" class="hidden" onchange="manejarArchivoInput(event, 'tecnica')">
+                            <div id="drop-tecnica"
+                                 class="az-dropzone"
+                                 onclick="document.getElementById('vend-file-tecnica').click()"
+                                 ondragover="manejarDragOver(event, 'tecnica')"
+                                 ondragleave="manejarDragLeave(event, 'tecnica')"
+                                 ondrop="manejarArchivoDrop(event, 'tecnica')">
+                                <div class="text-2xl mb-1">📋</div>
+                                <div class="font-extrabold text-sm text-[#0B192C]">Propuesta Técnica (.docx)</div>
+                                <div id="lbl-drop-tecnica" class="text-xs text-gray-600 mt-1">Arrastra el archivo aquí o haz clic para buscar</div>
+                                <button type="button" id="btn-clear-tecnica" onclick="quitarArchivoStaged(event, 'tecnica')" class="hidden mt-2 text-xs font-bold text-red-500 hover:underline">✕ Quitar archivo seleccionado</button>
                             </div>
                         </div>
                     </div>
@@ -674,12 +674,12 @@
                             </select>
                         </div>
 
-                        <!-- Fila 2: Vendedor de la empresa seleccionada + Tipo de Propuesta (Técnica / Económica) -->
+                        <!-- Fila 2: Vendedor de la empresa seleccionada + Tipo de Propuesta (Económica primero / Técnica segundo) -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-1.5">
                             <select id="cot-vendedor" class="p-2 rounded-lg w-full text-sm font-semibold" onchange="alCambiarVendedorCot()"></select>
                             <div class="az-seg-wrap">
-                                <button type="button" id="btn-cot-tipo-economica" onclick="seleccionarTipoPropuestaCot('economica')" class="az-seg-btn">💰 Económica</button>
-                                <button type="button" id="btn-cot-tipo-tecnica" onclick="seleccionarTipoPropuestaCot('tecnica')" class="az-seg-btn active-blue">📋 Técnica</button>
+                                <button type="button" id="btn-cot-tipo-economica" onclick="seleccionarTipoPropuestaCot('economica')" class="az-seg-btn active-orange">💰 Económica</button>
+                                <button type="button" id="btn-cot-tipo-tecnica" onclick="seleccionarTipoPropuestaCot('tecnica')" class="az-seg-btn">📋 Técnica</button>
                             </div>
                         </div>
                         <div id="lbl-estado-formato-cot" class="text-[11px] font-bold mb-4 px-1 text-gray-600"></div>
@@ -975,7 +975,6 @@
             });
 
             legacyMap.forEach(entry => {
-                // Si ya existe un vendedor nuevo con el mismo nombre y empresa, no duplicarlo en la lista
                 const yaExisteNuevo = resultado.some(r => r.empresa === entry.empresa && r.nombre === entry.nombre);
                 if (!yaExisteNuevo) resultado.push(entry);
             });
@@ -987,13 +986,10 @@
         function resolverVendedorPorIdOKey(valor, empresaPreferida) {
             if (!valor) return null;
             const todos = obtenerVendedoresAgrupados(null);
-            // 1. Coincidencia exacta por key o id
             let encontrado = todos.find(v => v.key === String(valor) || v.id === String(valor));
             if (encontrado) return encontrado;
-            // 2. Coincidencia por legacyIds (para cotizaciones viejas que guardaron el id de un solo formato)
             encontrado = todos.find(v => v.esLegacy && (v.legacyIds.tecnica === String(valor) || v.legacyIds.economica === String(valor)));
             if (encontrado) return encontrado;
-            // 3. Si es legacy ya reemplazado por versión nueva
             const rawLegacy = vendedores.find(v => String(v.id) === String(valor));
             if (rawLegacy) {
                 const info = inferirDatosLegacy(rawLegacy);
@@ -1007,7 +1003,6 @@
             try {
                 await setDoc(doc(db, 'vendedores', vendorId, 'plantillas', tipo), payload);
             } catch (subErr) {
-                // Respaldo si las reglas de Firestore no permiten subcolecciones
                 const fallbackId = `${vendorId}__tpl_${tipo}`;
                 await setDoc(doc(db, 'vendedores', fallbackId), {
                     id: fallbackId,
@@ -1097,9 +1092,9 @@
                 vigencia: d.vigencia || '',
                 plazo: d.plazo || '',
                 notas: d.notas || '',
-                empresa: d.empresa || 'US FIRE',
+                empresa: d.empresa || '',
                 vendedorId: vendEspecifico !== undefined ? vendEspecifico : (d.vendedorId || ''),
-                tipoPropuesta: d.tipoPropuesta || 'economica'
+                tipoPropuesta: d.tipoPropuesta || ''
             };
         }
 
@@ -1541,11 +1536,11 @@
         function pintarBotonesTipoPropuestaCot(tipo) {
             const t = tipo === 'tecnica' ? 'tecnica' : 'economica';
             document.getElementById('cot-tipo-propuesta').value = t;
-            const bTec = document.getElementById('btn-cot-tipo-tecnica');
             const bEco = document.getElementById('btn-cot-tipo-economica');
-            if (bTec && bEco) {
-                bTec.classList.toggle('active-blue', t === 'tecnica');
+            const bTec = document.getElementById('btn-cot-tipo-tecnica');
+            if (bEco && bTec) {
                 bEco.classList.toggle('active-orange', t === 'economica');
+                bTec.classList.toggle('active-blue', t === 'tecnica');
             }
         }
 
@@ -1563,15 +1558,15 @@
             }
 
             const vend = resolverVendedorPorIdOKey(vendVal, emp);
-            const tipoTexto = tipo === 'economica' ? 'Económica' : 'Técnica';
+            const tipoTexto = tipo === 'tecnica' ? 'Técnica' : 'Económica';
             if (!vend) {
                 lbl.className = 'text-[11px] font-bold mb-4 px-1 text-amber-600';
                 lbl.textContent = `⚠️ Vendedor no encontrado en ${emp}.`;
                 return;
             }
 
-            const tiene = tipo === 'economica' ? vend.tieneEconomica : vend.tieneTecnica;
-            const nomArch = tipo === 'economica' ? vend.nombreArchivoEconomica : vend.nombreArchivoTecnica;
+            const tiene = tipo === 'tecnica' ? vend.tieneTecnica : vend.tieneEconomica;
+            const nomArch = tipo === 'tecnica' ? vend.nombreArchivoTecnica : vend.nombreArchivoEconomica;
 
             if (tiene) {
                 lbl.className = 'text-[11px] font-bold mb-4 px-1 text-emerald-600';
@@ -1591,7 +1586,6 @@
             pintarBotonesEmpresaCot(empresa);
             window.renderSelectVendedores();
 
-            // Si existe un vendedor con el mismo nombre en la otra empresa, seleccionarlo automáticamente
             const listaNueva = obtenerVendedoresAgrupados(empresa);
             const mismoNombre = nombreActual ? listaNueva.find(v => v.nombre === nombreActual) : null;
             document.getElementById('cot-vendedor').value = mismoNombre ? mismoNombre.key : '';
@@ -1646,7 +1640,6 @@
             let tipoFinal = d.tipoPropuesta || 'economica';
             let vendKeyFinal = d.vendedorId || '';
 
-            // Compatibilidad automática con cotizaciones que tenían un ID de vendedor anterior (ej. "US FIRE - ROXANA - TÉCNICA")
             if (vendKeyFinal) {
                 const rawLeg = vendedores.find(v => String(v.id) === String(vendKeyFinal) && v.versionEstructura !== 2);
                 if (rawLeg) {
@@ -1733,7 +1726,7 @@
                     ...datosCapturados,
                     empresa: datosDestino.empresa || datosCapturados.empresa,
                     vendedorId: datosDestino.vendedorId || datosCapturados.vendedorId,
-                    tipoPropuesta: datosDestino.tipoPropuesta || datosCapturados.tipoPropuesta
+                    tipoPropuesta: datosDestino.tipoPropuesta || datosCapturados.tipoPropuesta || 'economica'
                 };
                 if (nuevaMoneda === 'USD') cot.datosUSD = copiaInicial;
                 else cot.datosMXN = copiaInicial;
@@ -1813,7 +1806,7 @@
                 if (!tieneInformacionCapturada(datosActualesUI) || confirm(`¿Deseas copiar también los Datos Comerciales, Folio y Condiciones de ${monOrigen} a ${monActual}?`)) {
                     const vendConservar = datosActualesUI.vendedorId || datosOrigen.vendedorId;
                     const empConservar = datosActualesUI.vendedorId ? datosActualesUI.empresa : datosOrigen.empresa;
-                    const tipoConservar = datosActualesUI.vendedorId ? datosActualesUI.tipoPropuesta : datosOrigen.tipoPropuesta;
+                    const tipoConservar = datosActualesUI.vendedorId ? datosActualesUI.tipoPropuesta : (datosOrigen.tipoPropuesta || 'economica');
                     const datosCopiados = { ...datosOrigen, empresa: empConservar, vendedorId: vendConservar, tipoPropuesta: tipoConservar };
                     if (monActual === 'USD') cot.datosUSD = datosCopiados;
                     else cot.datosMXN = datosCopiados;
@@ -2405,7 +2398,7 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        // --- ADMINISTRAR VENDEDORES (EMPRESA + DRAG & DROP TÉCNICA / ECONÓMICA) ---
+        // --- ADMINISTRAR VENDEDORES (EMPRESA + DRAG & DROP ECONÓMICA / TÉCNICA) ---
         window.seleccionarEmpresaFormVend = function(empresa) {
             const emp = empresa === 'USIICSA' ? 'USIICSA' : 'US FIRE';
             document.getElementById('vend-empresa').value = emp;
@@ -2503,11 +2496,11 @@
             window.seleccionarEmpresaFormVend(v.empresa || 'US FIRE');
 
             stagedFiles = { tecnica: null, economica: null };
-            document.getElementById('vend-file-tecnica').value = '';
             document.getElementById('vend-file-economica').value = '';
+            document.getElementById('vend-file-tecnica').value = '';
 
-            actualizarVisualDropzone('tecnica', v.tieneTecnica ? (v.nombreArchivoTecnica || 'Formato Técnica cargado') : '');
             actualizarVisualDropzone('economica', v.tieneEconomica ? (v.nombreArchivoEconomica || 'Formato Económica cargado') : '');
+            actualizarVisualDropzone('tecnica', v.tieneTecnica ? (v.nombreArchivoTecnica || 'Formato Técnica cargado') : '');
 
             const btnGuardar = document.getElementById('btn-guardar-vendedor');
             btnGuardar.textContent = '💾 Actualizar Vendedor';
@@ -2521,10 +2514,10 @@
             document.getElementById('vend-id').value = '';
             document.getElementById('vend-nombre').value = '';
             stagedFiles = { tecnica: null, economica: null };
-            document.getElementById('vend-file-tecnica').value = '';
             document.getElementById('vend-file-economica').value = '';
-            actualizarVisualDropzone('tecnica', '');
+            document.getElementById('vend-file-tecnica').value = '';
             actualizarVisualDropzone('economica', '');
+            actualizarVisualDropzone('tecnica', '');
 
             const btnGuardar = document.getElementById('btn-guardar-vendedor');
             btnGuardar.textContent = 'Guardar Cambios';
@@ -2542,7 +2535,6 @@
 
             let existente = idEdit ? vendedores.find(v => String(v.id) === String(idEdit)) : null;
 
-            // Si no se está editando, revisar si ya existe un vendedor con el mismo nombre y empresa
             if (!existente) {
                 const duplicado = vendedores.find(v => v.versionEstructura === 2 && v.empresa === empresa && String(v.nombre || '').toUpperCase() === nombre);
                 if (duplicado) {
@@ -2551,8 +2543,8 @@
                 }
             }
 
-            if (!existente && !stagedFiles.tecnica && !stagedFiles.economica) {
-                return alert('⚠️ Arrastra al menos un formato Word (.docx), ya sea Propuesta Técnica o Propuesta Económica.');
+            if (!existente && !stagedFiles.economica && !stagedFiles.tecnica) {
+                return alert('⚠️ Arrastra al menos un formato Word (.docx), ya sea Propuesta Económica o Propuesta Técnica.');
             }
 
             document.getElementById('loading-text').innerText = 'Guardando formatos del vendedor...';
@@ -2560,17 +2552,10 @@
 
             try {
                 const id = existente ? String(existente.id) : Date.now().toString();
-                let tieneTecnica = Boolean(existente?.tieneTecnica);
-                let nombreArchivoTecnica = existente?.nombreArchivoTecnica || '';
                 let tieneEconomica = Boolean(existente?.tieneEconomica);
                 let nombreArchivoEconomica = existente?.nombreArchivoEconomica || '';
-
-                if (stagedFiles.tecnica) {
-                    const b64Tec = await leerArchivoComoBase64(stagedFiles.tecnica);
-                    await guardarPlantillaEnNube(id, 'tecnica', b64Tec, stagedFiles.tecnica.name);
-                    tieneTecnica = true;
-                    nombreArchivoTecnica = stagedFiles.tecnica.name;
-                }
+                let tieneTecnica = Boolean(existente?.tieneTecnica);
+                let nombreArchivoTecnica = existente?.nombreArchivoTecnica || '';
 
                 if (stagedFiles.economica) {
                     const b64Eco = await leerArchivoComoBase64(stagedFiles.economica);
@@ -2579,15 +2564,22 @@
                     nombreArchivoEconomica = stagedFiles.economica.name;
                 }
 
+                if (stagedFiles.tecnica) {
+                    const b64Tec = await leerArchivoComoBase64(stagedFiles.tecnica);
+                    await guardarPlantillaEnNube(id, 'tecnica', b64Tec, stagedFiles.tecnica.name);
+                    tieneTecnica = true;
+                    nombreArchivoTecnica = stagedFiles.tecnica.name;
+                }
+
                 const obj = {
                     id,
                     nombre,
                     empresa,
                     versionEstructura: 2,
-                    tieneTecnica,
-                    nombreArchivoTecnica,
                     tieneEconomica,
                     nombreArchivoEconomica,
+                    tieneTecnica,
+                    nombreArchivoTecnica,
                     updatedAt: Date.now()
                 };
 
@@ -2629,11 +2621,11 @@
                         <div class="min-w-0">
                             <div class="font-extrabold text-[#0B192C] text-sm">${esc(v.nombre)}</div>
                             <div class="flex flex-wrap gap-1.5 mt-1.5">
-                                <span class="text-[11px] font-bold px-2 py-0.5 rounded ${v.tieneTecnica ? 'text-emerald-600' : 'text-gray-500 opacity-70'}">
-                                    📋 Técnica: ${v.tieneTecnica ? '✅ Cargada' : 'Sin archivo'}
-                                </span>
                                 <span class="text-[11px] font-bold px-2 py-0.5 rounded ${v.tieneEconomica ? 'text-emerald-600' : 'text-gray-500 opacity-70'}">
                                     💰 Económica: ${v.tieneEconomica ? '✅ Cargada' : 'Sin archivo'}
+                                </span>
+                                <span class="text-[11px] font-bold px-2 py-0.5 rounded ${v.tieneTecnica ? 'text-emerald-600' : 'text-gray-500 opacity-70'}">
+                                    📋 Técnica: ${v.tieneTecnica ? '✅ Cargada' : 'Sin archivo'}
                                 </span>
                             </div>
                         </div>
@@ -2671,8 +2663,7 @@
             if(!confirm("¿Eliminar vendedor y sus formatos?")) return;
             document.getElementById('loading-screen').classList.remove('hidden');
             await deleteDoc(doc(db, 'vendedores', id));
-            // Limpiar plantillas asociadas si existen
-            for (const tipo of ['tecnica', 'economica']) {
+            for (const tipo of ['economica', 'tecnica']) {
                 try { await deleteDoc(doc(db, 'vendedores', id, 'plantillas', tipo)); } catch (e) {}
                 const fbId = `${id}__tpl_${tipo}`;
                 if (plantillasFallbackMap[fbId]) {
@@ -3261,7 +3252,7 @@
             const d = cot.datos;
             const empresa = d.empresa || 'US FIRE';
             const tipoPropuesta = d.tipoPropuesta || 'economica';
-            const tipoTexto = tipoPropuesta === 'economica' ? 'Económica' : 'Técnica';
+            const tipoTexto = tipoPropuesta === 'tecnica' ? 'Técnica' : 'Económica';
 
             if (!d.vendedorId) {
                 alert(`⚠️ Selecciona un Vendedor de ${empresa} en la Configuración Inicial.`);
@@ -3495,5 +3486,3 @@
     </script>
 </body>
 </html>
-
-
