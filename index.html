@@ -996,6 +996,8 @@
             });
         }
 
+        const BRANDING_DOC_ID = 'az_branding_logo';
+
         window.manejarSubidaLogo = async function(event) {
             const input = event?.target;
             const file = input?.files?.[0];
@@ -1006,11 +1008,11 @@
 
             try {
                 const dataUrl = await optimizarImagenLogo(file);
-                const payload = { id: '__branding__', logo: dataUrl, updatedAt: Date.now() };
+                const payload = { id: BRANDING_DOC_ID, esBranding: true, logo: dataUrl, updatedAt: Date.now() };
                 try {
-                    await setDoc(doc(db, 'catalogo', '__branding__'), payload);
+                    await setDoc(doc(db, 'catalogo', BRANDING_DOC_ID), payload);
                 } catch (e1) {
-                    await setDoc(doc(db, 'vendedores', '__branding__'), payload);
+                    await setDoc(doc(db, 'vendedores', BRANDING_DOC_ID), payload);
                 }
                 try { localStorage.setItem('az_custom_logo', dataUrl); } catch (e) {}
                 aplicarLogoPersonalizado(dataUrl);
@@ -1030,8 +1032,8 @@
             document.getElementById('loading-text').innerText = 'Restaurando logotipo...';
             document.getElementById('loading-screen').classList.remove('hidden');
             try {
-                try { await deleteDoc(doc(db, 'catalogo', '__branding__')); } catch (e) {}
-                try { await deleteDoc(doc(db, 'vendedores', '__branding__')); } catch (e) {}
+                try { await deleteDoc(doc(db, 'catalogo', BRANDING_DOC_ID)); } catch (e) {}
+                try { await deleteDoc(doc(db, 'vendedores', BRANDING_DOC_ID)); } catch (e) {}
                 try { localStorage.removeItem('az_custom_logo'); } catch (e) {}
                 aplicarLogoPersonalizado(null);
             } finally {
@@ -2415,16 +2417,18 @@
                 await window.cargarUsuariosNube();
             }
 
+            const esDocBranding = x => x._docId === BRANDING_DOC_ID || x.esBranding === true || x.id === BRANDING_DOC_ID || x.id === '__branding__';
+            
             const catSnap = await getDocs(collection(db, 'catalogo'));
             const catDocs = catSnap.docs.map(d => ({ ...d.data(), _docId: d.id }));
-            const brandingCat = catDocs.find(x => x.id === '__branding__' || x._docId === '__branding__');
-            catalogo = catDocs.filter(x => x.id !== '__branding__' && x._docId !== '__branding__');
+            const brandingCat = catDocs.find(esDocBranding);
+            catalogo = catDocs.filter(x => !esDocBranding(x));
             window.renderCatalogo();
 
             const vendSnap = await getDocs(collection(db, 'vendedores'));
             const vendDocs = vendSnap.docs.map(d => ({ ...d.data(), _docId: d.id }));
-            const brandingVend = vendDocs.find(x => x.id === '__branding__' || x._docId === '__branding__');
-            const todosVend = vendDocs.filter(x => x.id !== '__branding__' && x._docId !== '__branding__');
+            const brandingVend = vendDocs.find(esDocBranding);
+            const todosVend = vendDocs.filter(x => !esDocBranding(x));
 
             const brandingDoc = brandingCat || brandingVend;
             const logoNube = brandingDoc?.logo || brandingDoc?.logoDataUrl || brandingDoc?.logoBase64 || brandingDoc?.dataUrl || brandingDoc?.image || null;
