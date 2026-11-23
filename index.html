@@ -120,6 +120,66 @@
             color: #0E859F;
         }
 
+        /* Selectores segmentados (Empresa / Tipo de Propuesta) */
+        .az-seg-wrap {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.35rem;
+            padding: 0.25rem;
+            border-radius: 0.75rem;
+            background-color: rgba(14, 133, 159, 0.06);
+        }
+        .az-seg-btn {
+            padding: 0.45rem 0.75rem;
+            border-radius: 0.55rem;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            color: #0B192C;
+            background: transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+        .az-seg-btn:hover {
+            background-color: rgba(14, 133, 159, 0.12);
+        }
+        .az-seg-btn.active-blue {
+            background: linear-gradient(90deg, #0E859F 0%, #0E5DF0 100%);
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 12px -2px rgba(14, 93, 240, 0.32);
+        }
+        .az-seg-btn.active-orange {
+            background: linear-gradient(90deg, #ED813C 0%, #CE8550 100%);
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 12px -2px rgba(237, 129, 60, 0.35);
+        }
+
+        /* Zonas Drag & Drop para formatos .docx */
+        .az-dropzone {
+            border: 2px dashed rgba(14, 133, 159, 0.38) !important;
+            background-color: rgba(14, 133, 159, 0.04) !important;
+            border-radius: 0.9rem;
+            padding: 1.25rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.22s ease;
+        }
+        .az-dropzone:hover {
+            border-color: #0E859F !important;
+            background-color: rgba(14, 133, 159, 0.09) !important;
+        }
+        .az-dropzone.drag-over {
+            border-color: #ED813C !important;
+            background-color: rgba(237, 129, 60, 0.12) !important;
+            transform: scale(1.01);
+        }
+        .az-dropzone.has-file {
+            border-style: solid !important;
+            border-color: rgba(16, 185, 129, 0.65) !important;
+            background-color: rgba(16, 185, 129, 0.08) !important;
+        }
+
         /* Menús desplegables flotantes de búsqueda */
         #resultados-busqueda,
         #resultados-busqueda-incluye {
@@ -221,6 +281,33 @@
         body.dark-mode .liquid-icon-btn:hover {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(14, 133, 159, 0.30) 100%) !important;
             color: #38BDF8;
+        }
+
+        body.dark-mode .az-seg-wrap {
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+        body.dark-mode .az-seg-btn {
+            color: #CBD5E1;
+        }
+        body.dark-mode .az-seg-btn:hover {
+            background-color: rgba(255, 255, 255, 0.10);
+        }
+
+        body.dark-mode .az-dropzone {
+            border-color: rgba(56, 189, 248, 0.35) !important;
+            background-color: rgba(255, 255, 255, 0.04) !important;
+        }
+        body.dark-mode .az-dropzone:hover {
+            border-color: #38BDF8 !important;
+            background-color: rgba(14, 133, 159, 0.16) !important;
+        }
+        body.dark-mode .az-dropzone.drag-over {
+            border-color: #ED813C !important;
+            background-color: rgba(237, 129, 60, 0.18) !important;
+        }
+        body.dark-mode .az-dropzone.has-file {
+            border-color: rgba(52, 211, 153, 0.7) !important;
+            background-color: rgba(16, 185, 129, 0.14) !important;
         }
 
         body.dark-mode #main-content input:not([type="file"]),
@@ -345,29 +432,21 @@
         </symbol>
     </svg>
 
-    <!-- Input oculto para subir el archivo de imagen del logo oficial -->
-    <input type="file" id="input-logo-oficial" accept="image/*" class="hidden" onchange="procesarLogoOficial(event)">
-
     <!-- PANTALLA DE CARGA GLOBAL -->
     <div id="loading-screen" class="fixed inset-0 flex flex-col items-center justify-center hidden">
-        <img id="loading-custom-img" class="w-24 h-24 object-contain mb-4 animate-pulse hidden" alt="AlphaZero">
-        <svg id="loading-default-svg" class="w-20 h-20 animate-spin mb-4" style="animation-duration: 6s;"><use href="#alphazero-emblem"></use></svg>
+        <svg class="w-20 h-20 animate-spin mb-4" style="animation-duration: 6s;"><use href="#alphazero-emblem"></use></svg>
         <div id="loading-text" class="text-white text-xl font-bold tracking-wider animate-pulse">Sincronizando con AlphaZero...</div>
     </div>
 
     <!-- PANTALLA DE INICIO DE SESIÓN SIN BORDES CON MARCA DE AGUA TENUE -->
     <div id="login-container" class="flex h-screen bg-[#0B192C] items-center justify-center relative overflow-hidden hidden">
-        <!-- Marca de agua tenue en el fondo del Login -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-            <img id="login-watermark-img" class="w-[820px] max-w-[92vw] max-h-[90vh] object-contain opacity-[0.10] hidden" alt="Marca de agua AlphaZero">
-            <svg id="login-watermark-svg" class="w-[680px] h-[680px] opacity-[0.10]"><use href="#alphazero-emblem"></use></svg>
+            <svg class="w-[680px] h-[680px] opacity-[0.10]"><use href="#alphazero-emblem"></use></svg>
         </div>
 
-        <!-- Tarjeta de Login Sin Bordes -->
         <div class="az-login-card p-8 rounded-xl w-96 max-w-[92vw] relative z-10">
             <div class="flex flex-col items-center text-center mb-6">
-                <img id="login-card-img" class="h-24 object-contain mb-2 hidden" alt="Logo AlphaZero">
-                <div id="login-card-svg-wrap" class="flex flex-col items-center">
+                <div class="flex flex-col items-center">
                     <svg class="w-24 h-24 mb-2"><use href="#alphazero-emblem"></use></svg>
                     <h2 class="text-3xl font-extrabold tracking-wider leading-none">
                         <span class="text-white">ALPHA</span><span class="az-gradient-text">ZERO</span>
@@ -385,10 +464,9 @@
     <!-- APLICACIÓN PRINCIPAL -->
     <div id="app-container" class="flex h-screen hidden relative overflow-hidden">
         
-        <!-- MARCA DE AGUA TENUE EN EL FONDO (Visible también detrás del Liquid Glass de la barra lateral) -->
+        <!-- MARCA DE AGUA TENUE EN EL FONDO -->
         <div class="fixed inset-0 pointer-events-none select-none flex flex-col items-center justify-center z-0">
-            <img id="app-watermark-img" class="w-[700px] max-w-[86vw] max-h-[82vh] object-contain opacity-[0.07] hidden" alt="Marca de agua AlphaZero">
-            <div id="app-watermark-svg-wrap" class="flex flex-col items-center justify-center">
+            <div class="flex flex-col items-center justify-center">
                 <svg class="w-[500px] h-[500px] max-w-[80vw] max-h-[72vh] opacity-[0.07]"><use href="#alphazero-emblem"></use></svg>
                 <div class="text-4xl font-black tracking-[0.25em] opacity-[0.06] mt-2 text-[#0B192C]">ALPHAZERO</div>
                 <div class="text-xs font-bold tracking-[0.35em] opacity-[0.07] text-[#0E859F]">SISTEMAS CONTRAINCENDIOS</div>
@@ -399,8 +477,7 @@
         <div id="sidebar" class="w-64 text-[#0B192C] p-4 flex flex-col transition-all duration-300 shrink-0 relative z-20 rounded-r-2xl">
             <div class="flex items-center justify-between mb-6 sidebar-header w-full pb-2">
                 <div class="flex items-center gap-2.5 sidebar-text">
-                    <img id="sidebar-logo-img" class="w-11 h-11 object-contain bg-white/80 rounded-full p-0.5 shrink-0 shadow-sm hidden" alt="AlphaZero">
-                    <svg id="sidebar-logo-svg" class="w-11 h-11 shrink-0"><use href="#alphazero-emblem"></use></svg>
+                    <svg class="w-11 h-11 shrink-0"><use href="#alphazero-emblem"></use></svg>
                     <div class="leading-tight">
                         <h2 class="text-lg font-extrabold tracking-wider">
                             <span class="text-[#0B192C]">ALPHA</span><span class="az-gradient-text">ZERO</span>
@@ -425,10 +502,6 @@
             
             <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" title="Gestión de Usuarios" class="liquid-nav-btn text-left mb-2 py-2.5 px-3 text-[#ED813C] hover:text-[#d96e2b] font-bold hidden mt-2 flex items-center gap-3 w-full justify-center md:justify-start">
                 <span class="text-xl">⚙️</span> <span class="sidebar-text">Gestión de Usuarios</span>
-            </button>
-
-            <button id="btn-subir-logo" onclick="document.getElementById('input-logo-oficial').click()" title="Subir imagen del logo AlphaZero para marca de agua y pestaña" class="liquid-nav-btn text-left mb-2 py-2 px-3 text-[#0E859F] font-bold hidden flex items-center gap-3 w-full justify-center md:justify-start text-xs">
-                <span class="text-lg">🖼️</span> <span class="sidebar-text">Subir Logo Oficial</span>
             </button>
 
             <!-- Botón de Modo Oscuro / Modo Claro -->
@@ -457,9 +530,6 @@
             <div id="sec-usuarios" class="hidden relative z-10">
                 <div class="flex flex-wrap justify-between items-center pb-2 mb-4 gap-2">
                     <h3 class="text-2xl font-extrabold text-[#0B192C]">Gestión de Accesos</h3>
-                    <button onclick="document.getElementById('input-logo-oficial').click()" class="bg-transparent hover:bg-[#0E859F]/10 text-[#0E859F] px-3 py-1.5 rounded-lg text-xs font-bold transition">
-                        🖼️ Cargar Imagen de Logo AlphaZero
-                    </button>
                 </div>
                 <div class="az-card p-6 rounded-xl mb-6">
                     <h4 class="font-bold mb-1 text-[#0B192C]">Dar de alta o sincronizar vendedor</h4>
@@ -477,16 +547,72 @@
                 <div id="lista-cuentas" class="az-card rounded-xl p-2 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
 
-            <!-- SECCIÓN: VENDEDORES -->
+            <!-- SECCIÓN: VENDEDORES (CON EMPRESA + DRAG & DROP TÉCNICA / ECONÓMICA) -->
             <div id="sec-vendedores" class="hidden relative z-10">
                 <h3 class="text-2xl font-extrabold pb-2 mb-4 text-[#0B192C]">Administrar Vendedores</h3>
                 <div class="az-card p-6 rounded-xl mb-6">
-                    <input type="text" id="vend-nombre" placeholder="Nombre del Vendedor" class="p-2.5 w-full mb-3 rounded-lg">
-                    <label class="block mb-2 text-sm font-bold text-[#0B192C]">Subir formato:</label>
-                    <input type="file" id="vend-file" accept=".docx" class="mb-4 block">
-                    <button onclick="guardarVendedor()" class="az-gradient-btn text-white px-5 py-2.5 rounded-lg font-bold transition">Guardar Cambios</button>
+                    <input type="hidden" id="vend-id">
+                    <input type="hidden" id="vend-empresa" value="US FIRE">
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 items-center">
+                        <div class="md:col-span-2">
+                            <label class="block mb-1.5 text-xs font-bold uppercase tracking-wider text-gray-700">Nombre del Vendedor</label>
+                            <input type="text" id="vend-nombre" placeholder="Ej: ROXANA" class="p-2.5 w-full rounded-lg uppercase">
+                        </div>
+                        <div>
+                            <label class="block mb-1.5 text-xs font-bold uppercase tracking-wider text-gray-700">Empresa</label>
+                            <div class="az-seg-wrap">
+                                <button type="button" id="btn-vend-emp-usfire" onclick="seleccionarEmpresaFormVend('US FIRE')" class="az-seg-btn active-orange">US FIRE</button>
+                                <button type="button" id="btn-vend-emp-usiicsa" onclick="seleccionarEmpresaFormVend('USIICSA')" class="az-seg-btn">USIICSA</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="block mb-2 text-xs font-bold uppercase tracking-wider text-gray-700">Formatos Word (.docx) — Arrastra y suelta cada archivo:</label>
+
+                    <!-- Zonas Drag & Drop independientes -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                        <!-- Dropzone Técnica -->
+                        <div>
+                            <input type="file" id="vend-file-tecnica" accept=".docx" class="hidden" onchange="manejarArchivoInput(event, 'tecnica')">
+                            <div id="drop-tecnica"
+                                 class="az-dropzone"
+                                 onclick="document.getElementById('vend-file-tecnica').click()"
+                                 ondragover="manejarDragOver(event, 'tecnica')"
+                                 ondragleave="manejarDragLeave(event, 'tecnica')"
+                                 ondrop="manejarArchivoDrop(event, 'tecnica')">
+                                <div class="text-2xl mb-1">📋</div>
+                                <div class="font-extrabold text-sm text-[#0B192C]">Propuesta Técnica (.docx)</div>
+                                <div id="lbl-drop-tecnica" class="text-xs text-gray-600 mt-1">Arrastra el archivo aquí o haz clic para buscar</div>
+                                <button type="button" id="btn-clear-tecnica" onclick="quitarArchivoStaged(event, 'tecnica')" class="hidden mt-2 text-xs font-bold text-red-500 hover:underline">✕ Quitar archivo seleccionado</button>
+                            </div>
+                        </div>
+
+                        <!-- Dropzone Económica -->
+                        <div>
+                            <input type="file" id="vend-file-economica" accept=".docx" class="hidden" onchange="manejarArchivoInput(event, 'economica')">
+                            <div id="drop-economica"
+                                 class="az-dropzone"
+                                 onclick="document.getElementById('vend-file-economica').click()"
+                                 ondragover="manejarDragOver(event, 'economica')"
+                                 ondragleave="manejarDragLeave(event, 'economica')"
+                                 ondrop="manejarArchivoDrop(event, 'economica')">
+                                <div class="text-2xl mb-1">💰</div>
+                                <div class="font-extrabold text-sm text-[#0B192C]">Propuesta Económica (.docx)</div>
+                                <div id="lbl-drop-economica" class="text-xs text-gray-600 mt-1">Arrastra el archivo aquí o haz clic para buscar</div>
+                                <button type="button" id="btn-clear-economica" onclick="quitarArchivoStaged(event, 'economica')" class="hidden mt-2 text-xs font-bold text-red-500 hover:underline">✕ Quitar archivo seleccionado</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button id="btn-guardar-vendedor" onclick="guardarVendedor()" class="az-gradient-btn text-white px-5 py-2.5 rounded-lg font-bold transition">Guardar Cambios</button>
+                        <button id="btn-cancelar-vendedor" onclick="cancelarEdicionVendedor()" class="hidden text-gray-700 hover:bg-gray-500/10 px-4 py-2.5 rounded-lg font-bold transition">Cancelar Edición</button>
+                    </div>
                 </div>
-                <div id="lista-vendedores" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+                <!-- Lista de vendedores separada por US FIRE y USIICSA -->
+                <div id="lista-vendedores" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </div>
 
             <!-- SECCIÓN: CATÁLOGO -->
@@ -513,8 +639,7 @@
             <div id="sec-cotizaciones" class="hidden relative z-10">
                 <div class="flex flex-wrap justify-between items-center mb-3 pb-2 gap-2">
                     <div class="flex items-center gap-2">
-                        <img id="header-cot-img" class="w-8 h-8 object-contain hidden" alt="AlphaZero">
-                        <svg id="header-cot-svg" class="w-7 h-7"><use href="#alphazero-emblem"></use></svg>
+                        <svg class="w-7 h-7"><use href="#alphazero-emblem"></use></svg>
                         <h3 class="text-xl font-extrabold text-[#0B192C]">Cotizaciones <span class="az-gradient-text">AlphaZero</span></h3>
                     </div>
                     <div class="flex flex-wrap gap-2 items-center">
@@ -533,13 +658,31 @@
                             <h4 class="font-bold text-[#0B192C]">Configuración Inicial</h4>
                             <span id="badge-moneda-datos" class="text-xs px-2 py-0.5 rounded text-[#0E859F] font-bold">🇲🇽 Datos en MXN</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 mb-4">
-                            <select id="cot-vendedor" class="p-2 rounded-lg w-full text-sm font-semibold" onchange="guardarEstadoCotizaciones()"></select>
+
+                        <input type="hidden" id="cot-empresa" value="US FIRE">
+                        <input type="hidden" id="cot-tipo-propuesta" value="tecnica">
+
+                        <!-- Fila 1: Empresa (US FIRE / USIICSA) + Moneda -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+                            <div class="az-seg-wrap">
+                                <button type="button" id="btn-cot-emp-usfire" onclick="seleccionarEmpresaCot('US FIRE')" class="az-seg-btn active-orange">US FIRE</button>
+                                <button type="button" id="btn-cot-emp-usiicsa" onclick="seleccionarEmpresaCot('USIICSA')" class="az-seg-btn">USIICSA</button>
+                            </div>
                             <select id="cot-moneda" class="p-2 rounded-lg w-full text-sm font-bold !text-[#0E859F]" onchange="cambiarMonedaCotizacion()">
                                 <option id="opt-moneda-mxn" value="MXN">MXN - Pesos Mexicanos</option>
                                 <option id="opt-moneda-usd" value="USD">USD - Dólares</option>
                             </select>
                         </div>
+
+                        <!-- Fila 2: Vendedor de la empresa seleccionada + Tipo de Propuesta (Técnica / Económica) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-1.5">
+                            <select id="cot-vendedor" class="p-2 rounded-lg w-full text-sm font-semibold" onchange="alCambiarVendedorCot()"></select>
+                            <div class="az-seg-wrap">
+                                <button type="button" id="btn-cot-tipo-tecnica" onclick="seleccionarTipoPropuestaCot('tecnica')" class="az-seg-btn active-blue">📋 Técnica</button>
+                                <button type="button" id="btn-cot-tipo-economica" onclick="seleccionarTipoPropuestaCot('economica')" class="az-seg-btn">💰 Económica</button>
+                            </div>
+                        </div>
+                        <div id="lbl-estado-formato-cot" class="text-[11px] font-bold mb-4 px-1 text-gray-600"></div>
 
                         <div class="flex flex-wrap justify-between items-center mb-1.5 gap-1">
                             <h4 class="font-bold text-[#0B192C]">Estructura del Folio</h4>
@@ -548,7 +691,7 @@
                                 <button type="button" id="btn-eliminar-version" onclick="eliminarVersionActual()" title="Eliminar únicamente esta revisión" class="text-red-500 hover:bg-red-500/10 px-1.5 py-0.5 rounded text-[11px] font-bold transition hidden">✕</button>
                             </div>
                         </div>
-                        <!-- Botones directos para cambiar entre versiones (V1: Original, V2: REV 1...) en Estructura del Folio -->
+                        <!-- Botones directos para cambiar entre versiones -->
                         <div id="barra-botones-versiones" class="flex flex-wrap gap-1.5 mb-2.5"></div>
 
                         <div class="flex flex-wrap items-center gap-2 mb-4">
@@ -594,7 +737,6 @@
                             <ul id="resultados-busqueda" class="rounded-lg max-h-40 overflow-y-auto hidden absolute z-50 w-full left-0 mt-1"></ul>
                         </div>
                         
-                        <!-- Pda. acepta números, letras y caracteres (Ej: 1, 2, M1, M2, A-1) -->
                         <div class="grid grid-cols-4 gap-1.5 mb-2">
                             <input type="text" id="part-pda" placeholder="Partida" class="p-2 rounded-lg uppercase text-sm">
                             <input type="number" id="part-cant" placeholder="Cantidad" class="p-2 rounded-lg text-sm">
@@ -623,7 +765,7 @@
                             </button>
                         </div>
 
-                        <!-- PANEL 1: SECCIÓN INCLUYE (CON SOPORTE DE FICHA TÉCNICA) -->
+                        <!-- PANEL 1: SECCIÓN INCLUYE -->
                         <div id="panel-incluye" class="hidden p-2 rounded-lg mb-3">
                             <input type="hidden" id="inc-cat-id">
                             <div class="flex justify-between items-center mb-2">
@@ -752,6 +894,9 @@
         let currentRole = null;
         let dbUsuarios = [];
         let vendedores = [];
+        let plantillasFallbackMap = {};
+        let plantillasCache = {};
+        let stagedFiles = { tecnica: null, economica: null };
         let catalogo = [];
         let cotizaciones = [];
         let cotIndexActiva = 0;
@@ -762,6 +907,157 @@
         let tempNotasPartida = [];
 
         let respaldoVersionAlAbrir = null;
+
+        // --- UTILIDADES PARA EMPRESAS Y VENDEDORES (COMPATIBLE CON FORMATOS NUEVOS Y ANTERIORES) ---
+        function inferirDatosLegacy(v) {
+            const rawNombre = String(v?.nombre || '').trim();
+            const upper = rawNombre.toUpperCase();
+            const empresa = upper.includes('USIICSA') ? 'USIICSA' : 'US FIRE';
+            const tipoLegacy = /ECON[ÓO]MIC/.test(upper) ? 'economica' : 'tecnica';
+
+            let limpio = rawNombre
+                .replace(/^(US\s*FIRE|USIICSA)\s*[-–:|]*\s*/i, '')
+                .replace(/\s*[-–:|]*\s*(PROPUESTA\s+)?(T[ÉE]CNICA|ECON[ÓO]MICA)\s*$/i, '')
+                .trim();
+            if (!limpio) limpio = rawNombre;
+            return { empresa, tipoLegacy, nombreLimpio: limpio.toUpperCase() };
+        }
+
+        function obtenerVendedoresAgrupados(empresaFiltro) {
+            const resultado = [];
+            const legacyMap = new Map();
+
+            vendedores.forEach(v => {
+                if (v.versionEstructura === 2) {
+                    const emp = (v.empresa || 'US FIRE').toUpperCase();
+                    if (empresaFiltro && emp !== empresaFiltro) return;
+                    resultado.push({
+                        key: String(v.id),
+                        id: String(v.id),
+                        nombre: String(v.nombre || '').toUpperCase(),
+                        empresa: emp,
+                        tieneTecnica: Boolean(v.tieneTecnica),
+                        tieneEconomica: Boolean(v.tieneEconomica),
+                        nombreArchivoTecnica: v.nombreArchivoTecnica || '',
+                        nombreArchivoEconomica: v.nombreArchivoEconomica || '',
+                        esLegacy: false,
+                        raw: v
+                    });
+                } else {
+                    const info = inferirDatosLegacy(v);
+                    if (empresaFiltro && info.empresa !== empresaFiltro) return;
+                    const mapKey = `legacy::${info.empresa}::${info.nombreLimpio}`;
+                    if (!legacyMap.has(mapKey)) {
+                        legacyMap.set(mapKey, {
+                            key: mapKey,
+                            id: String(v.id),
+                            nombre: info.nombreLimpio,
+                            empresa: info.empresa,
+                            tieneTecnica: false,
+                            tieneEconomica: false,
+                            nombreArchivoTecnica: '',
+                            nombreArchivoEconomica: '',
+                            esLegacy: true,
+                            legacyIds: { tecnica: null, economica: null }
+                        });
+                    }
+                    const entry = legacyMap.get(mapKey);
+                    if (info.tipoLegacy === 'economica') {
+                        entry.tieneEconomica = true;
+                        entry.legacyIds.economica = String(v.id);
+                        entry.nombreArchivoEconomica = v.nombre;
+                    } else {
+                        entry.tieneTecnica = true;
+                        entry.legacyIds.tecnica = String(v.id);
+                        entry.nombreArchivoTecnica = v.nombre;
+                    }
+                }
+            });
+
+            legacyMap.forEach(entry => {
+                // Si ya existe un vendedor nuevo con el mismo nombre y empresa, no duplicarlo en la lista
+                const yaExisteNuevo = resultado.some(r => r.empresa === entry.empresa && r.nombre === entry.nombre);
+                if (!yaExisteNuevo) resultado.push(entry);
+            });
+
+            resultado.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+            return resultado;
+        }
+
+        function resolverVendedorPorIdOKey(valor, empresaPreferida) {
+            if (!valor) return null;
+            const todos = obtenerVendedoresAgrupados(null);
+            // 1. Coincidencia exacta por key o id
+            let encontrado = todos.find(v => v.key === String(valor) || v.id === String(valor));
+            if (encontrado) return encontrado;
+            // 2. Coincidencia por legacyIds (para cotizaciones viejas que guardaron el id de un solo formato)
+            encontrado = todos.find(v => v.esLegacy && (v.legacyIds.tecnica === String(valor) || v.legacyIds.economica === String(valor)));
+            if (encontrado) return encontrado;
+            // 3. Si es legacy ya reemplazado por versión nueva
+            const rawLegacy = vendedores.find(v => String(v.id) === String(valor));
+            if (rawLegacy) {
+                const info = inferirDatosLegacy(rawLegacy);
+                return todos.find(v => v.empresa === (empresaPreferida || info.empresa) && v.nombre === info.nombreLimpio) || null;
+            }
+            return null;
+        }
+
+        async function guardarPlantillaEnNube(vendorId, tipo, base64, fileName) {
+            const payload = { template: base64, fileName, updatedAt: Date.now() };
+            try {
+                await setDoc(doc(db, 'vendedores', vendorId, 'plantillas', tipo), payload);
+            } catch (subErr) {
+                // Respaldo si las reglas de Firestore no permiten subcolecciones
+                const fallbackId = `${vendorId}__tpl_${tipo}`;
+                await setDoc(doc(db, 'vendedores', fallbackId), {
+                    id: fallbackId,
+                    vendorId,
+                    tipo,
+                    esPlantilla: true,
+                    ...payload
+                });
+                plantillasFallbackMap[fallbackId] = payload;
+            }
+            plantillasCache[`${vendorId}_${tipo}`] = base64;
+        }
+
+        async function obtenerBase64Plantilla(vendEntry, tipoPropuesta) {
+            if (!vendEntry) return null;
+
+            if (vendEntry.esLegacy) {
+                const docId = vendEntry.legacyIds[tipoPropuesta];
+                if (!docId) return null;
+                const rawDoc = vendedores.find(v => String(v.id) === String(docId));
+                return rawDoc?.template || null;
+            }
+
+            const cacheKey = `${vendEntry.id}_${tipoPropuesta}`;
+            if (plantillasCache[cacheKey]) return plantillasCache[cacheKey];
+
+            try {
+                const snap = await getDoc(doc(db, 'vendedores', vendEntry.id, 'plantillas', tipoPropuesta));
+                if (snap.exists() && snap.data()?.template) {
+                    plantillasCache[cacheKey] = snap.data().template;
+                    return snap.data().template;
+                }
+            } catch (e) {}
+
+            const fallbackId = `${vendEntry.id}__tpl_${tipoPropuesta}`;
+            if (plantillasFallbackMap[fallbackId]?.template) {
+                plantillasCache[cacheKey] = plantillasFallbackMap[fallbackId].template;
+                return plantillasFallbackMap[fallbackId].template;
+            }
+
+            try {
+                const snapFb = await getDoc(doc(db, 'vendedores', fallbackId));
+                if (snapFb.exists() && snapFb.data()?.template) {
+                    plantillasCache[cacheKey] = snapFb.data().template;
+                    return snapFb.data().template;
+                }
+            } catch (e) {}
+
+            return vendEntry.raw?.[`template_${tipoPropuesta}`] || null;
+        }
 
         // --- FORMATEADOR DE FECHA Y HORA PARA VERSIONES ---
         function formatearFechaHora(inputDate) {
@@ -779,146 +1075,13 @@
             return `${dia}/${mes}/${anio} ${horasStr}:${minutos} ${ampm}`;
         }
 
-        // --- SISTEMA DE LOGO OFICIAL ---
-        function aplicarLogoPersonalizado(logoDataUrl, faviconDataUrl) {
-            if (!logoDataUrl) return;
-            try {
-                localStorage.setItem('az_logo_cache', logoDataUrl);
-                if (faviconDataUrl) localStorage.setItem('az_fav_cache', faviconDataUrl);
-            } catch (e) {}
-
-            const loginWmImg = document.getElementById('login-watermark-img');
-            const loginWmSvg = document.getElementById('login-watermark-svg');
-            if (loginWmImg && loginWmSvg) {
-                loginWmImg.src = logoDataUrl;
-                loginWmImg.classList.remove('hidden');
-                loginWmSvg.classList.add('hidden');
-            }
-
-            const loginCardImg = document.getElementById('login-card-img');
-            const loginCardSvg = document.getElementById('login-card-svg-wrap');
-            if (loginCardImg && loginCardSvg) {
-                loginCardImg.src = logoDataUrl;
-                loginCardImg.classList.remove('hidden');
-                loginCardSvg.classList.add('hidden');
-            }
-
-            const appWmImg = document.getElementById('app-watermark-img');
-            const appWmSvg = document.getElementById('app-watermark-svg-wrap');
-            if (appWmImg && appWmSvg) {
-                appWmImg.src = logoDataUrl;
-                appWmImg.classList.remove('hidden');
-                appWmSvg.classList.add('hidden');
-            }
-
-            const iconSrc = faviconDataUrl || logoDataUrl;
-            [['sidebar-logo-img','sidebar-logo-svg'], ['header-cot-img','header-cot-svg'], ['loading-custom-img','loading-default-svg']].forEach(([imgId, svgId]) => {
-                const imgEl = document.getElementById(imgId);
-                const svgEl = document.getElementById(svgId);
-                if (imgEl && svgEl) {
-                    imgEl.src = iconSrc;
-                    imgEl.classList.remove('hidden');
-                    svgEl.classList.add('hidden');
-                }
-            });
-
-            const favLink = document.getElementById('dynamic-favicon');
-            if (favLink && iconSrc) {
-                favLink.type = 'image/png';
-                favLink.href = iconSrc;
-            }
-        }
-
-        const cacheLogoInicial = localStorage.getItem('az_logo_cache');
-        const cacheFavInicial = localStorage.getItem('az_fav_cache');
-        if (cacheLogoInicial) aplicarLogoPersonalizado(cacheLogoInicial, cacheFavInicial);
-
-        window.procesarLogoOficial = function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            document.getElementById('loading-screen').classList.remove('hidden');
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = async function() {
-                    try {
-                        const maxW = 800;
-                        const scale = Math.min(1, maxW / img.width);
-                        const w = Math.round(img.width * scale);
-                        const h = Math.round(img.height * scale);
-
-                        const canvas = document.createElement('canvas');
-                        canvas.width = w;
-                        canvas.height = h;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, w, h);
-
-                        const imgData = ctx.getImageData(0, 0, w, h);
-                        const d = imgData.data;
-                        for (let i = 0; i < d.length; i += 4) {
-                            const r = d[i], g = d[i+1], b = d[i+2];
-                            if (r > 238 && g > 238 && b > 238) {
-                                d[i+3] = 0;
-                            } else if (r > 215 && g > 215 && b > 215) {
-                                const prom = (r + g + b) / 3;
-                                d[i+3] = Math.round(((255 - prom) / 40) * 255);
-                            }
-                        }
-                        ctx.putImageData(imgData, 0, 0);
-                        const logoTransparente = canvas.toDataURL('image/png');
-
-                        const favCanvas = document.createElement('canvas');
-                        favCanvas.width = 128;
-                        favCanvas.height = 128;
-                        const fctx = favCanvas.getContext('2d');
-
-                        fctx.beginPath();
-                        fctx.arc(64, 64, 62, 0, Math.PI * 2);
-                        fctx.fillStyle = '#FFFFFF';
-                        fctx.fill();
-
-                        const cropSize = img.width > img.height * 1.25 ? img.height : Math.min(img.width, img.height);
-                        const sx = img.width > img.height * 1.25 ? Math.max(0, (img.width * 0.52 - cropSize) / 2) : (img.width - cropSize) / 2;
-                        const sy = (img.height - cropSize) / 2;
-
-                        fctx.drawImage(img, sx, sy, cropSize, cropSize, 6, 6, 116, 116);
-                        const faviconDataUrl = favCanvas.toDataURL('image/png');
-
-                        aplicarLogoPersonalizado(logoTransparente, faviconDataUrl);
-
-                        const brandingPayload = {
-                            id: '__branding__',
-                            nombre: '__branding__',
-                            logo: logoTransparente,
-                            favicon: faviconDataUrl,
-                            updatedAt: Date.now()
-                        };
-
-                        try {
-                            await setDoc(doc(db, 'vendedores', '__branding__'), brandingPayload);
-                        } catch (permErr1) {
-                            try {
-                                await setDoc(doc(db, 'catalogo', '__branding__'), brandingPayload);
-                            } catch (permErr2) {}
-                        }
-
-                        alert('✅ ¡Logo oficial de AlphaZero aplicado como marca de agua tenue y en la pestaña!');
-                    } catch (err) {
-                        console.error(err);
-                        alert('❌ Error al procesar la imagen: ' + err.message);
-                    } finally {
-                        document.getElementById('loading-screen').classList.add('hidden');
-                    }
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        };
-
         // --- FUNCIONES AUXILIARES DE DATOS, VERSIONES Y ORDENAMIENTO ALFANUMÉRICO DE PARTIDAS ---
         function crearDatosMonedaVacios() {
-            return { folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '', lugar: '', pago: '', vigencia: '', plazo: '', notas: '', vendedorId: '' };
+            return {
+                folioMid: '', folioEnd: '', cliente: '', referencia: '', contacto: '',
+                lugar: '', pago: '', vigencia: '', plazo: '', notas: '',
+                empresa: 'US FIRE', vendedorId: '', tipoPropuesta: 'tecnica'
+            };
         }
 
         function extraerDatosMoneda(origen, vendEspecifico) {
@@ -934,7 +1097,9 @@
                 vigencia: d.vigencia || '',
                 plazo: d.plazo || '',
                 notas: d.notas || '',
-                vendedorId: vendEspecifico !== undefined ? vendEspecifico : (d.vendedorId || '')
+                empresa: d.empresa || 'US FIRE',
+                vendedorId: vendEspecifico !== undefined ? vendEspecifico : (d.vendedorId || ''),
+                tipoPropuesta: d.tipoPropuesta || 'tecnica'
             };
         }
 
@@ -1361,6 +1526,91 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
+        // --- CONTROLES DE EMPRESA, VENDEDOR Y TIPO DE PROPUESTA EN COTIZACIONES ---
+        function pintarBotonesEmpresaCot(empresa) {
+            const emp = empresa === 'USIICSA' ? 'USIICSA' : 'US FIRE';
+            document.getElementById('cot-empresa').value = emp;
+            const bUsFire = document.getElementById('btn-cot-emp-usfire');
+            const bUsiicsa = document.getElementById('btn-cot-emp-usiicsa');
+            if (bUsFire && bUsiicsa) {
+                bUsFire.classList.toggle('active-orange', emp === 'US FIRE');
+                bUsiicsa.classList.toggle('active-blue', emp === 'USIICSA');
+            }
+        }
+
+        function pintarBotonesTipoPropuestaCot(tipo) {
+            const t = tipo === 'economica' ? 'economica' : 'tecnica';
+            document.getElementById('cot-tipo-propuesta').value = t;
+            const bTec = document.getElementById('btn-cot-tipo-tecnica');
+            const bEco = document.getElementById('btn-cot-tipo-economica');
+            if (bTec && bEco) {
+                bTec.classList.toggle('active-blue', t === 'tecnica');
+                bEco.classList.toggle('active-orange', t === 'economica');
+            }
+        }
+
+        function actualizarEstadoFormatoUI() {
+            const lbl = document.getElementById('lbl-estado-formato-cot');
+            if (!lbl) return;
+            const emp = document.getElementById('cot-empresa').value || 'US FIRE';
+            const tipo = document.getElementById('cot-tipo-propuesta').value || 'tecnica';
+            const vendVal = document.getElementById('cot-vendedor').value;
+
+            if (!vendVal) {
+                lbl.className = 'text-[11px] font-semibold mb-4 px-1 text-gray-600';
+                lbl.textContent = `Selecciona un vendedor de ${emp} y el tipo de propuesta.`;
+                return;
+            }
+
+            const vend = resolverVendedorPorIdOKey(vendVal, emp);
+            const tipoTexto = tipo === 'economica' ? 'Económica' : 'Técnica';
+            if (!vend) {
+                lbl.className = 'text-[11px] font-bold mb-4 px-1 text-amber-600';
+                lbl.textContent = `⚠️ Vendedor no encontrado en ${emp}.`;
+                return;
+            }
+
+            const tiene = tipo === 'economica' ? vend.tieneEconomica : vend.tieneTecnica;
+            const nomArch = tipo === 'economica' ? vend.nombreArchivoEconomica : vend.nombreArchivoTecnica;
+
+            if (tiene) {
+                lbl.className = 'text-[11px] font-bold mb-4 px-1 text-emerald-600';
+                lbl.textContent = `✅ Listo: ${emp} · ${vend.nombre} · Propuesta ${tipoTexto}${nomArch ? ` (${nomArch})` : ''}`;
+            } else {
+                lbl.className = 'text-[11px] font-bold mb-4 px-1 text-[#ED813C]';
+                lbl.textContent = `⚠️ ${vend.nombre} (${emp}) aún no tiene cargado el formato de Propuesta ${tipoTexto}.`;
+            }
+        }
+
+        window.seleccionarEmpresaCot = async function(empresa) {
+            const empAnterior = document.getElementById('cot-empresa').value;
+            const vendActualVal = document.getElementById('cot-vendedor').value;
+            const vendActualObj = resolverVendedorPorIdOKey(vendActualVal, empAnterior);
+            const nombreActual = vendActualObj ? vendActualObj.nombre : '';
+
+            pintarBotonesEmpresaCot(empresa);
+            window.renderSelectVendedores();
+
+            // Si existe un vendedor con el mismo nombre en la otra empresa, seleccionarlo automáticamente
+            const listaNueva = obtenerVendedoresAgrupados(empresa);
+            const mismoNombre = nombreActual ? listaNueva.find(v => v.nombre === nombreActual) : null;
+            document.getElementById('cot-vendedor').value = mismoNombre ? mismoNombre.key : '';
+
+            actualizarEstadoFormatoUI();
+            await window.guardarEstadoCotizaciones();
+        };
+
+        window.seleccionarTipoPropuestaCot = async function(tipo) {
+            pintarBotonesTipoPropuestaCot(tipo);
+            actualizarEstadoFormatoUI();
+            await window.guardarEstadoCotizaciones();
+        };
+
+        window.alCambiarVendedorCot = async function() {
+            actualizarEstadoFormatoUI();
+            await window.guardarEstadoCotizaciones();
+        };
+
         function leerFormularioDatosUI() {
             return {
                 folioMid: document.getElementById('cot-folio-mid').value,
@@ -1373,7 +1623,9 @@
                 vigencia: document.getElementById('cot-vigencia').value,
                 plazo: document.getElementById('cot-plazo').value,
                 notas: document.getElementById('cot-notas').value,
-                vendedorId: document.getElementById('cot-vendedor').value
+                empresa: document.getElementById('cot-empresa').value || 'US FIRE',
+                vendedorId: document.getElementById('cot-vendedor').value,
+                tipoPropuesta: document.getElementById('cot-tipo-propuesta').value || 'tecnica'
             };
         }
 
@@ -1389,8 +1641,31 @@
             document.getElementById('cot-plazo').value = d.plazo || '';
             document.getElementById('cot-notas').value = d.notas || '';
             document.getElementById('cot-moneda').value = moneda || 'MXN';
+
+            let empresaFinal = d.empresa || 'US FIRE';
+            let tipoFinal = d.tipoPropuesta || 'tecnica';
+            let vendKeyFinal = d.vendedorId || '';
+
+            // Compatibilidad automática con cotizaciones que tenían un ID de vendedor anterior (ej. "US FIRE - ROXANA - TÉCNICA")
+            if (vendKeyFinal) {
+                const rawLeg = vendedores.find(v => String(v.id) === String(vendKeyFinal) && v.versionEstructura !== 2);
+                if (rawLeg) {
+                    const info = inferirDatosLegacy(rawLeg);
+                    if (!d.empresa) empresaFinal = info.empresa;
+                    if (!d.tipoPropuesta) tipoFinal = info.tipoLegacy;
+                }
+                const resuelto = resolverVendedorPorIdOKey(vendKeyFinal, empresaFinal);
+                if (resuelto) {
+                    empresaFinal = resuelto.empresa;
+                    vendKeyFinal = resuelto.key;
+                }
+            }
+
+            pintarBotonesEmpresaCot(empresaFinal);
+            pintarBotonesTipoPropuestaCot(tipoFinal);
             window.renderSelectVendedores();
-            document.getElementById('cot-vendedor').value = d.vendedorId || '';
+            document.getElementById('cot-vendedor').value = vendKeyFinal;
+            actualizarEstadoFormatoUI();
         }
 
         function actualizarIndicadoresMoneda() {
@@ -1454,7 +1729,12 @@
 
             const datosDestino = nuevaMoneda === 'USD' ? cot.datosUSD : cot.datosMXN;
             if (!tieneInformacionCapturada(datosDestino) && tieneInformacionCapturada(datosCapturados)) {
-                const copiaInicial = { ...datosCapturados, vendedorId: datosDestino.vendedorId || datosCapturados.vendedorId };
+                const copiaInicial = {
+                    ...datosCapturados,
+                    empresa: datosDestino.empresa || datosCapturados.empresa,
+                    vendedorId: datosDestino.vendedorId || datosCapturados.vendedorId,
+                    tipoPropuesta: datosDestino.tipoPropuesta || datosCapturados.tipoPropuesta
+                };
                 if (nuevaMoneda === 'USD') cot.datosUSD = copiaInicial;
                 else cot.datosMXN = copiaInicial;
             }
@@ -1532,7 +1812,9 @@
                 const datosActualesUI = leerFormularioDatosUI();
                 if (!tieneInformacionCapturada(datosActualesUI) || confirm(`¿Deseas copiar también los Datos Comerciales, Folio y Condiciones de ${monOrigen} a ${monActual}?`)) {
                     const vendConservar = datosActualesUI.vendedorId || datosOrigen.vendedorId;
-                    const datosCopiados = { ...datosOrigen, vendedorId: vendConservar };
+                    const empConservar = datosActualesUI.vendedorId ? datosActualesUI.empresa : datosOrigen.empresa;
+                    const tipoConservar = datosActualesUI.vendedorId ? datosActualesUI.tipoPropuesta : datosOrigen.tipoPropuesta;
+                    const datosCopiados = { ...datosOrigen, empresa: empConservar, vendedorId: vendConservar, tipoPropuesta: tipoConservar };
                     if (monActual === 'USD') cot.datosUSD = datosCopiados;
                     else cot.datosMXN = datosCopiados;
                     escribirFormularioDatosUI(datosCopiados, monActual);
@@ -1577,7 +1859,6 @@
             const normBuscada = normTextoCat(descNormal);
             const tieneModEspecifico = !esModeloGenerico(modBuscado);
 
-            // 1. Por ID directo del catálogo (verificando que siga correspondiendo al mismo equipo)
             if (catId) {
                 const porId = catalogo.find(c => String(c.id) === String(catId));
                 if (porId) {
@@ -1589,7 +1870,6 @@
                 }
             }
 
-            // 2. Si tiene un modelo específico, el modelo debe coincidir EXACTAMENTE
             if (tieneModEspecifico) {
                 const candidatosModelo = catalogo.filter(c => {
                     const cMod = limpiarPrefijoMod(c.modelo);
@@ -1607,7 +1887,6 @@
                 return null;
             }
 
-            // 3. Si NO tiene modelo específico (vacío o S/M), buscar por coincidencia exacta de Descripción Detallada + Descripción Corta
             if (normBuscada) {
                 const candidatosDesc = catalogo.filter(c => {
                     if (normTextoCat(c.desc) !== normBuscada) return false;
@@ -1623,7 +1902,6 @@
                 }
             }
 
-            // 4. Solo si no hay descripción detallada ni modelo, y existe un ÚNICO equipo en todo el catálogo con esa descripción corta y marca
             if (cortaBuscada && !normBuscada) {
                 const candidatosCorta = catalogo.filter(c => {
                     if (normTextoCat(c.descCorta) !== cortaBuscada) return false;
@@ -1948,10 +2226,8 @@
                 
                 if (currentRole === 'master') {
                     document.getElementById('btn-admin-usuarios').classList.remove('hidden');
-                    document.getElementById('btn-subir-logo').classList.remove('hidden');
                 } else {
                     document.getElementById('btn-admin-usuarios').classList.add('hidden');
-                    document.getElementById('btn-subir-logo').classList.add('hidden');
                 }
 
                 try { await cargarDatosDesdeNube(); } catch (e) { console.error(e); alert('❌ No se pudieron cargar los datos: ' + e.message); }
@@ -1990,17 +2266,20 @@
             }
 
             const catSnap = await getDocs(collection(db, 'catalogo'));
-            const todosCat = catSnap.docs.map(d => d.data());
-            const brandCat = todosCat.find(x => x.id === '__branding__');
-            if (brandCat && brandCat.logo) aplicarLogoPersonalizado(brandCat.logo, brandCat.favicon);
-            catalogo = todosCat.filter(x => x.id !== '__branding__');
+            catalogo = catSnap.docs.map(d => d.data()).filter(x => x.id !== '__branding__');
             window.renderCatalogo();
 
             const vendSnap = await getDocs(collection(db, 'vendedores'));
-            const todosVend = vendSnap.docs.map(d => d.data());
-            const brandVend = todosVend.find(x => x.id === '__branding__');
-            if (brandVend && brandVend.logo) aplicarLogoPersonalizado(brandVend.logo, brandVend.favicon);
-            vendedores = todosVend.filter(x => x.id !== '__branding__');
+            const todosVend = vendSnap.docs.map(d => d.data()).filter(x => x.id !== '__branding__');
+            plantillasFallbackMap = {};
+            vendedores = [];
+            todosVend.forEach(item => {
+                if (item.esPlantilla) {
+                    plantillasFallbackMap[item.id] = item;
+                } else {
+                    vendedores.push(item);
+                }
+            });
             window.renderSelectVendedores();
 
             const cotSnap = await getDocs(collection(db, 'cotizaciones'));
@@ -2036,7 +2315,11 @@
             if (sec === 'cotizaciones') {
                 window.renderSelectVendedores();
                 if(cotizaciones[cotIndexActiva]) {
-                    document.getElementById('cot-vendedor').value = cotizaciones[cotIndexActiva].datos.vendedorId || '';
+                    const cot = cotizaciones[cotIndexActiva];
+                    const datosAct = cot.monedaActiva === 'USD' ? cot.datosUSD : cot.datosMXN;
+                    const resuelto = resolverVendedorPorIdOKey(datosAct.vendedorId, datosAct.empresa);
+                    document.getElementById('cot-vendedor').value = resuelto ? resuelto.key : '';
+                    actualizarEstadoFormatoUI();
                 }
             }
         };
@@ -2122,48 +2405,287 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        window.guardarVendedor = function() {
-            const nombre = document.getElementById('vend-nombre').value;
-            const fileInput = document.getElementById('vend-file');
-            if (!nombre || fileInput.files.length === 0) return alert('⚠️ Faltan datos.');
-            
+        // --- ADMINISTRAR VENDEDORES (EMPRESA + DRAG & DROP TÉCNICA / ECONÓMICA) ---
+        window.seleccionarEmpresaFormVend = function(empresa) {
+            const emp = empresa === 'USIICSA' ? 'USIICSA' : 'US FIRE';
+            document.getElementById('vend-empresa').value = emp;
+            document.getElementById('btn-vend-emp-usfire').classList.toggle('active-orange', emp === 'US FIRE');
+            document.getElementById('btn-vend-emp-usiicsa').classList.toggle('active-blue', emp === 'USIICSA');
+        };
+
+        function actualizarVisualDropzone(tipo, textoExtra) {
+            const dz = document.getElementById(`drop-${tipo}`);
+            const lbl = document.getElementById(`lbl-drop-${tipo}`);
+            const btnClear = document.getElementById(`btn-clear-${tipo}`);
+            const file = stagedFiles[tipo];
+
+            if (file) {
+                const kb = Math.round(file.size / 1024);
+                dz.classList.add('has-file');
+                lbl.innerHTML = `<span class="text-emerald-600 font-bold">✅ ${esc(file.name)} (${kb} KB)</span>`;
+                btnClear.classList.remove('hidden');
+            } else if (textoExtra) {
+                dz.classList.add('has-file');
+                lbl.innerHTML = `<span class="text-[#0E859F] font-bold">📄 Guardado: ${esc(textoExtra)}</span><br><span class="text-[11px] opacity-80">Arrastra otro archivo aquí para reemplazarlo</span>`;
+                btnClear.classList.add('hidden');
+            } else {
+                dz.classList.remove('has-file');
+                lbl.textContent = 'Arrastra el archivo aquí o haz clic para buscar';
+                btnClear.classList.add('hidden');
+            }
+        }
+
+        function procesarArchivoSeleccionado(file, tipo) {
+            if (!file) return;
+            if (!file.name.toLowerCase().endsWith('.docx')) {
+                return alert('⚠️ Solo se permiten archivos de Word con extensión .docx');
+            }
+            if (file.size > 740 * 1024) {
+                return alert('⚠️ El archivo supera el tamaño máximo recomendado (~740 KB) para guardarse en Firestore. Comprime las imágenes dentro del Word e intenta de nuevo.');
+            }
+            stagedFiles[tipo] = file;
+            actualizarVisualDropzone(tipo);
+        }
+
+        window.manejarDragOver = function(event, tipo) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById(`drop-${tipo}`).classList.add('drag-over');
+        };
+
+        window.manejarDragLeave = function(event, tipo) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById(`drop-${tipo}`).classList.remove('drag-over');
+        };
+
+        window.manejarArchivoDrop = function(event, tipo) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById(`drop-${tipo}`).classList.remove('drag-over');
+            const files = event.dataTransfer?.files;
+            if (files && files.length > 0) {
+                procesarArchivoSeleccionado(files[0], tipo);
+            }
+        };
+
+        window.manejarArchivoInput = function(event, tipo) {
+            const file = event.target.files?.[0];
+            if (file) procesarArchivoSeleccionado(file, tipo);
+        };
+
+        window.quitarArchivoStaged = function(event, tipo) {
+            event.stopPropagation();
+            stagedFiles[tipo] = null;
+            const inp = document.getElementById(`vend-file-${tipo}`);
+            if (inp) inp.value = '';
+
+            const editId = document.getElementById('vend-id').value;
+            const vendEdit = editId ? vendedores.find(v => String(v.id) === String(editId)) : null;
+            const archGuardado = vendEdit ? (tipo === 'tecnica' ? vendEdit.nombreArchivoTecnica : vendEdit.nombreArchivoEconomica) : '';
+            actualizarVisualDropzone(tipo, archGuardado);
+        };
+
+        function leerArchivoComoBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result.split(',')[1]);
+                reader.onerror = () => reject(new Error('No se pudo leer el archivo ' + file.name));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        window.editarVendedor = function(id) {
+            const v = vendedores.find(x => String(x.id) === String(id));
+            if (!v) return;
+            document.getElementById('vend-id').value = v.id;
+            document.getElementById('vend-nombre').value = v.nombre || '';
+            window.seleccionarEmpresaFormVend(v.empresa || 'US FIRE');
+
+            stagedFiles = { tecnica: null, economica: null };
+            document.getElementById('vend-file-tecnica').value = '';
+            document.getElementById('vend-file-economica').value = '';
+
+            actualizarVisualDropzone('tecnica', v.tieneTecnica ? (v.nombreArchivoTecnica || 'Formato Técnica cargado') : '');
+            actualizarVisualDropzone('economica', v.tieneEconomica ? (v.nombreArchivoEconomica || 'Formato Económica cargado') : '');
+
+            const btnGuardar = document.getElementById('btn-guardar-vendedor');
+            btnGuardar.textContent = '💾 Actualizar Vendedor';
+            btnGuardar.classList.remove('az-gradient-btn');
+            btnGuardar.classList.add('az-orange-btn');
+            document.getElementById('btn-cancelar-vendedor').classList.remove('hidden');
+            document.getElementById('vend-nombre').focus();
+        };
+
+        window.cancelarEdicionVendedor = function() {
+            document.getElementById('vend-id').value = '';
+            document.getElementById('vend-nombre').value = '';
+            stagedFiles = { tecnica: null, economica: null };
+            document.getElementById('vend-file-tecnica').value = '';
+            document.getElementById('vend-file-economica').value = '';
+            actualizarVisualDropzone('tecnica', '');
+            actualizarVisualDropzone('economica', '');
+
+            const btnGuardar = document.getElementById('btn-guardar-vendedor');
+            btnGuardar.textContent = 'Guardar Cambios';
+            btnGuardar.classList.remove('az-orange-btn');
+            btnGuardar.classList.add('az-gradient-btn');
+            document.getElementById('btn-cancelar-vendedor').classList.add('hidden');
+        };
+
+        window.guardarVendedor = async function() {
+            const idEdit = document.getElementById('vend-id').value.trim();
+            const nombre = document.getElementById('vend-nombre').value.trim().toUpperCase();
+            const empresa = document.getElementById('vend-empresa').value || 'US FIRE';
+
+            if (!nombre) return alert('⚠️ Ingresa el nombre del vendedor.');
+
+            let existente = idEdit ? vendedores.find(v => String(v.id) === String(idEdit)) : null;
+
+            // Si no se está editando, revisar si ya existe un vendedor con el mismo nombre y empresa
+            if (!existente) {
+                const duplicado = vendedores.find(v => v.versionEstructura === 2 && v.empresa === empresa && String(v.nombre || '').toUpperCase() === nombre);
+                if (duplicado) {
+                    if (!confirm(`Ya existe "${nombre}" en ${empresa}. ¿Deseas actualizar sus formatos con los archivos cargados?`)) return;
+                    existente = duplicado;
+                }
+            }
+
+            if (!existente && !stagedFiles.tecnica && !stagedFiles.economica) {
+                return alert('⚠️ Arrastra al menos un formato Word (.docx), ya sea Propuesta Técnica o Propuesta Económica.');
+            }
+
+            document.getElementById('loading-text').innerText = 'Guardando formatos del vendedor...';
             document.getElementById('loading-screen').classList.remove('hidden');
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64 = e.target.result.split(',')[1];
-                const id = Date.now().toString();
-                const obj = { id, nombre, template: base64 };
-                
+
+            try {
+                const id = existente ? String(existente.id) : Date.now().toString();
+                let tieneTecnica = Boolean(existente?.tieneTecnica);
+                let nombreArchivoTecnica = existente?.nombreArchivoTecnica || '';
+                let tieneEconomica = Boolean(existente?.tieneEconomica);
+                let nombreArchivoEconomica = existente?.nombreArchivoEconomica || '';
+
+                if (stagedFiles.tecnica) {
+                    const b64Tec = await leerArchivoComoBase64(stagedFiles.tecnica);
+                    await guardarPlantillaEnNube(id, 'tecnica', b64Tec, stagedFiles.tecnica.name);
+                    tieneTecnica = true;
+                    nombreArchivoTecnica = stagedFiles.tecnica.name;
+                }
+
+                if (stagedFiles.economica) {
+                    const b64Eco = await leerArchivoComoBase64(stagedFiles.economica);
+                    await guardarPlantillaEnNube(id, 'economica', b64Eco, stagedFiles.economica.name);
+                    tieneEconomica = true;
+                    nombreArchivoEconomica = stagedFiles.economica.name;
+                }
+
+                const obj = {
+                    id,
+                    nombre,
+                    empresa,
+                    versionEstructura: 2,
+                    tieneTecnica,
+                    nombreArchivoTecnica,
+                    tieneEconomica,
+                    nombreArchivoEconomica,
+                    updatedAt: Date.now()
+                };
+
                 await setDoc(doc(db, 'vendedores', id), obj);
-                vendedores.push(obj);
-                
-                document.getElementById('vend-nombre').value = '';
-                fileInput.value = '';
+
+                const idx = vendedores.findIndex(v => String(v.id) === id);
+                if (idx >= 0) vendedores[idx] = obj;
+                else vendedores.push(obj);
+
+                window.cancelarEdicionVendedor();
                 window.renderVendedores();
                 window.renderSelectVendedores();
+                actualizarEstadoFormatoUI();
+                alert(`✅ Vendedor "${nombre}" (${empresa}) guardado correctamente.`);
+            } catch (err) {
+                console.error(err);
+                alert('❌ Error al guardar vendedor: ' + (err.message || err));
+            } finally {
+                document.getElementById('loading-text').innerText = 'Sincronizando con AlphaZero...';
                 document.getElementById('loading-screen').classList.add('hidden');
-                alert('✅ Vendedor guardado en la nube.');
-            };
-            reader.readAsDataURL(file);
+            }
         };
 
         window.renderVendedores = function() {
             const lista = document.getElementById('lista-vendedores');
-            lista.innerHTML = vendedores.map(v => `
-                <div class="az-card p-3 rounded-xl flex justify-between items-center">
-                    <span class="font-bold text-[#0B192C]">${esc(v.nombre)}</span>
-                    <button onclick="eliminarVendedor('${v.id}')" class="text-red-500 font-bold">X</button>
-                </div>
-            `).join('');
+            if (!lista) return;
+
+            const renderGrupoEmpresa = (empresa, colorTitulo) => {
+                const nuevos = vendedores
+                    .filter(v => v.versionEstructura === 2 && (v.empresa || 'US FIRE').toUpperCase() === empresa)
+                    .sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || ''), 'es'));
+
+                const legacy = vendedores
+                    .filter(v => v.versionEstructura !== 2 && inferirDatosLegacy(v).empresa === empresa)
+                    .sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || ''), 'es'));
+
+                const htmlNuevos = nuevos.map(v => `
+                    <div class="p-3 rounded-xl flex justify-between items-start gap-2 mb-2" style="background-color: rgba(14, 133, 159, 0.06);">
+                        <div class="min-w-0">
+                            <div class="font-extrabold text-[#0B192C] text-sm">${esc(v.nombre)}</div>
+                            <div class="flex flex-wrap gap-1.5 mt-1.5">
+                                <span class="text-[11px] font-bold px-2 py-0.5 rounded ${v.tieneTecnica ? 'text-emerald-600' : 'text-gray-500 opacity-70'}">
+                                    📋 Técnica: ${v.tieneTecnica ? '✅ Cargada' : 'Sin archivo'}
+                                </span>
+                                <span class="text-[11px] font-bold px-2 py-0.5 rounded ${v.tieneEconomica ? 'text-emerald-600' : 'text-gray-500 opacity-70'}">
+                                    💰 Económica: ${v.tieneEconomica ? '✅ Cargada' : 'Sin archivo'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button onclick="editarVendedor('${v.id}')" title="Editar o subir formatos" class="text-[#0E859F] hover:underline font-bold text-xs">✏️ Editar</button>
+                            <button onclick="eliminarVendedor('${v.id}')" title="Eliminar vendedor" class="text-red-500 hover:text-red-700 font-bold text-xs px-1">✕</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                const htmlLegacy = legacy.map(v => {
+                    const info = inferirDatosLegacy(v);
+                    return `
+                    <div class="p-3 rounded-xl flex justify-between items-center gap-2 mb-2 opacity-85" style="background-color: rgba(237, 129, 60, 0.06);">
+                        <div class="min-w-0">
+                            <div class="font-bold text-[#0B192C] text-xs">${esc(v.nombre)}</div>
+                            <div class="text-[10px] text-gray-600 mt-0.5">Formato anterior · Detectado como: <b>${esc(info.nombreLimpio)} (${info.tipoLegacy === 'economica' ? 'Económica' : 'Técnica'})</b></div>
+                        </div>
+                        <button onclick="eliminarVendedor('${v.id}')" title="Eliminar formato anterior" class="text-red-500 hover:text-red-700 font-bold text-xs px-1 shrink-0">✕</button>
+                    </div>`;
+                }).join('');
+
+                return `
+                    <div class="az-card p-3 rounded-xl">
+                        <h4 class="font-extrabold text-base mb-3 tracking-wide ${colorTitulo}">${empresa}</h4>
+                        ${htmlNuevos || htmlLegacy ? (htmlNuevos + htmlLegacy) : `<p class="text-xs text-gray-600">No hay vendedores registrados en ${empresa}.</p>`}
+                    </div>
+                `;
+            };
+
+            lista.innerHTML = renderGrupoEmpresa('US FIRE', 'text-[#ED813C]') + renderGrupoEmpresa('USIICSA', 'text-[#0E859F]');
         };
 
         window.eliminarVendedor = async function(id) {
-            if(!confirm("¿Eliminar vendedor y su formato?")) return;
+            if(!confirm("¿Eliminar vendedor y sus formatos?")) return;
             document.getElementById('loading-screen').classList.remove('hidden');
             await deleteDoc(doc(db, 'vendedores', id));
-            vendedores = vendedores.filter(v => v.id !== id);
+            // Limpiar plantillas asociadas si existen
+            for (const tipo of ['tecnica', 'economica']) {
+                try { await deleteDoc(doc(db, 'vendedores', id, 'plantillas', tipo)); } catch (e) {}
+                const fbId = `${id}__tpl_${tipo}`;
+                if (plantillasFallbackMap[fbId]) {
+                    try { await deleteDoc(doc(db, 'vendedores', fbId)); } catch (e) {}
+                    delete plantillasFallbackMap[fbId];
+                }
+                delete plantillasCache[`${id}_${tipo}`];
+            }
+            vendedores = vendedores.filter(v => String(v.id) !== String(id));
+            if (document.getElementById('vend-id').value === String(id)) window.cancelarEdicionVendedor();
             window.renderVendedores();
+            window.renderSelectVendedores();
+            actualizarEstadoFormatoUI();
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
@@ -2435,8 +2957,17 @@
 
         window.renderSelectVendedores = function() {
             const select = document.getElementById('cot-vendedor');
-            select.innerHTML = `<option value="">-- SELECCIONA EL VENDEDOR AQUÍ --</option>` + 
-                vendedores.map(v => `<option value="${v.id}">${esc(v.nombre)}</option>`).join('');
+            if (!select) return;
+            const empActiva = document.getElementById('cot-empresa')?.value || 'US FIRE';
+            const lista = obtenerVendedoresAgrupados(empActiva);
+            const valorPrevio = select.value;
+
+            select.innerHTML = `<option value="">-- Vendedor (${empActiva}) --</option>` + 
+                lista.map(v => `<option value="${esc(v.key)}">${esc(v.nombre)}</option>`).join('');
+
+            if (valorPrevio && lista.some(v => v.key === valorPrevio)) {
+                select.value = valorPrevio;
+            }
         };
 
         window.buscarEquipoParaPartida = function() {
@@ -2576,7 +3107,6 @@
                 pdf = equipoMatch.pdf;
             }
 
-            // Sincronizar también cada ítem de incluyeList con su ficha exacta antes de guardar
             const incluyeSincronizado = tempIncluye.map(inc => {
                 const pdfResuelto = obtenerPdfIncluye(inc);
                 const matchInc = buscarEquipoExactoEnCatalogo({
@@ -2616,7 +3146,7 @@
             document.getElementById('loading-screen').classList.add('hidden');
         };
 
-        // --- RENDERIZADO DE PARTIDAS AGREGADAS CON FICHAS TÉCNICAS TAMBIÉN EN "INCLUYE" ---
+        // --- RENDERIZADO DE PARTIDAS AGREGADAS ---
         window.renderPartidas = function() {
             const cot = cotizaciones[cotIndexActiva];
             const lista = document.getElementById('lista-partidas');
@@ -2729,14 +3259,23 @@
 
             const cot = cotizaciones[cotIndexActiva];
             const d = cot.datos;
+            const empresa = d.empresa || 'US FIRE';
+            const tipoPropuesta = d.tipoPropuesta || 'tecnica';
+            const tipoTexto = tipoPropuesta === 'economica' ? 'Económica' : 'Técnica';
 
             if (!d.vendedorId) {
-                alert('⚠️ Selecciona un Vendedor en la Configuración Inicial.');
+                alert(`⚠️ Selecciona un Vendedor de ${empresa} en la Configuración Inicial.`);
                 return null;
             }
-            const vend = vendedores.find(v => v.id.toString() === d.vendedorId.toString());
-            if (!vend) {
+            const vendEntry = resolverVendedorPorIdOKey(d.vendedorId, empresa);
+            if (!vendEntry) {
                 alert('⚠️ Vendedor inválido.');
+                return null;
+            }
+
+            const templateBase64 = await obtenerBase64Plantilla(vendEntry, tipoPropuesta);
+            if (!templateBase64) {
+                alert(`⚠️ El vendedor "${vendEntry.nombre}" (${empresa}) no tiene cargado el formato de Propuesta ${tipoTexto}.\n\nVe a la sección "Vendedores" y arrastra el archivo .docx correspondiente.`);
                 return null;
             }
 
@@ -2752,11 +3291,11 @@
             const nombreBase = `${folioFinal} - ${monedaDocName}`;
             const textoMonedaFormato = d.moneda === 'MXN' ? 'PESOS MEXICANOS (MXN)' : 'DÓLARES (USD)';
 
-            const content = base64ToUint8Array(vend.template);
+            const content = base64ToUint8Array(templateBase64);
             const zip = new PizZip(content);
-            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+            const docWord = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
-            doc.render({
+            docWord.render({
                 FECHA: fechaString, FOLIO: folioFinal, CLIENTE: d.cliente || '', REFERENCIA: d.referencia || '',
                 LUGAR_ENTREGA: d.lugar || '', MONEDA: textoMonedaFormato, DATOS_CONTACTO: d.contacto || '',
                 CONDICIONES_PAGO: d.pago || '', VIGENCIA: d.vigencia || '', PLAZO_ENTREGA: d.plazo || '',
@@ -2879,7 +3418,7 @@
                 })
             });
 
-            const outBlob = doc.getZip().generate({
+            const outBlob = docWord.getZip().generate({
                 type: "blob",
                 mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             });
