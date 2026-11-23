@@ -368,6 +368,9 @@
 </head>
 <body class="text-gray-800 relative selection:bg-[#0E859F] selection:text-white">
 
+    <!-- Input oculto global para subir logotipo -->
+    <input type="file" id="input-subir-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="hidden" onchange="manejarSubidaLogo(event)">
+
     <!-- Símbolo vectorial del emblema AlphaZero -->
     <svg style="position:absolute; width:0; height:0; overflow:hidden;" aria-hidden="true">
         <defs>
@@ -434,25 +437,28 @@
 
     <!-- PANTALLA DE CARGA GLOBAL -->
     <div id="loading-screen" class="fixed inset-0 flex flex-col items-center justify-center hidden">
-        <svg class="w-20 h-20 animate-spin mb-4" style="animation-duration: 6s;"><use href="#alphazero-emblem"></use></svg>
+        <svg id="loading-logo-default" class="w-20 h-20 animate-spin mb-4" style="animation-duration: 6s;"><use href="#alphazero-emblem"></use></svg>
+        <img id="loading-logo-custom" class="w-24 h-24 object-contain animate-pulse mb-4 hidden" alt="Logo AlphaZero">
         <div id="loading-text" class="text-white text-xl font-bold tracking-wider animate-pulse">Sincronizando con AlphaZero...</div>
     </div>
 
     <!-- PANTALLA DE INICIO DE SESIÓN SIN BORDES CON MARCA DE AGUA TENUE -->
     <div id="login-container" class="flex h-screen bg-[#0B192C] items-center justify-center relative overflow-hidden hidden">
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-            <svg class="w-[680px] h-[680px] opacity-[0.10]"><use href="#alphazero-emblem"></use></svg>
+            <svg id="login-wm-default" class="w-[680px] h-[680px] opacity-[0.10]"><use href="#alphazero-emblem"></use></svg>
+            <img id="login-wm-custom" class="w-[620px] h-[620px] max-w-[85vw] max-h-[80vh] object-contain opacity-[0.10] hidden" alt="">
         </div>
 
         <div class="az-login-card p-8 rounded-xl w-96 max-w-[92vw] relative z-10">
             <div class="flex flex-col items-center text-center mb-6">
-                <div class="flex flex-col items-center">
+                <div id="login-logo-default" class="flex flex-col items-center">
                     <svg class="w-24 h-24 mb-2"><use href="#alphazero-emblem"></use></svg>
                     <h2 class="text-3xl font-extrabold tracking-wider leading-none">
                         <span class="text-white">ALPHA</span><span class="az-gradient-text">ZERO</span>
                     </h2>
                     <p class="text-[11px] font-semibold tracking-[0.22em] text-gray-300 mt-1">SISTEMAS CONTRAINCENDIOS</p>
                 </div>
+                <img id="login-logo-custom" class="max-h-28 max-w-[240px] object-contain mb-2 hidden" alt="Logo AlphaZero">
                 <p class="text-gray-400 font-semibold text-[11px] mt-3">CONTACTA A UN ADMINISTRADOR PARA SER DADO DE ALTA</p>
             </div>
             <input type="email" id="login-user" placeholder="Correo electrónico" class="p-3 w-full mb-3 rounded-lg text-sm font-medium text-white placeholder-gray-400">
@@ -466,18 +472,20 @@
         
         <!-- MARCA DE AGUA TENUE EN EL FONDO -->
         <div class="fixed inset-0 pointer-events-none select-none flex flex-col items-center justify-center z-0">
-            <div class="flex flex-col items-center justify-center">
+            <div id="app-wm-default" class="flex flex-col items-center justify-center">
                 <svg class="w-[500px] h-[500px] max-w-[80vw] max-h-[72vh] opacity-[0.07]"><use href="#alphazero-emblem"></use></svg>
                 <div class="text-4xl font-black tracking-[0.25em] opacity-[0.06] mt-2 text-[#0B192C]">ALPHAZERO</div>
                 <div class="text-xs font-bold tracking-[0.35em] opacity-[0.07] text-[#0E859F]">SISTEMAS CONTRAINCENDIOS</div>
             </div>
+            <img id="app-wm-custom" class="w-[460px] h-[460px] max-w-[78vw] max-h-[68vh] object-contain opacity-[0.08] hidden" alt="">
         </div>
 
         <!-- Menú Lateral Contraíble estilo Apple Liquid Glass -->
         <div id="sidebar" class="w-64 text-[#0B192C] p-4 flex flex-col transition-all duration-300 shrink-0 relative z-20 rounded-r-2xl">
             <div class="flex items-center justify-between mb-6 sidebar-header w-full pb-2">
                 <div class="flex items-center gap-2.5 sidebar-text">
-                    <svg class="w-11 h-11 shrink-0"><use href="#alphazero-emblem"></use></svg>
+                    <svg id="sidebar-logo-default" class="w-11 h-11 shrink-0"><use href="#alphazero-emblem"></use></svg>
+                    <img id="sidebar-logo-custom" class="w-11 h-11 object-contain shrink-0 hidden" alt="Logo">
                     <div class="leading-tight">
                         <h2 class="text-lg font-extrabold tracking-wider">
                             <span class="text-[#0B192C]">ALPHA</span><span class="az-gradient-text">ZERO</span>
@@ -502,6 +510,10 @@
             
             <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" title="Gestión de Usuarios" class="liquid-nav-btn text-left mb-2 py-2.5 px-3 text-[#ED813C] hover:text-[#d96e2b] font-bold hidden mt-2 flex items-center gap-3 w-full justify-center md:justify-start">
                 <span class="text-xl">⚙️</span> <span class="sidebar-text">Gestión de Usuarios</span>
+            </button>
+
+            <button id="btn-admin-logo" onclick="document.getElementById('input-subir-logo').click()" title="Subir Logotipo" class="liquid-nav-btn text-left mb-2.5 py-2.5 px-3 hover:text-[#0E859F] font-bold hidden flex items-center gap-3 w-full justify-center md:justify-start">
+                <span class="text-xl">🖼️</span> <span class="sidebar-text">Subir Logo</span>
             </button>
 
             <!-- Botón de Modo Oscuro / Modo Claro -->
@@ -530,6 +542,14 @@
             <div id="sec-usuarios" class="hidden relative z-10">
                 <div class="flex flex-wrap justify-between items-center pb-2 mb-4 gap-2">
                     <h3 class="text-2xl font-extrabold text-[#0B192C]">Gestión de Accesos</h3>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" onclick="document.getElementById('input-subir-logo').click()" class="az-gradient-btn text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                            🖼️ Subir Logo
+                        </button>
+                        <button type="button" id="btn-restaurar-logo" onclick="restaurarLogoPredeterminado()" class="hidden text-red-600 hover:bg-red-500/10 px-3 py-2 rounded-lg text-xs font-bold transition">
+                            ↺ Restaurar Logo
+                        </button>
+                    </div>
                 </div>
                 <div class="az-card p-6 rounded-xl mb-6">
                     <h4 class="font-bold mb-1 text-[#0B192C]">Dar de alta o sincronizar vendedor</h4>
@@ -639,7 +659,8 @@
             <div id="sec-cotizaciones" class="hidden relative z-10">
                 <div class="flex flex-wrap justify-between items-center mb-3 pb-2 gap-2">
                     <div class="flex items-center gap-2">
-                        <svg class="w-7 h-7"><use href="#alphazero-emblem"></use></svg>
+                        <svg id="cot-logo-default" class="w-7 h-7"><use href="#alphazero-emblem"></use></svg>
+                        <img id="cot-logo-custom" class="w-7 h-7 object-contain hidden" alt="Logo">
                         <h3 class="text-xl font-extrabold text-[#0B192C]">Cotizaciones <span class="az-gradient-text">AlphaZero</span></h3>
                     </div>
                     <div class="flex flex-wrap gap-2 items-center">
@@ -889,6 +910,140 @@
         };
 
         aplicarTema(localStorage.getItem('az_theme') === 'dark');
+
+        // --- SISTEMA DE LOGOTIPO PERSONALIZADO (SUBIR / RESTAURAR / SINCRONIZAR) ---
+        const DEFAULT_FAVICON_HREF = document.getElementById('dynamic-favicon')?.getAttribute('href') || '';
+
+        function aplicarLogoPersonalizado(dataUrl) {
+            const tieneLogo = Boolean(dataUrl && typeof dataUrl === 'string' && dataUrl.startsWith('data:image/'));
+            const pares = [
+                ['loading-logo-default', 'loading-logo-custom'],
+                ['login-wm-default', 'login-wm-custom'],
+                ['login-logo-default', 'login-logo-custom'],
+                ['app-wm-default', 'app-wm-custom'],
+                ['sidebar-logo-default', 'sidebar-logo-custom'],
+                ['cot-logo-default', 'cot-logo-custom']
+            ];
+
+            pares.forEach(([idDef, idCust]) => {
+                const elDef = document.getElementById(idDef);
+                const elCust = document.getElementById(idCust);
+                if (elDef) elDef.classList.toggle('hidden', tieneLogo);
+                if (elCust) {
+                    if (tieneLogo) elCust.src = dataUrl;
+                    else elCust.removeAttribute('src');
+                    elCust.classList.toggle('hidden', !tieneLogo);
+                }
+            });
+
+            const fav = document.getElementById('dynamic-favicon');
+            if (fav) {
+                fav.href = tieneLogo ? dataUrl : DEFAULT_FAVICON_HREF;
+                fav.type = tieneLogo ? (dataUrl.startsWith('data:image/svg') ? 'image/svg+xml' : 'image/png') : 'image/svg+xml';
+            }
+
+            const btnRestaurar = document.getElementById('btn-restaurar-logo');
+            if (btnRestaurar) btnRestaurar.classList.toggle('hidden', !tieneLogo);
+        }
+
+        function optimizarImagenLogo(file) {
+            return new Promise((resolve, reject) => {
+                if (!file || !file.type.startsWith('image/')) {
+                    return reject(new Error('Selecciona una imagen válida (PNG, JPG, WebP o SVG).'));
+                }
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('No se pudo leer la imagen seleccionada.'));
+                reader.onload = e => {
+                    const rawDataUrl = e.target.result;
+                    if (file.type === 'image/svg+xml') {
+                        if (rawDataUrl.length > 650000) {
+                            return reject(new Error('El archivo SVG es demasiado pesado para la nube.'));
+                        }
+                        return resolve(rawDataUrl);
+                    }
+                    const img = new Image();
+                    img.onerror = () => reject(new Error('No se pudo procesar la imagen.'));
+                    img.onload = () => {
+                        const maxDim = 700;
+                        let w = img.naturalWidth || img.width;
+                        let h = img.naturalHeight || img.height;
+                        if (w > maxDim || h > maxDim) {
+                            const ratio = Math.min(maxDim / w, maxDim / h);
+                            w = Math.max(1, Math.round(w * ratio));
+                            h = Math.max(1, Math.round(h * ratio));
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+
+                        let out = canvas.toDataURL('image/png');
+                        if (out.length > 650000) {
+                            out = canvas.toDataURL('image/webp', 0.88);
+                        }
+                        if (out.length > 750000) {
+                            out = canvas.toDataURL('image/webp', 0.72);
+                        }
+                        if (out.length > 850000) {
+                            return reject(new Error('La imagen sigue siendo demasiado pesada. Intenta con un archivo más ligero.'));
+                        }
+                        resolve(out);
+                    };
+                    img.src = rawDataUrl;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        window.manejarSubidaLogo = async function(event) {
+            const input = event?.target;
+            const file = input?.files?.[0];
+            if (!file) return;
+
+            document.getElementById('loading-text').innerText = 'Guardando logotipo...';
+            document.getElementById('loading-screen').classList.remove('hidden');
+
+            try {
+                const dataUrl = await optimizarImagenLogo(file);
+                const payload = { id: '__branding__', logo: dataUrl, updatedAt: Date.now() };
+                try {
+                    await setDoc(doc(db, 'catalogo', '__branding__'), payload);
+                } catch (e1) {
+                    await setDoc(doc(db, 'vendedores', '__branding__'), payload);
+                }
+                try { localStorage.setItem('az_custom_logo', dataUrl); } catch (e) {}
+                aplicarLogoPersonalizado(dataUrl);
+                alert('✅ Logotipo actualizado y sincronizado en la nube.');
+            } catch (err) {
+                console.error(err);
+                alert('❌ Error al subir logotipo: ' + (err.message || err));
+            } finally {
+                if (input) input.value = '';
+                document.getElementById('loading-text').innerText = 'Sincronizando con AlphaZero...';
+                document.getElementById('loading-screen').classList.add('hidden');
+            }
+        };
+
+        window.restaurarLogoPredeterminado = async function() {
+            if (!confirm('¿Deseas restaurar el logotipo predeterminado de AlphaZero?')) return;
+            document.getElementById('loading-text').innerText = 'Restaurando logotipo...';
+            document.getElementById('loading-screen').classList.remove('hidden');
+            try {
+                try { await deleteDoc(doc(db, 'catalogo', '__branding__')); } catch (e) {}
+                try { await deleteDoc(doc(db, 'vendedores', '__branding__')); } catch (e) {}
+                try { localStorage.removeItem('az_custom_logo'); } catch (e) {}
+                aplicarLogoPersonalizado(null);
+            } finally {
+                document.getElementById('loading-text').innerText = 'Sincronizando con AlphaZero...';
+                document.getElementById('loading-screen').classList.add('hidden');
+            }
+        };
+
+        try {
+            const logoCache = localStorage.getItem('az_custom_logo');
+            if (logoCache) aplicarLogoPersonalizado(logoCache);
+        } catch (e) {}
 
         let currentUser = null;
         let currentRole = null;
@@ -2219,8 +2374,10 @@
                 
                 if (currentRole === 'master') {
                     document.getElementById('btn-admin-usuarios').classList.remove('hidden');
+                    document.getElementById('btn-admin-logo').classList.remove('hidden');
                 } else {
                     document.getElementById('btn-admin-usuarios').classList.add('hidden');
+                    document.getElementById('btn-admin-logo').classList.add('hidden');
                 }
 
                 try { await cargarDatosDesdeNube(); } catch (e) { console.error(e); alert('❌ No se pudieron cargar los datos: ' + e.message); }
@@ -2259,11 +2416,26 @@
             }
 
             const catSnap = await getDocs(collection(db, 'catalogo'));
-            catalogo = catSnap.docs.map(d => d.data()).filter(x => x.id !== '__branding__');
+            const catDocs = catSnap.docs.map(d => ({ ...d.data(), _docId: d.id }));
+            const brandingCat = catDocs.find(x => x.id === '__branding__' || x._docId === '__branding__');
+            catalogo = catDocs.filter(x => x.id !== '__branding__' && x._docId !== '__branding__');
             window.renderCatalogo();
 
             const vendSnap = await getDocs(collection(db, 'vendedores'));
-            const todosVend = vendSnap.docs.map(d => d.data()).filter(x => x.id !== '__branding__');
+            const vendDocs = vendSnap.docs.map(d => ({ ...d.data(), _docId: d.id }));
+            const brandingVend = vendDocs.find(x => x.id === '__branding__' || x._docId === '__branding__');
+            const todosVend = vendDocs.filter(x => x.id !== '__branding__' && x._docId !== '__branding__');
+
+            const brandingDoc = brandingCat || brandingVend;
+            const logoNube = brandingDoc?.logo || brandingDoc?.logoDataUrl || brandingDoc?.logoBase64 || brandingDoc?.dataUrl || brandingDoc?.image || null;
+            if (logoNube) {
+                try { localStorage.setItem('az_custom_logo', logoNube); } catch (e) {}
+                aplicarLogoPersonalizado(logoNube);
+            } else {
+                try { localStorage.removeItem('az_custom_logo'); } catch (e) {}
+                aplicarLogoPersonalizado(null);
+            }
+
             plantillasFallbackMap = {};
             vendedores = [];
             todosVend.forEach(item => {
@@ -3468,7 +3640,7 @@
         window.seleccionarIncluyePorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipoIncluye(c); };
         ['guardarEquipo','eliminarEquipo','eliminarVendedor','eliminarUsuario','nuevaCotizacion','duplicarCotizacion',
          'eliminarCotizacionActual','cambiarCotizacionTab','cambiarVersionCotizacion','crearNuevaRevision','eliminarVersionActual','manejarCambioCampoRev',
-         'cambiarMonedaCotizacion','copiarPartidasOtraMoneda','agregarPartida','eliminarPartida','generarDocumentoWord'].forEach(n => {
+         'cambiarMonedaCotizacion','copiarPartidasOtraMoneda','agregarPartida','eliminarPartida','generarDocumentoWord','restaurarLogoPredeterminado'].forEach(n => {
             const f = window[n];
             window[n] = async (...a) => {
                 try { return await f(...a); }
