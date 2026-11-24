@@ -360,11 +360,132 @@
         body.dark-mode .\!text-red-600 { color: #F87171 !important; }
         body.dark-mode .bg-\[\#0B192C\]\/10 { background-color: rgba(255, 255, 255, 0.12) !important; }
         body.dark-mode #main-content .bg-\[\#0B192C\] { background-color: #1E293B !important; }
+
+        /* ==========================================
+           ESTILOS DEL APARTADO DE ANÁLISIS (SOLO MASTER)
+           ========================================== */
+        .az-ana-panel {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            border-radius: 1rem;
+            box-shadow: 0 8px 28px -8px rgba(11, 25, 44, 0.10), inset 0 0 0 1px rgba(14, 133, 159, 0.16);
+            transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+        }
+        .az-ana-kpi {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.85) 0%, rgba(240, 248, 255, 0.58) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 1rem;
+            box-shadow: 0 6px 20px -6px rgba(11, 25, 44, 0.09), inset 0 0 0 1px rgba(14, 133, 159, 0.18);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .az-ana-kpi:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px -6px rgba(14, 133, 159, 0.18), inset 0 0 0 1px rgba(14, 133, 159, 0.30);
+        }
+        .az-ana-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.78rem;
+        }
+        .az-ana-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: rgba(11, 25, 44, 0.06);
+            backdrop-filter: blur(10px);
+            color: #0B192C;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-size: 0.68rem;
+            padding: 0.65rem 0.75rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .az-ana-table tbody td {
+            padding: 0.6rem 0.75rem;
+            color: #0B192C;
+            vertical-align: middle;
+            box-shadow: inset 0 -1px 0 rgba(14, 133, 159, 0.10);
+        }
+        .az-ana-table tbody tr:hover td {
+            background: rgba(14, 133, 159, 0.07);
+        }
+        .az-ana-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.18rem 0.55rem;
+            border-radius: 9999px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        .az-ana-tab-btn {
+            padding: 0.45rem 0.9rem;
+            border-radius: 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #0B192C;
+            background: rgba(14, 133, 159, 0.08);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .az-ana-tab-btn:hover {
+            background: rgba(14, 133, 159, 0.16);
+        }
+        .az-ana-tab-btn.active {
+            background: linear-gradient(90deg, #0E859F 0%, #0E5DF0 100%);
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 12px -2px rgba(14, 93, 240, 0.30);
+        }
+        .az-ana-chart-box {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+        .az-ana-chart-box-tall {
+            position: relative;
+            height: 360px;
+            width: 100%;
+        }
+
+        body.dark-mode .az-ana-panel {
+            background: rgba(15, 31, 54, 0.68);
+            box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.50), inset 0 0 0 1px rgba(56, 189, 248, 0.16);
+        }
+        body.dark-mode .az-ana-kpi {
+            background: linear-gradient(145deg, rgba(15, 31, 54, 0.80) 0%, rgba(11, 25, 44, 0.64) 100%);
+            box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.48), inset 0 0 0 1px rgba(56, 189, 248, 0.18);
+        }
+        body.dark-mode .az-ana-table thead th {
+            background: rgba(15, 23, 42, 0.92);
+            color: #E2E8F0;
+        }
+        body.dark-mode .az-ana-table tbody td {
+            color: #E2E8F0;
+            box-shadow: inset 0 -1px 0 rgba(148, 163, 184, 0.12);
+        }
+        body.dark-mode .az-ana-table tbody tr:hover td {
+            background: rgba(56, 189, 248, 0.10);
+        }
+        body.dark-mode .az-ana-tab-btn {
+            color: #CBD5E1;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        body.dark-mode .az-ana-tab-btn:hover {
+            background: rgba(255, 255, 255, 0.14);
+        }
     </style>
     <!-- Librerías de Word -->
     <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.4/dist/pizzip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.37.11/build/docxtemplater.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <!-- Librería de Gráficos Interactivos (Solo Análisis Master) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body class="text-gray-800 relative selection:bg-[#0E859F] selection:text-white">
 
@@ -508,6 +629,10 @@
                 <span class="text-xl">👥</span> <span class="sidebar-text">Vendedores</span>
             </button>
             
+            <button id="btn-admin-analisis" onclick="mostrarSeccion('analisis')" title="Análisis Comercial (Solo Master)" class="liquid-nav-btn text-left mb-2 py-2.5 px-3 text-[#0E5DF0] hover:text-[#0E859F] font-bold hidden mt-2 flex items-center gap-3 w-full justify-center md:justify-start">
+                <span class="text-xl">📊</span> <span class="sidebar-text">Análisis</span>
+            </button>
+
             <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" title="Gestión de Usuarios" class="liquid-nav-btn text-left mb-2 py-2.5 px-3 text-[#ED813C] hover:text-[#d96e2b] font-bold hidden mt-2 flex items-center gap-3 w-full justify-center md:justify-start">
                 <span class="text-xl">⚙️</span> <span class="sidebar-text">Gestión de Usuarios</span>
             </button>
@@ -537,6 +662,300 @@
 
         <!-- Contenedor Principal Sin Bordes -->
         <div class="flex-1 p-4 overflow-y-auto relative z-10" id="main-content">
+
+            <!-- SECCIÓN: ANÁLISIS COMERCIAL Y ESTADÍSTICAS (Solo Master) -->
+            <div id="sec-analisis" class="hidden relative z-10 pb-8">
+                <!-- Encabezado y Acciones -->
+                <div class="flex flex-wrap justify-between items-center pb-2 mb-4 gap-3">
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="text-2xl font-extrabold text-[#0B192C]">Análisis Comercial <span class="az-gradient-text">AlphaZero</span></h3>
+                            <span class="az-ana-pill bg-[#ED813C]/15 text-[#ED813C]">🔒 SOLO MASTER</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-0.5">Inteligencia de cotizaciones, revisiones históricas, precios por modelo/marca y actividad de clientes.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" onclick="sincronizarYActualizarAnalisis()" class="az-gradient-btn text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                            🔄 Sincronizar Datos
+                        </button>
+                        <button type="button" onclick="exportarAnalisisCSV()" class="az-orange-btn text-white px-3.5 py-2 rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                            📥 Exportar CSV (Excel)
+                        </button>
+                        <button type="button" onclick="limpiarFiltrosAnalisis()" class="bg-[#0B192C]/10 hover:bg-[#0E859F]/20 text-[#0B192C] px-3 py-2 rounded-lg text-xs font-bold transition">
+                            🧹 Limpiar Filtros
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Barra de Filtros Interactivos -->
+                <div class="az-ana-panel p-4 mb-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 items-end">
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase tracking-wider text-gray-600 mb-1">Revisiones</label>
+                            <select id="ana-filtro-revisiones" onchange="actualizarAnalisis()" class="p-2 w-full rounded-lg text-xs font-bold">
+                                <option value="todas">Todas las revisiones (Historial)</option>
+                                <option value="ultima">Solo última revisión por folio</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase tracking-wider text-gray-600 mb-1">Empresa</label>
+                            <select id="ana-filtro-empresa" onchange="actualizarAnalisis()" class="p-2 w-full rounded-lg text-xs font-bold">
+                                <option value="TODAS">Todas (US FIRE + USIICSA)</option>
+                                <option value="US FIRE">US FIRE</option>
+                                <option value="USIICSA">USIICSA</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase tracking-wider text-gray-600 mb-1">Moneda</label>
+                            <select id="ana-filtro-moneda" onchange="actualizarAnalisis()" class="p-2 w-full rounded-lg text-xs font-bold">
+                                <option value="TODAS">Todas (MXN + USD)</option>
+                                <option value="MXN">Solo MXN</option>
+                                <option value="USD">Solo USD</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase tracking-wider text-gray-600 mb-1">Fecha Desde</label>
+                            <input type="date" id="ana-fecha-desde" onchange="actualizarAnalisis()" class="p-2 w-full rounded-lg text-xs font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase tracking-wider text-gray-600 mb-1">Fecha Hasta</label>
+                            <input type="date" id="ana-fecha-hasta" onchange="actualizarAnalisis()" class="p-2 w-full rounded-lg text-xs font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase tracking-wider text-gray-600 mb-1">Buscar</label>
+                            <input type="text" id="ana-buscar" oninput="actualizarAnalisis()" placeholder="🔍 Modelo, marca, cliente, folio..." class="p-2 w-full rounded-lg text-xs font-bold">
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap justify-between items-center gap-2 mt-3 pt-2">
+                        <label class="inline-flex items-center gap-2 text-xs font-bold text-gray-700 cursor-pointer select-none">
+                            <input type="checkbox" id="ana-incluir-subpartidas" onchange="actualizarAnalisis()" class="w-4 h-4 accent-[#0E859F] rounded cursor-pointer">
+                            <span>Incluir equipos dentro de "INCLUYE:" en el conteo de frecuencia</span>
+                        </label>
+                        <div id="ana-resumen-filtro" class="text-[11px] font-bold text-[#0E859F]"></div>
+                    </div>
+                </div>
+
+                <!-- Tarjetas KPI Principales -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+                    <div class="az-ana-kpi p-4">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-600">Cotizaciones / Revisiones</span>
+                            <span class="text-lg">📄</span>
+                        </div>
+                        <div id="kpi-cotizaciones" class="text-2xl font-black text-[#0B192C]">0</div>
+                        <div id="kpi-cotizaciones-sub" class="text-xs font-semibold text-[#0E859F] mt-0.5">0 revisiones analizadas</div>
+                    </div>
+
+                    <div class="az-ana-kpi p-4">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-600">Más Cotizado (Mod / Marca)</span>
+                            <span class="text-lg">🏆</span>
+                        </div>
+                        <div id="kpi-top-producto" class="text-base font-black text-[#0E5DF0] truncate" title="">—</div>
+                        <div id="kpi-top-producto-sub" class="text-xs font-semibold text-gray-600 mt-0.5">Sin datos</div>
+                    </div>
+
+                    <div class="az-ana-kpi p-4">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-600">Cliente Más Cotizado</span>
+                            <span class="text-lg">🤝</span>
+                        </div>
+                        <div id="kpi-top-cliente" class="text-base font-black text-[#ED813C] truncate" title="">—</div>
+                        <div id="kpi-top-cliente-sub" class="text-xs font-semibold text-gray-600 mt-0.5">Sin datos</div>
+                    </div>
+
+                    <div class="az-ana-kpi p-4">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-gray-600">Volumen Cotizado</span>
+                            <span class="text-lg">💰</span>
+                        </div>
+                        <div id="kpi-monto-mxn" class="text-sm font-black text-[#0B192C]">MXN: $0.00</div>
+                        <div id="kpi-monto-usd" class="text-sm font-black text-[#0E859F]">USD: $0.00</div>
+                        <div id="kpi-partidas-sub" class="text-[11px] font-semibold text-gray-600 mt-0.5">0 partidas</div>
+                    </div>
+                </div>
+
+                <!-- BLOQUE 1 DE GRÁFICOS INTERACTIVOS: QUÉ SE COTIZA MÁS (MODELO Y MARCA) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+                    <div class="az-ana-panel p-4 lg:col-span-2">
+                        <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                            <div>
+                                <h4 class="font-extrabold text-sm text-[#0B192C]">📦 ¿Qué se cotiza más? (Top Modelos y Marcas)</h4>
+                                <p class="text-[11px] text-gray-600">Haz clic en cualquier barra para ver su historial de precios y fechas abajo.</p>
+                            </div>
+                            <div class="flex gap-1.5">
+                                <button type="button" id="btn-metric-veces" onclick="cambiarMetricaProductos('veces')" class="az-ana-tab-btn active">Veces cotizado</button>
+                                <button type="button" id="btn-metric-unidades" onclick="cambiarMetricaProductos('unidades')" class="az-ana-tab-btn">Unidades</button>
+                            </div>
+                        </div>
+                        <div class="az-ana-chart-box-tall">
+                            <canvas id="chart-top-productos"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="az-ana-panel p-4">
+                        <div class="mb-3">
+                            <h4 class="font-extrabold text-sm text-[#0B192C]">🏷️ Participación por Marca</h4>
+                            <p class="text-[11px] text-gray-600">Haz clic en una marca para filtrar el análisis.</p>
+                        </div>
+                        <div class="az-ana-chart-box-tall">
+                            <canvas id="chart-marcas"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOQUE 2 DE GRÁFICOS INTERACTIVOS: ¿A QUÉ PRECIO SE COTIZA? (EVOLUCIÓN POR FECHA Y REVISIÓN) -->
+                <div class="az-ana-panel p-4 mb-6" id="panel-evolucion-precios">
+                    <div class="flex flex-wrap justify-between items-start gap-3 mb-3">
+                        <div>
+                            <h4 class="font-extrabold text-sm text-[#0B192C]">💵 ¿A qué precio se cotiza? (Evolución Histórica por Modelo y Marca)</h4>
+                            <p class="text-[11px] text-gray-600">Compara el precio unitario cotizado en cada fecha, folio y revisión.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                            <select id="ana-sel-producto-precio" onchange="renderGraficoPrecios()" class="p-2 rounded-lg text-xs font-bold max-w-full sm:max-w-xs"></select>
+                            <select id="ana-sel-moneda-precio" onchange="renderGraficoPrecios()" class="p-2 rounded-lg text-xs font-bold">
+                                <option value="AUTO">Moneda: Auto</option>
+                                <option value="MXN">MXN</option>
+                                <option value="USD">USD</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Estadísticas rápidas de precio del modelo seleccionado -->
+                    <div id="ana-stats-precio-modelo" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3"></div>
+
+                    <div class="az-ana-chart-box">
+                        <canvas id="chart-precios-evolucion"></canvas>
+                    </div>
+                </div>
+
+                <!-- BLOQUE 3 DE GRÁFICOS INTERACTIVOS: ¿A QUÉ CLIENTE SE LE COTIZA MÁS? + ACTIVIDAD EN EL TIEMPO -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+                    <div class="az-ana-panel p-4">
+                        <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                            <div>
+                                <h4 class="font-extrabold text-sm text-[#0B192C]">🤝 ¿A qué cliente se le cotiza más?</h4>
+                                <p class="text-[11px] text-gray-600">Haz clic en un cliente para filtrar su historial detallado.</p>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" id="btn-cli-rev" onclick="cambiarMetricaClientes('revisiones')" class="az-ana-tab-btn active">Revisiones</button>
+                                <button type="button" id="btn-cli-mxn" onclick="cambiarMetricaClientes('mxn')" class="az-ana-tab-btn">Monto MXN</button>
+                                <button type="button" id="btn-cli-usd" onclick="cambiarMetricaClientes('usd')" class="az-ana-tab-btn">Monto USD</button>
+                            </div>
+                        </div>
+                        <div class="az-ana-chart-box">
+                            <canvas id="chart-top-clientes"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="az-ana-panel p-4">
+                        <div class="mb-3">
+                            <h4 class="font-extrabold text-sm text-[#0B192C]">📅 Actividad de Cotizaciones y Revisiones por Mes</h4>
+                            <p class="text-[11px] text-gray-600">Evolución mensual contemplando cotizaciones originales y revisiones.</p>
+                        </div>
+                        <div class="az-ana-chart-box">
+                            <canvas id="chart-actividad-mensual"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOQUE 4: TABLAS DE DATOS NORMALES (INTERACTIVAS POR PESTAÑAS) -->
+                <div class="az-ana-panel p-4">
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+                        <h4 class="font-extrabold text-base text-[#0B192C]">📋 Datos Detallados</h4>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button type="button" id="tab-ana-productos" onclick="cambiarTabTablaAnalisis('productos')" class="az-ana-tab-btn active">📦 Más Cotizados</button>
+                            <button type="button" id="tab-ana-precios" onclick="cambiarTabTablaAnalisis('precios')" class="az-ana-tab-btn">💵 Precios por Modelo/Marca</button>
+                            <button type="button" id="tab-ana-clientes" onclick="cambiarTabTablaAnalisis('clientes')" class="az-ana-tab-btn">🤝 Ranking Clientes</button>
+                            <button type="button" id="tab-ana-historial" onclick="cambiarTabTablaAnalisis('historial')" class="az-ana-tab-btn">📅 Historial por Fecha y Rev.</button>
+                        </div>
+                    </div>
+
+                    <!-- Tabla 1: Ranking Productos -->
+                    <div id="wrap-tabla-productos" class="overflow-x-auto max-h-[460px] overflow-y-auto rounded-lg">
+                        <table class="az-ana-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Modelo</th>
+                                    <th>Marca</th>
+                                    <th>Descripción</th>
+                                    <th>Veces Cotizado</th>
+                                    <th>Unidades</th>
+                                    <th>Prom. MXN</th>
+                                    <th>Prom. USD</th>
+                                    <th>Última Fecha</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-ana-productos"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tabla 2: Precios por Modelo y Marca -->
+                    <div id="wrap-tabla-precios" class="hidden overflow-x-auto max-h-[460px] overflow-y-auto rounded-lg">
+                        <table class="az-ana-table">
+                            <thead>
+                                <tr>
+                                    <th>Modelo</th>
+                                    <th>Marca</th>
+                                    <th>Moneda</th>
+                                    <th>Mínimo</th>
+                                    <th>Promedio</th>
+                                    <th>Máximo</th>
+                                    <th>Último Precio</th>
+                                    <th>Última Fecha</th>
+                                    <th>Registros</th>
+                                    <th>Gráfica</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-ana-precios"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tabla 3: Ranking Clientes -->
+                    <div id="wrap-tabla-clientes" class="hidden overflow-x-auto max-h-[460px] overflow-y-auto rounded-lg">
+                        <table class="az-ana-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Cliente</th>
+                                    <th>Cotizaciones Únicas</th>
+                                    <th>Total Revisiones</th>
+                                    <th>Partidas</th>
+                                    <th>Total MXN</th>
+                                    <th>Total USD</th>
+                                    <th>Última Fecha</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-ana-clientes"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tabla 4: Historial completo con fechas y revisiones -->
+                    <div id="wrap-tabla-historial" class="hidden overflow-x-auto max-h-[480px] overflow-y-auto rounded-lg">
+                        <table class="az-ana-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha y Hora</th>
+                                    <th>Folio</th>
+                                    <th>Revisión</th>
+                                    <th>Empresa</th>
+                                    <th>Cliente</th>
+                                    <th>Modelo</th>
+                                    <th>Marca</th>
+                                    <th>Cant.</th>
+                                    <th>Precio Unit.</th>
+                                    <th>Total</th>
+                                    <th>Moneda</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-ana-historial"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
             <!-- SECCIÓN: GESTIÓN DE USUARIOS (Solo Master) -->
             <div id="sec-usuarios" class="hidden relative z-10">
@@ -901,6 +1320,9 @@
             const texto = document.getElementById('texto-tema');
             if (icono) icono.innerText = modoOscuro ? '☀️' : '🌙';
             if (texto) texto.innerText = modoOscuro ? 'Modo Claro' : 'Modo Oscuro';
+            if (typeof window.refrescarTemaAnalisis === 'function') {
+                window.refrescarTemaAnalisis();
+            }
         }
 
         window.toggleTema = function() {
@@ -2377,9 +2799,11 @@
                 if (currentRole === 'master') {
                     document.getElementById('btn-admin-usuarios').classList.remove('hidden');
                     document.getElementById('btn-admin-logo').classList.remove('hidden');
+                    document.getElementById('btn-admin-analisis').classList.remove('hidden');
                 } else {
                     document.getElementById('btn-admin-usuarios').classList.add('hidden');
                     document.getElementById('btn-admin-logo').classList.add('hidden');
+                    document.getElementById('btn-admin-analisis').classList.add('hidden');
                 }
 
                 try { await cargarDatosDesdeNube(); } catch (e) { console.error(e); alert('❌ No se pudieron cargar los datos: ' + e.message); }
@@ -2473,14 +2897,21 @@
         }
 
         window.mostrarSeccion = function(sec) {
-            ['vendedores', 'catalogo', 'cotizaciones', 'usuarios'].forEach(s => {
-                document.getElementById(`sec-${s}`).classList.add('hidden');
+            if ((sec === 'usuarios' || sec === 'analisis') && currentRole !== 'master') {
+                alert('🔒 Esta sección es exclusiva para la cuenta Master.');
+                sec = 'cotizaciones';
+            }
+            ['vendedores', 'catalogo', 'cotizaciones', 'usuarios', 'analisis'].forEach(s => {
+                const el = document.getElementById(`sec-${s}`);
+                if (el) el.classList.add('hidden');
             });
-            document.getElementById(`sec-${sec}`).classList.remove('hidden');
+            const secEl = document.getElementById(`sec-${sec}`);
+            if (secEl) secEl.classList.remove('hidden');
             
             if (sec === 'vendedores') window.renderVendedores();
             if (sec === 'catalogo') window.renderCatalogo();
             if (sec === 'usuarios') window.cargarUsuariosNube();
+            if (sec === 'analisis') window.actualizarAnalisis();
             if (sec === 'cotizaciones') {
                 window.renderSelectVendedores();
                 if(cotizaciones[cotIndexActiva]) {
@@ -3637,6 +4068,1155 @@
             window.cargarCotizacionUI();
             tomarRespaldoVersionActual();
             document.getElementById('loading-screen').classList.add('hidden');
+        };
+
+
+        // =========================================================================
+        // MOTOR DE ANÁLISIS COMERCIAL Y GRÁFICOS INTERACTIVOS (SOLO CUENTA MASTER)
+        // =========================================================================
+        const anaCharts = {
+            productos: null,
+            marcas: null,
+            precios: null,
+            clientes: null,
+            mensual: null
+        };
+        let anaMetricaProductos = 'veces';
+        let anaMetricaClientes = 'revisiones';
+        let anaTabActiva = 'productos';
+        let anaUltimoDataset = null;
+
+        const MESES_CORTOS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const PALETA_AZ = [
+            '#0E859F', '#ED813C', '#0E5DF0', '#CE8550',
+            '#10B981', '#8B5CF6', '#F59E0B', '#EC4899',
+            '#06B6D4', '#EF4444', '#6366F1', '#14B8A6'
+        ];
+
+        function limpiarTextoModelo(m) {
+            let s = String(m ?? '').trim().toUpperCase().replace(/\s+/g, ' ');
+            s = s.replace(/^(MODELO|MOD|N\/P|NP)[:.\s-]*/i, '').trim();
+            return s || 'SIN MODELO';
+        }
+
+        function limpiarTextoMarca(m) {
+            let s = String(m ?? '').trim().toUpperCase().replace(/\s+/g, ' ');
+            s = s.replace(/^(MARCA|MCA)[:.\s-]*/i, '').trim();
+            return s || 'SIN MARCA';
+        }
+
+        function limpiarTextoCliente(c) {
+            const s = String(c ?? '').trim().toUpperCase().replace(/\s+/g, ' ');
+            return s || 'SIN CLIENTE';
+        }
+
+        function parsearFechaVersion(ver, cot) {
+            let d = null;
+            const rawStr = String(ver?.fechaHora || '').trim();
+            if (rawStr) {
+                const m = rawStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?:\s*(a\.?\s*m\.?|p\.?\s*m\.?))?)?/i);
+                if (m) {
+                    const dia = parseInt(m[1], 10);
+                    const mes = parseInt(m[2], 10) - 1;
+                    const anio = parseInt(m[3], 10);
+                    let hh = m[4] ? parseInt(m[4], 10) : 12;
+                    const mm = m[5] ? parseInt(m[5], 10) : 0;
+                    const ampm = (m[6] || '').toLowerCase().replace(/[^ap]/g, '');
+                    if (ampm === 'p' && hh < 12) hh += 12;
+                    if (ampm === 'a' && hh === 12) hh = 0;
+                    const candidato = new Date(anio, mes, dia, hh, mm, 0, 0);
+                    if (!isNaN(candidato.getTime())) d = candidato;
+                }
+            }
+            if (!d) {
+                const tsVer = Number(ver?.idVer);
+                const tsCot = Number(cot?.id);
+                const tsValido = (!isNaN(tsVer) && tsVer > 1000000000000) ? tsVer
+                               : ((!isNaN(tsCot) && tsCot > 1000000000000) ? tsCot : Date.now());
+                d = new Date(tsValido);
+            }
+            if (isNaN(d.getTime())) d = new Date();
+
+            const anio = d.getFullYear();
+            const mes = d.getMonth();
+            const diaStr = String(d.getDate()).padStart(2, '0');
+            const mesStr = String(mes + 1).padStart(2, '0');
+            return {
+                date: d,
+                ts: d.getTime(),
+                isoDate: `${anio}-${mesStr}-${diaStr}`,
+                fechaStr: `${diaStr}/${mesStr}/${anio}`,
+                fechaHoraStr: rawStr || formatearFechaHora(d),
+                mesKey: `${anio}-${mesStr}`,
+                mesLabel: `${MESES_CORTOS[mes]} ${anio}`
+            };
+        }
+
+        function fmtDinero(num) {
+            return '$' + (Number(num) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function obtenerColoresTemaChart() {
+            const dark = document.body.classList.contains('dark-mode');
+            return {
+                text: dark ? '#E2E8F0' : '#0B192C',
+                muted: dark ? '#94A3B8' : '#475569',
+                grid: dark ? 'rgba(148, 163, 184, 0.14)' : 'rgba(11, 25, 44, 0.08)',
+                tooltipBg: dark ? 'rgba(11, 25, 44, 0.96)' : 'rgba(11, 25, 44, 0.92)',
+                tooltipBorder: dark ? 'rgba(56, 189, 248, 0.45)' : 'rgba(14, 133, 159, 0.45)'
+            };
+        }
+
+        function construirDatasetAnalisis() {
+            const modoRev = document.getElementById('ana-filtro-revisiones')?.value || 'todas';
+            const filtroEmp = document.getElementById('ana-filtro-empresa')?.value || 'TODAS';
+            const filtroMon = document.getElementById('ana-filtro-moneda')?.value || 'TODAS';
+            const fechaDesde = document.getElementById('ana-fecha-desde')?.value || '';
+            const fechaHasta = document.getElementById('ana-fecha-hasta')?.value || '';
+            const busqueda = (document.getElementById('ana-buscar')?.value || '').trim().toLowerCase();
+            const incSub = Boolean(document.getElementById('ana-incluir-subpartidas')?.checked);
+
+            const registros = [];
+            const revisionesProcesadas = new Map();
+            const cotizacionesUnicasSet = new Set();
+
+            cotizaciones.forEach(cotRaw => {
+                const cot = normalizarCotizacion(cotRaw);
+                const versiones = Array.isArray(cot.versiones) && cot.versiones.length > 0 ? cot.versiones : [];
+                if (versiones.length === 0) return;
+
+                const indicesAProcesar = modoRev === 'ultima'
+                    ? [versiones.length - 1]
+                    : versiones.map((_, idx) => idx);
+
+                indicesAProcesar.forEach(vIdx => {
+                    const ver = versiones[vIdx];
+                    if (!ver) return;
+
+                    const fInfo = parsearFechaVersion(ver, cot);
+                    if (fechaDesde && fInfo.isoDate < fechaDesde) return;
+                    if (fechaHasta && fInfo.isoDate > fechaHasta) return;
+
+                    const revEtq = obtenerEtiquetaVersion(ver, vIdx);
+                    const dMXN = ver.datosMXN || {};
+                    const dUSD = ver.datosUSD || {};
+
+                    const monedas = filtroMon === 'TODAS' ? ['MXN', 'USD'] : [filtroMon];
+
+                    monedas.forEach(mon => {
+                        const datosMon = mon === 'USD' ? dUSD : dMXN;
+                        const datosAlt = mon === 'USD' ? dMXN : dUSD;
+                        const partidasMon = mon === 'USD'
+                            ? (Array.isArray(ver.partidasUSD) ? ver.partidasUSD : [])
+                            : (Array.isArray(ver.partidasMXN) ? ver.partidasMXN : []);
+
+                        const empresa = String(datosMon.empresa || datosAlt.empresa || 'US FIRE').toUpperCase();
+                        if (filtroEmp !== 'TODAS' && empresa !== filtroEmp) return;
+
+                        const cliente = limpiarTextoCliente(datosMon.cliente || datosAlt.cliente);
+                        const folioMid = String(datosMon.folioMid || datosAlt.folioMid || '').trim().toUpperCase();
+                        const folioEnd = String(datosMon.folioEnd || datosAlt.folioEnd || '').trim().toUpperCase();
+                        const anioVer = String(fInfo.date.getFullYear()).slice(-2);
+                        const folio = folioMid
+                            ? `NO-${folioMid}-${anioVer}${folioEnd ? '-' + folioEnd : ''}`
+                            : `COT-${String(cot.id).slice(-4)}${folioEnd ? '-' + folioEnd : ''}`;
+
+                        const revKey = `${cot.id}::${vIdx}`;
+
+                        // Registrar la revisión aunque no tenga partidas solo si coincide con la moneda activa y tiene cliente/folio
+                        const esMonActivaConInfo = (mon === (ver.monedaActiva || 'MXN')) && (cliente !== 'SIN CLIENTE' || folioMid !== '');
+
+                        if (partidasMon.length === 0) {
+                            if (esMonActivaConInfo) {
+                                const textoMatchRev = `${cliente} ${folio} ${revEtq} ${empresa} ${fInfo.fechaHoraStr}`.toLowerCase();
+                                if (!busqueda || textoMatchRev.includes(busqueda)) {
+                                    cotizacionesUnicasSet.add(String(cot.id));
+                                    if (!revisionesProcesadas.has(revKey)) {
+                                        revisionesProcesadas.set(revKey, {
+                                            revKey, cotId: String(cot.id), vIdx, folio, revision: revEtq,
+                                            empresa, cliente, ...fInfo, montoMXN: 0, montoUSD: 0, partidasCount: 0
+                                        });
+                                    }
+                                }
+                            }
+                            return;
+                        }
+
+                        partidasMon.forEach(p => {
+                            const modelo = limpiarTextoModelo(p.modelo);
+                            const marca = limpiarTextoMarca(p.marca);
+                            const descCorta = String(p.descCorta || p.descripcion || '').trim();
+                            const cantidad = parseFloat(p.cantidad) || 0;
+                            const precio = parseFloat(p.precio) || 0;
+                            const total = !isNaN(parseFloat(p.total)) ? parseFloat(p.total) : Math.round(cantidad * precio * 100) / 100;
+
+                            const item = {
+                                cotId: String(cot.id),
+                                vIdx,
+                                revKey,
+                                folio,
+                                revision: revEtq,
+                                empresa,
+                                moneda: mon,
+                                cliente,
+                                modelo,
+                                marca,
+                                prodKey: `${modelo}||${marca}`,
+                                prodLabel: marca !== 'SIN MARCA' ? `${modelo} (${marca})` : modelo,
+                                descCorta,
+                                cantidad,
+                                precio,
+                                total,
+                                esIncluye: false,
+                                ...fInfo
+                            };
+
+                            const textoBusq = `${item.modelo} ${item.marca} ${item.descCorta} ${item.cliente} ${item.folio} ${item.revision} ${item.empresa} ${item.fechaHoraStr}`.toLowerCase();
+                            if (!busqueda || textoBusq.includes(busqueda)) {
+                                registros.push(item);
+                                cotizacionesUnicasSet.add(String(cot.id));
+                                if (!revisionesProcesadas.has(revKey)) {
+                                    revisionesProcesadas.set(revKey, {
+                                        revKey, cotId: String(cot.id), vIdx, folio, revision: revEtq,
+                                        empresa, cliente, ...fInfo, montoMXN: 0, montoUSD: 0, partidasCount: 0
+                                    });
+                                }
+                                const revObj = revisionesProcesadas.get(revKey);
+                                if (mon === 'USD') revObj.montoUSD += total;
+                                else revObj.montoMXN += total;
+                                revObj.partidasCount += 1;
+                            }
+
+                            if (incSub && Array.isArray(p.incluyeList) && p.incluyeList.length > 0) {
+                                p.incluyeList.forEach(inc => {
+                                    const modInc = limpiarTextoModelo(inc.modelo);
+                                    const marInc = limpiarTextoMarca(inc.marca);
+                                    if (modInc === 'SIN MODELO' && marInc === 'SIN MARCA') return;
+                                    const subItem = {
+                                        cotId: String(cot.id),
+                                        vIdx,
+                                        revKey,
+                                        folio,
+                                        revision: revEtq,
+                                        empresa,
+                                        moneda: mon,
+                                        cliente,
+                                        modelo: modInc,
+                                        marca: marInc,
+                                        prodKey: `${modInc}||${marInc}`,
+                                        prodLabel: marInc !== 'SIN MARCA' ? `${modInc} (${marInc})` : modInc,
+                                        descCorta: String(inc.descCorta || inc.descNormal || '').trim() + ' [INCLUYE]',
+                                        cantidad: cantidad || 1,
+                                        precio: 0,
+                                        total: 0,
+                                        esIncluye: true,
+                                        ...fInfo
+                                    };
+                                    const textoSub = `${subItem.modelo} ${subItem.marca} ${subItem.descCorta} ${subItem.cliente} ${subItem.folio} ${subItem.revision} ${subItem.empresa}`.toLowerCase();
+                                    if (!busqueda || textoSub.includes(busqueda)) {
+                                        registros.push(subItem);
+                                    }
+                                });
+                            }
+                        });
+                    });
+                });
+            });
+
+            // 1. Agregación por Modelo y Marca
+            const prodMap = new Map();
+            const marcaMap = new Map();
+            const precioResumenMap = new Map();
+
+            registros.forEach(r => {
+                if (!prodMap.has(r.prodKey)) {
+                    prodMap.set(r.prodKey, {
+                        prodKey: r.prodKey,
+                        prodLabel: r.prodLabel,
+                        modelo: r.modelo,
+                        marca: r.marca,
+                        descCorta: r.descCorta,
+                        veces: 0,
+                        unidades: 0,
+                        preciosMXN: [],
+                        preciosUSD: [],
+                        ultimaFechaTs: 0,
+                        ultimaFechaStr: '',
+                        historialPrecios: []
+                    });
+                }
+                const pm = prodMap.get(r.prodKey);
+                pm.veces += 1;
+                pm.unidades += r.cantidad;
+                if (!pm.descCorta && r.descCorta) pm.descCorta = r.descCorta;
+                if (r.ts >= pm.ultimaFechaTs) {
+                    pm.ultimaFechaTs = r.ts;
+                    pm.ultimaFechaStr = r.fechaHoraStr;
+                }
+                if (!r.esIncluye && r.precio > 0) {
+                    if (r.moneda === 'USD') pm.preciosUSD.push(r.precio);
+                    else pm.preciosMXN.push(r.precio);
+                    pm.historialPrecios.push(r);
+
+                    const pKey = `${r.prodKey}||${r.moneda}`;
+                    if (!precioResumenMap.has(pKey)) {
+                        precioResumenMap.set(pKey, {
+                            prodKey: r.prodKey,
+                            prodLabel: r.prodLabel,
+                            modelo: r.modelo,
+                            marca: r.marca,
+                            moneda: r.moneda,
+                            min: r.precio,
+                            max: r.precio,
+                            suma: 0,
+                            count: 0,
+                            ultimoPrecio: r.precio,
+                            ultimaFechaTs: r.ts,
+                            ultimaFechaStr: r.fechaHoraStr
+                        });
+                    }
+                    const pr = precioResumenMap.get(pKey);
+                    pr.min = Math.min(pr.min, r.precio);
+                    pr.max = Math.max(pr.max, r.precio);
+                    pr.suma += r.precio;
+                    pr.count += 1;
+                    if (r.ts >= pr.ultimaFechaTs) {
+                        pr.ultimaFechaTs = r.ts;
+                        pr.ultimaFechaStr = r.fechaHoraStr;
+                        pr.ultimoPrecio = r.precio;
+                    }
+                }
+
+                // Marca
+                const mCur = marcaMap.get(r.marca) || { marca: r.marca, veces: 0, unidades: 0 };
+                mCur.veces += 1;
+                mCur.unidades += r.cantidad;
+                marcaMap.set(r.marca, mCur);
+            });
+
+            const productosArr = Array.from(prodMap.values()).map(p => {
+                p.promMXN = p.preciosMXN.length ? p.preciosMXN.reduce((a, b) => a + b, 0) / p.preciosMXN.length : null;
+                p.promUSD = p.preciosUSD.length ? p.preciosUSD.reduce((a, b) => a + b, 0) / p.preciosUSD.length : null;
+                p.historialPrecios.sort((a, b) => a.ts - b.ts);
+                return p;
+            }).sort((a, b) => b.veces - a.veces || b.unidades - a.unidades);
+
+            const marcasArr = Array.from(marcaMap.values()).sort((a, b) => b.veces - a.veces);
+
+            const preciosResumenArr = Array.from(precioResumenMap.values()).map(pr => ({
+                ...pr,
+                promedio: pr.count ? pr.suma / pr.count : 0
+            })).sort((a, b) => b.count - a.count || b.ultimaFechaTs - a.ultimaFechaTs);
+
+            // 2. Agregación por Cliente
+            const cliMap = new Map();
+            revisionesProcesadas.forEach(rev => {
+                if (!cliMap.has(rev.cliente)) {
+                    cliMap.set(rev.cliente, {
+                        cliente: rev.cliente,
+                        cotizacionesSet: new Set(),
+                        revisionesCount: 0,
+                        partidasCount: 0,
+                        montoMXN: 0,
+                        montoUSD: 0,
+                        ultimaFechaTs: 0,
+                        ultimaFechaStr: ''
+                    });
+                }
+                const cm = cliMap.get(rev.cliente);
+                cm.cotizacionesSet.add(rev.cotId);
+                cm.revisionesCount += 1;
+                cm.partidasCount += rev.partidasCount;
+                cm.montoMXN += rev.montoMXN;
+                cm.montoUSD += rev.montoUSD;
+                if (rev.ts >= cm.ultimaFechaTs) {
+                    cm.ultimaFechaTs = rev.ts;
+                    cm.ultimaFechaStr = rev.fechaHoraStr;
+                }
+            });
+
+            const clientesArr = Array.from(cliMap.values()).map(c => ({
+                cliente: c.cliente,
+                cotizacionesUnicas: c.cotizacionesSet.size,
+                revisionesCount: c.revisionesCount,
+                partidasCount: c.partidasCount,
+                montoMXN: c.montoMXN,
+                montoUSD: c.montoUSD,
+                ultimaFechaTs: c.ultimaFechaTs,
+                ultimaFechaStr: c.ultimaFechaStr
+            })).sort((a, b) => b.revisionesCount - a.revisionesCount || (b.montoMXN + b.montoUSD * 20) - (a.montoMXN + a.montoUSD * 20));
+
+            // 3. Actividad Mensual (Originales vs Revisiones)
+            const mesMap = new Map();
+            revisionesProcesadas.forEach(rev => {
+                if (!mesMap.has(rev.mesKey)) {
+                    mesMap.set(rev.mesKey, {
+                        mesKey: rev.mesKey,
+                        mesLabel: rev.mesLabel,
+                        originales: 0,
+                        revisiones: 0,
+                        total: 0
+                    });
+                }
+                const mm = mesMap.get(rev.mesKey);
+                if (rev.vIdx === 0) mm.originales += 1;
+                else mm.revisiones += 1;
+                mm.total += 1;
+            });
+            const mensualArr = Array.from(mesMap.values()).sort((a, b) => a.mesKey.localeCompare(b.mesKey));
+
+            // 4. Totales globales
+            const totalMXN = registros.filter(r => !r.esIncluye && r.moneda === 'MXN').reduce((a, b) => a + b.total, 0);
+            const totalUSD = registros.filter(r => !r.esIncluye && r.moneda === 'USD').reduce((a, b) => a + b.total, 0);
+
+            registros.sort((a, b) => b.ts - a.ts);
+
+            return {
+                registros,
+                productosArr,
+                marcasArr,
+                preciosResumenArr,
+                clientesArr,
+                mensualArr,
+                totalCotizacionesUnicas: cotizacionesUnicasSet.size,
+                totalRevisiones: revisionesProcesadas.size,
+                totalPartidas: registros.length,
+                totalMXN,
+                totalUSD
+            };
+        }
+
+        function destruirChart(key) {
+            if (anaCharts[key]) {
+                anaCharts[key].destroy();
+                anaCharts[key] = null;
+            }
+        }
+
+        function renderGraficoProductos(ds) {
+            destruirChart('productos');
+            const canvas = document.getElementById('chart-top-productos');
+            if (!canvas || typeof Chart === 'undefined') return;
+
+            const colores = obtenerColoresTemaChart();
+            const ordenados = [...ds.productosArr].sort((a, b) =>
+                anaMetricaProductos === 'unidades' ? (b.unidades - a.unidades) : (b.veces - a.veces)
+            ).slice(0, 12);
+
+            const labels = ordenados.map(p => p.prodLabel.length > 34 ? p.prodLabel.slice(0, 32) + '…' : p.prodLabel);
+            const values = ordenados.map(p => anaMetricaProductos === 'unidades' ? p.unidades : p.veces);
+
+            anaCharts.productos = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels.length ? labels : ['Sin datos'],
+                    datasets: [{
+                        label: anaMetricaProductos === 'unidades' ? 'Unidades cotizadas' : 'Veces cotizado',
+                        data: values.length ? values : [0],
+                        backgroundColor: ordenados.map((_, i) => PALETA_AZ[i % PALETA_AZ.length] + 'CC'),
+                        hoverBackgroundColor: ordenados.map((_, i) => PALETA_AZ[i % PALETA_AZ.length]),
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (_, elements) => {
+                        if (!elements.length || !ordenados[elements[0].index]) return;
+                        window.inspeccionarPreciosProducto(ordenados[elements[0].index].prodKey);
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: colores.tooltipBg,
+                            borderColor: colores.tooltipBorder,
+                            borderWidth: 1,
+                            padding: 10,
+                            callbacks: {
+                                title: items => {
+                                    const p = ordenados[items[0]?.dataIndex];
+                                    return p ? `${p.modelo} · ${p.marca}` : '';
+                                },
+                                label: ctx => {
+                                    const p = ordenados[ctx.dataIndex];
+                                    if (!p) return 'Sin datos';
+                                    const lines = [
+                                        `Veces cotizado: ${p.veces}`,
+                                        `Unidades totales: ${p.unidades.toLocaleString('en-US')}`
+                                    ];
+                                    if (p.promMXN !== null) lines.push(`Precio prom. MXN: ${fmtDinero(p.promMXN)}`);
+                                    if (p.promUSD !== null) lines.push(`Precio prom. USD: ${fmtDinero(p.promUSD)}`);
+                                    if (p.ultimaFechaStr) lines.push(`Última fecha: ${p.ultimaFechaStr}`);
+                                    return lines;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { color: colores.muted, font: { weight: 'bold', size: 11 } },
+                            grid: { color: colores.grid }
+                        },
+                        y: {
+                            ticks: { color: colores.text, font: { weight: 'bold', size: 11 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderGraficoMarcas(ds) {
+            destruirChart('marcas');
+            const canvas = document.getElementById('chart-marcas');
+            if (!canvas || typeof Chart === 'undefined') return;
+
+            const colores = obtenerColoresTemaChart();
+            const top = ds.marcasArr.slice(0, 8);
+            const resto = ds.marcasArr.slice(8);
+            if (resto.length > 0) {
+                top.push({
+                    marca: 'OTRAS MARCAS',
+                    veces: resto.reduce((a, b) => a + b.veces, 0),
+                    unidades: resto.reduce((a, b) => a + b.unidades, 0)
+                });
+            }
+
+            const totalVeces = top.reduce((a, b) => a + b.veces, 0) || 1;
+
+            anaCharts.marcas = new Chart(canvas.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: top.length ? top.map(m => m.marca) : ['Sin datos'],
+                    datasets: [{
+                        data: top.length ? top.map(m => m.veces) : [1],
+                        backgroundColor: top.length ? top.map((_, i) => PALETA_AZ[i % PALETA_AZ.length]) : ['#94A3B8'],
+                        borderWidth: 2,
+                        borderColor: document.body.classList.contains('dark-mode') ? '#0B192C' : '#FFFFFF',
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '58%',
+                    onClick: (_, elements) => {
+                        if (!elements.length || !top[elements[0].index]) return;
+                        const marcaClic = top[elements[0].index].marca;
+                        if (marcaClic === 'OTRAS MARCAS' || marcaClic === 'SIN MARCA') return;
+                        document.getElementById('ana-buscar').value = marcaClic;
+                        window.actualizarAnalisis();
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: colores.text,
+                                boxWidth: 12,
+                                padding: 10,
+                                font: { size: 11, weight: 'bold' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: colores.tooltipBg,
+                            borderColor: colores.tooltipBorder,
+                            borderWidth: 1,
+                            callbacks: {
+                                label: ctx => {
+                                    const m = top[ctx.dataIndex];
+                                    if (!m) return 'Sin datos';
+                                    const pct = ((m.veces / totalVeces) * 100).toFixed(1);
+                                    return ` ${m.marca}: ${m.veces} cotiz. (${pct}%) · ${m.unidades.toLocaleString('en-US')} uds`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function poblarSelectorPrecios(ds) {
+            const sel = document.getElementById('ana-sel-producto-precio');
+            if (!sel) return;
+            const prev = sel.value;
+            const conPrecio = ds.productosArr.filter(p => p.historialPrecios.length > 0);
+            if (conPrecio.length === 0) {
+                sel.innerHTML = '<option value="">-- Sin equipos con precio registrado --</option>';
+                return;
+            }
+            sel.innerHTML = conPrecio.map(p =>
+                `<option value="${esc(p.prodKey)}">${esc(p.modelo)} · ${esc(p.marca)} (${p.historialPrecios.length} reg.)</option>`
+            ).join('');
+            if (prev && conPrecio.some(p => p.prodKey === prev)) {
+                sel.value = prev;
+            } else {
+                sel.value = conPrecio[0].prodKey;
+            }
+        }
+
+        window.renderGraficoPrecios = function() {
+            destruirChart('precios');
+            const canvas = document.getElementById('chart-precios-evolucion');
+            const statsWrap = document.getElementById('ana-stats-precio-modelo');
+            const sel = document.getElementById('ana-sel-producto-precio');
+            const selMon = document.getElementById('ana-sel-moneda-precio');
+            if (!canvas || !anaUltimoDataset || typeof Chart === 'undefined') return;
+
+            const prodKey = sel?.value;
+            const prod = anaUltimoDataset.productosArr.find(p => p.prodKey === prodKey);
+            const colores = obtenerColoresTemaChart();
+
+            if (!prod || !prod.historialPrecios.length) {
+                if (statsWrap) {
+                    statsWrap.innerHTML = '<div class="col-span-full text-xs text-gray-600 font-semibold py-2">No hay registros con precio mayor a $0 para los filtros actuales.</div>';
+                }
+                return;
+            }
+
+            let monPreferida = selMon?.value || 'AUTO';
+            const puntosMXN = prod.historialPrecios.filter(h => h.moneda === 'MXN');
+            const puntosUSD = prod.historialPrecios.filter(h => h.moneda === 'USD');
+
+            if (monPreferida === 'AUTO') {
+                monPreferida = puntosMXN.length >= puntosUSD.length ? 'MXN' : 'USD';
+            }
+
+            const puntos = monPreferida === 'USD' ? puntosUSD : puntosMXN;
+
+            if (puntos.length === 0) {
+                if (statsWrap) {
+                    statsWrap.innerHTML = `<div class="col-span-full text-xs text-[#ED813C] font-bold py-2">Este modelo no tiene precios registrados en ${monPreferida}. Cambia el selector de moneda a ${monPreferida === 'MXN' ? 'USD' : 'MXN'}.</div>`;
+                }
+                return;
+            }
+
+            const preciosNum = puntos.map(x => x.precio);
+            const minP = Math.min(...preciosNum);
+            const maxP = Math.max(...preciosNum);
+            const promP = preciosNum.reduce((a, b) => a + b, 0) / preciosNum.length;
+            const ultPunto = puntos[puntos.length - 1];
+
+            if (statsWrap) {
+                statsWrap.innerHTML = `
+                    <div class="p-2.5 rounded-lg" style="background: rgba(16, 185, 129, 0.10);">
+                        <div class="text-[10px] font-extrabold uppercase text-emerald-600">Precio Mínimo (${monPreferida})</div>
+                        <div class="text-sm font-black text-[#0B192C]">${fmtDinero(minP)}</div>
+                    </div>
+                    <div class="p-2.5 rounded-lg" style="background: rgba(14, 133, 159, 0.10);">
+                        <div class="text-[10px] font-extrabold uppercase text-[#0E859F]">Precio Promedio (${monPreferida})</div>
+                        <div class="text-sm font-black text-[#0B192C]">${fmtDinero(promP)}</div>
+                    </div>
+                    <div class="p-2.5 rounded-lg" style="background: rgba(237, 129, 60, 0.10);">
+                        <div class="text-[10px] font-extrabold uppercase text-[#ED813C]">Precio Máximo (${monPreferida})</div>
+                        <div class="text-sm font-black text-[#0B192C]">${fmtDinero(maxP)}</div>
+                    </div>
+                    <div class="p-2.5 rounded-lg" style="background: rgba(14, 93, 240, 0.10);">
+                        <div class="text-[10px] font-extrabold uppercase text-[#0E5DF0]">Último (${esc(ultPunto.fechaStr)})</div>
+                        <div class="text-sm font-black text-[#0B192C]">${fmtDinero(ultPunto.precio)}</div>
+                    </div>
+                `;
+            }
+
+            const colorLinea = monPreferida === 'USD' ? '#ED813C' : '#0E859F';
+            const colorRelleno = monPreferida === 'USD' ? 'rgba(237, 129, 60, 0.16)' : 'rgba(14, 133, 159, 0.16)';
+
+            anaCharts.precios = new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: puntos.map(pt => `${pt.fechaStr} (${pt.revision})`),
+                    datasets: [{
+                        label: `Precio Unitario (${monPreferida})`,
+                        data: puntos.map(pt => pt.precio),
+                        borderColor: colorLinea,
+                        backgroundColor: colorRelleno,
+                        fill: true,
+                        tension: 0.25,
+                        pointRadius: 6,
+                        pointHoverRadius: 9,
+                        pointBackgroundColor: '#FFFFFF',
+                        pointBorderColor: colorLinea,
+                        pointBorderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: colores.text, font: { weight: 'bold', size: 11 } }
+                        },
+                        tooltip: {
+                            backgroundColor: colores.tooltipBg,
+                            borderColor: colores.tooltipBorder,
+                            borderWidth: 1,
+                            padding: 10,
+                            callbacks: {
+                                title: items => {
+                                    const pt = puntos[items[0]?.dataIndex];
+                                    return pt ? `${pt.folio} · ${pt.revision}` : '';
+                                },
+                                label: ctx => {
+                                    const pt = puntos[ctx.dataIndex];
+                                    if (!pt) return '';
+                                    return [
+                                        `Fecha: ${pt.fechaHoraStr}`,
+                                        `Precio Unit.: ${fmtDinero(pt.precio)} ${pt.moneda}`,
+                                        `Cantidad: ${pt.cantidad} · Total: ${fmtDinero(pt.total)}`,
+                                        `Cliente: ${pt.cliente}`,
+                                        `Empresa: ${pt.empresa}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: colores.muted, font: { weight: 'bold', size: 10 }, maxRotation: 30 },
+                            grid: { color: colores.grid }
+                        },
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                color: colores.text,
+                                font: { weight: 'bold', size: 11 },
+                                callback: v => '$' + Number(v).toLocaleString('en-US')
+                            },
+                            grid: { color: colores.grid }
+                        }
+                    }
+                }
+            });
+        };
+
+        function renderGraficoClientes(ds) {
+            destruirChart('clientes');
+            const canvas = document.getElementById('chart-top-clientes');
+            if (!canvas || typeof Chart === 'undefined') return;
+
+            const colores = obtenerColoresTemaChart();
+            const ordenados = [...ds.clientesArr].sort((a, b) => {
+                if (anaMetricaClientes === 'mxn') return b.montoMXN - a.montoMXN;
+                if (anaMetricaClientes === 'usd') return b.montoUSD - a.montoUSD;
+                return b.revisionesCount - a.revisionesCount || b.cotizacionesUnicas - a.cotizacionesUnicas;
+            }).slice(0, 10);
+
+            const labels = ordenados.map(c => c.cliente.length > 28 ? c.cliente.slice(0, 26) + '…' : c.cliente);
+            const values = ordenados.map(c => {
+                if (anaMetricaClientes === 'mxn') return Math.round(c.montoMXN * 100) / 100;
+                if (anaMetricaClientes === 'usd') return Math.round(c.montoUSD * 100) / 100;
+                return c.revisionesCount;
+            });
+
+            const colorBar = anaMetricaClientes === 'usd' ? '#ED813CCC'
+                           : (anaMetricaClientes === 'mxn' ? '#0E5DF0CC' : '#0E859FCC');
+
+            anaCharts.clientes = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels.length ? labels : ['Sin datos'],
+                    datasets: [{
+                        label: anaMetricaClientes === 'mxn' ? 'Monto MXN' : (anaMetricaClientes === 'usd' ? 'Monto USD' : 'Cotizaciones / Revisiones'),
+                        data: values.length ? values : [0],
+                        backgroundColor: colorBar,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (_, elements) => {
+                        if (!elements.length || !ordenados[elements[0].index]) return;
+                        const cli = ordenados[elements[0].index].cliente;
+                        if (cli === 'SIN CLIENTE') return;
+                        document.getElementById('ana-buscar').value = cli;
+                        window.actualizarAnalisis();
+                        window.cambiarTabTablaAnalisis('historial');
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: colores.tooltipBg,
+                            borderColor: colores.tooltipBorder,
+                            borderWidth: 1,
+                            padding: 10,
+                            callbacks: {
+                                title: items => ordenados[items[0]?.dataIndex]?.cliente || '',
+                                label: ctx => {
+                                    const c = ordenados[ctx.dataIndex];
+                                    if (!c) return 'Sin datos';
+                                    return [
+                                        `Cotizaciones únicas: ${c.cotizacionesUnicas}`,
+                                        `Total revisiones: ${c.revisionesCount}`,
+                                        `Partidas cotizadas: ${c.partidasCount}`,
+                                        `Total MXN: ${fmtDinero(c.montoMXN)}`,
+                                        `Total USD: ${fmtDinero(c.montoUSD)}`,
+                                        `Última fecha: ${c.ultimaFechaStr}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: colores.muted,
+                                font: { weight: 'bold', size: 11 },
+                                callback: v => anaMetricaClientes === 'revisiones' ? v : '$' + Number(v).toLocaleString('en-US')
+                            },
+                            grid: { color: colores.grid }
+                        },
+                        y: {
+                            ticks: { color: colores.text, font: { weight: 'bold', size: 11 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderGraficoMensual(ds) {
+            destruirChart('mensual');
+            const canvas = document.getElementById('chart-actividad-mensual');
+            if (!canvas || typeof Chart === 'undefined') return;
+
+            const colores = obtenerColoresTemaChart();
+            const arr = ds.mensualArr;
+
+            anaCharts.mensual = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: arr.length ? arr.map(m => m.mesLabel) : ['Sin datos'],
+                    datasets: [
+                        {
+                            label: 'Originales',
+                            data: arr.length ? arr.map(m => m.originales) : [0],
+                            backgroundColor: '#0E859FCC',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Revisiones (Rev 1, 2...)',
+                            data: arr.length ? arr.map(m => m.revisiones) : [0],
+                            backgroundColor: '#ED813CCC',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: colores.text, font: { weight: 'bold', size: 11 } }
+                        },
+                        tooltip: {
+                            backgroundColor: colores.tooltipBg,
+                            borderColor: colores.tooltipBorder,
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            ticks: { color: colores.muted, font: { weight: 'bold', size: 11 } },
+                            grid: { display: false }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, color: colores.text, font: { weight: 'bold', size: 11 } },
+                            grid: { color: colores.grid }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTablasAnalisis(ds) {
+            // Tabla 1: Productos más cotizados
+            const tbProd = document.getElementById('tbody-ana-productos');
+            if (tbProd) {
+                if (ds.productosArr.length === 0) {
+                    tbProd.innerHTML = '<tr><td colspan="10" class="text-center py-6 text-gray-500 font-bold">No se encontraron partidas con los filtros seleccionados.</td></tr>';
+                } else {
+                    tbProd.innerHTML = ds.productosArr.map((p, idx) => `
+                        <tr>
+                            <td class="font-extrabold text-[#0E859F]">${idx + 1}</td>
+                            <td class="font-extrabold text-red-600">${esc(p.modelo)}</td>
+                            <td class="font-bold">${esc(p.marca)}</td>
+                            <td class="max-w-xs truncate" title="${esc(p.descCorta)}">${esc(p.descCorta || '—')}</td>
+                            <td class="font-black text-[#0E5DF0]">${p.veces}</td>
+                            <td class="font-bold">${p.unidades.toLocaleString('en-US')}</td>
+                            <td class="font-bold">${p.promMXN !== null ? fmtDinero(p.promMXN) : '—'}</td>
+                            <td class="font-bold text-[#ED813C]">${p.promUSD !== null ? fmtDinero(p.promUSD) : '—'}</td>
+                            <td class="text-xs whitespace-nowrap">${esc(p.ultimaFechaStr)}</td>
+                            <td>
+                                ${p.historialPrecios.length > 0
+                                    ? `<button type="button" onclick="inspeccionarPreciosProducto(decodeURIComponent('${encodeURIComponent(p.prodKey)}'))" class="text-[#0E859F] hover:underline font-extrabold text-xs whitespace-nowrap">📈 Precios</button>`
+                                    : '<span class="text-[11px] opacity-60">Sin precio</span>'}
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            // Tabla 2: Precios por Modelo y Marca
+            const tbPrecios = document.getElementById('tbody-ana-precios');
+            if (tbPrecios) {
+                if (ds.preciosResumenArr.length === 0) {
+                    tbPrecios.innerHTML = '<tr><td colspan="10" class="text-center py-6 text-gray-500 font-bold">No hay registros con precio mayor a $0.</td></tr>';
+                } else {
+                    tbPrecios.innerHTML = ds.preciosResumenArr.map(pr => `
+                        <tr>
+                            <td class="font-extrabold text-red-600">${esc(pr.modelo)}</td>
+                            <td class="font-bold">${esc(pr.marca)}</td>
+                            <td><span class="az-ana-pill ${pr.moneda === 'USD' ? 'bg-[#ED813C]/15 text-[#ED813C]' : 'bg-[#0E859F]/15 text-[#0E859F]'}">${esc(pr.moneda)}</span></td>
+                            <td class="font-bold text-emerald-600">${fmtDinero(pr.min)}</td>
+                            <td class="font-black text-[#0E5DF0]">${fmtDinero(pr.promedio)}</td>
+                            <td class="font-bold text-[#ED813C]">${fmtDinero(pr.max)}</td>
+                            <td class="font-extrabold">${fmtDinero(pr.ultimoPrecio)}</td>
+                            <td class="text-xs whitespace-nowrap">${esc(pr.ultimaFechaStr)}</td>
+                            <td class="font-bold">${pr.count}</td>
+                            <td>
+                                <button type="button" onclick="inspeccionarPreciosProducto(decodeURIComponent('${encodeURIComponent(pr.prodKey)}'), '${esc(pr.moneda)}')" class="text-[#0E859F] hover:underline font-extrabold text-xs whitespace-nowrap">📈 Ver curva</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            // Tabla 3: Ranking Clientes
+            const tbCli = document.getElementById('tbody-ana-clientes');
+            if (tbCli) {
+                if (ds.clientesArr.length === 0) {
+                    tbCli.innerHTML = '<tr><td colspan="9" class="text-center py-6 text-gray-500 font-bold">No hay clientes registrados con los filtros seleccionados.</td></tr>';
+                } else {
+                    tbCli.innerHTML = ds.clientesArr.map((c, idx) => `
+                        <tr>
+                            <td class="font-extrabold text-[#ED813C]">${idx + 1}</td>
+                            <td class="font-extrabold">${esc(c.cliente)}</td>
+                            <td class="font-bold">${c.cotizacionesUnicas}</td>
+                            <td class="font-black text-[#0E5DF0]">${c.revisionesCount}</td>
+                            <td class="font-bold">${c.partidasCount}</td>
+                            <td class="font-bold text-[#0E859F]">${fmtDinero(c.montoMXN)}</td>
+                            <td class="font-bold text-[#ED813C]">${fmtDinero(c.montoUSD)}</td>
+                            <td class="text-xs whitespace-nowrap">${esc(c.ultimaFechaStr)}</td>
+                            <td>
+                                <button type="button" onclick="filtrarPorClienteAnalisis(decodeURIComponent('${encodeURIComponent(c.cliente)}'))" class="text-[#0E859F] hover:underline font-extrabold text-xs whitespace-nowrap">🔍 Ver historial</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            // Tabla 4: Historial completo (Fecha, Folio, Revisión, Cliente, Modelo, Marca, Precio)
+            const tbHist = document.getElementById('tbody-ana-historial');
+            if (tbHist) {
+                if (ds.registros.length === 0) {
+                    tbHist.innerHTML = '<tr><td colspan="11" class="text-center py-6 text-gray-500 font-bold">Sin movimientos registrados para los filtros actuales.</td></tr>';
+                } else {
+                    const maxFilas = 500;
+                    const visibles = ds.registros.slice(0, maxFilas);
+                    tbHist.innerHTML = visibles.map(r => `
+                        <tr>
+                            <td class="text-xs font-semibold whitespace-nowrap">${esc(r.fechaHoraStr)}</td>
+                            <td class="font-extrabold text-[#0E5DF0] whitespace-nowrap">${esc(r.folio)}</td>
+                            <td><span class="az-ana-pill ${r.vIdx === 0 ? 'bg-[#0E859F]/15 text-[#0E859F]' : 'bg-[#ED813C]/15 text-[#ED813C]'}">${esc(r.revision)}</span></td>
+                            <td class="font-bold text-xs whitespace-nowrap">${esc(r.empresa)}</td>
+                            <td class="font-bold max-w-[180px] truncate" title="${esc(r.cliente)}">${esc(r.cliente)}</td>
+                            <td class="font-extrabold text-red-600 whitespace-nowrap">${esc(r.modelo)}</td>
+                            <td class="font-bold whitespace-nowrap">${esc(r.marca)}</td>
+                            <td class="font-bold">${r.cantidad}</td>
+                            <td class="font-extrabold whitespace-nowrap">${r.esIncluye ? '—' : fmtDinero(r.precio)}</td>
+                            <td class="font-extrabold whitespace-nowrap">${r.esIncluye ? '—' : fmtDinero(r.total)}</td>
+                            <td><span class="az-ana-pill ${r.moneda === 'USD' ? 'bg-[#ED813C]/15 text-[#ED813C]' : 'bg-[#0E859F]/15 text-[#0E859F]'}">${esc(r.moneda)}</span></td>
+                        </tr>
+                    `).join('') + (ds.registros.length > maxFilas
+                        ? `<tr><td colspan="11" class="text-center py-3 text-xs font-bold text-[#0E859F]">Mostrando los ${maxFilas} registros más recientes de ${ds.registros.length}. Usa los filtros o Exportar CSV para ver todos.</td></tr>`
+                        : '');
+                }
+            }
+        }
+
+        window.actualizarAnalisis = function() {
+            if (currentRole !== 'master') return;
+            const ds = construirDatasetAnalisis();
+            anaUltimoDataset = ds;
+
+            // KPIs
+            document.getElementById('kpi-cotizaciones').textContent = ds.totalCotizacionesUnicas;
+            document.getElementById('kpi-cotizaciones-sub').textContent = `${ds.totalRevisiones} revisión${ds.totalRevisiones === 1 ? '' : 'es'} analizada${ds.totalRevisiones === 1 ? '' : 's'}`;
+
+            const topProd = ds.productosArr[0];
+            const elTopProd = document.getElementById('kpi-top-producto');
+            const elTopProdSub = document.getElementById('kpi-top-producto-sub');
+            if (topProd) {
+                elTopProd.textContent = `${topProd.modelo} · ${topProd.marca}`;
+                elTopProd.title = `${topProd.modelo} · ${topProd.marca}`;
+                elTopProdSub.textContent = `${topProd.veces} veces · ${topProd.unidades.toLocaleString('en-US')} uds`;
+            } else {
+                elTopProd.textContent = '—';
+                elTopProdSub.textContent = 'Sin datos';
+            }
+
+            const topCli = ds.clientesArr[0];
+            const elTopCli = document.getElementById('kpi-top-cliente');
+            const elTopCliSub = document.getElementById('kpi-top-cliente-sub');
+            if (topCli) {
+                elTopCli.textContent = topCli.cliente;
+                elTopCli.title = topCli.cliente;
+                elTopCliSub.textContent = `${topCli.revisionesCount} rev. (${topCli.cotizacionesUnicas} cotiz.)`;
+            } else {
+                elTopCli.textContent = '—';
+                elTopCliSub.textContent = 'Sin datos';
+            }
+
+            document.getElementById('kpi-monto-mxn').textContent = `MXN: ${fmtDinero(ds.totalMXN)}`;
+            document.getElementById('kpi-monto-usd').textContent = `USD: ${fmtDinero(ds.totalUSD)}`;
+            document.getElementById('kpi-partidas-sub').textContent = `${ds.totalPartidas} partida${ds.totalPartidas === 1 ? '' : 's'} registrada${ds.totalPartidas === 1 ? '' : 's'}`;
+
+            const lblResumen = document.getElementById('ana-resumen-filtro');
+            if (lblResumen) {
+                lblResumen.textContent = `Mostrando ${ds.totalPartidas} partidas en ${ds.totalRevisiones} revisiones (${ds.totalCotizacionesUnicas} cotizaciones)`;
+            }
+
+            // Gráficos interactivos
+            renderGraficoProductos(ds);
+            renderGraficoMarcas(ds);
+            poblarSelectorPrecios(ds);
+            window.renderGraficoPrecios();
+            renderGraficoClientes(ds);
+            renderGraficoMensual(ds);
+
+            // Tablas normales
+            renderTablasAnalisis(ds);
+        };
+
+        window.refrescarTemaAnalisis = function() {
+            const sec = document.getElementById('sec-analisis');
+            if (currentRole === 'master' && sec && !sec.classList.contains('hidden')) {
+                window.actualizarAnalisis();
+            }
+        };
+
+        window.cambiarMetricaProductos = function(m) {
+            anaMetricaProductos = m;
+            document.getElementById('btn-metric-veces')?.classList.toggle('active', m === 'veces');
+            document.getElementById('btn-metric-unidades')?.classList.toggle('active', m === 'unidades');
+            if (anaUltimoDataset) renderGraficoProductos(anaUltimoDataset);
+        };
+
+        window.cambiarMetricaClientes = function(m) {
+            anaMetricaClientes = m;
+            document.getElementById('btn-cli-rev')?.classList.toggle('active', m === 'revisiones');
+            document.getElementById('btn-cli-mxn')?.classList.toggle('active', m === 'mxn');
+            document.getElementById('btn-cli-usd')?.classList.toggle('active', m === 'usd');
+            if (anaUltimoDataset) renderGraficoClientes(anaUltimoDataset);
+        };
+
+        window.cambiarTabTablaAnalisis = function(tab) {
+            anaTabActiva = tab;
+            ['productos', 'precios', 'clientes', 'historial'].forEach(t => {
+                document.getElementById(`tab-ana-${t}`)?.classList.toggle('active', t === tab);
+                document.getElementById(`wrap-tabla-${t}`)?.classList.toggle('hidden', t !== tab);
+            });
+        };
+
+        window.inspeccionarPreciosProducto = function(prodKey, monedaOpt) {
+            const sel = document.getElementById('ana-sel-producto-precio');
+            const selMon = document.getElementById('ana-sel-moneda-precio');
+            if (sel) sel.value = prodKey;
+            if (selMon) selMon.value = monedaOpt || 'AUTO';
+            window.renderGraficoPrecios();
+            document.getElementById('panel-evolucion-precios')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+
+        window.filtrarPorClienteAnalisis = function(cliente) {
+            if (!cliente || cliente === 'SIN CLIENTE') return;
+            document.getElementById('ana-buscar').value = cliente;
+            window.actualizarAnalisis();
+            window.cambiarTabTablaAnalisis('historial');
+        };
+
+        window.limpiarFiltrosAnalisis = function() {
+            document.getElementById('ana-filtro-revisiones').value = 'todas';
+            document.getElementById('ana-filtro-empresa').value = 'TODAS';
+            document.getElementById('ana-filtro-moneda').value = 'TODAS';
+            document.getElementById('ana-fecha-desde').value = '';
+            document.getElementById('ana-fecha-hasta').value = '';
+            document.getElementById('ana-buscar').value = '';
+            document.getElementById('ana-incluir-subpartidas').checked = false;
+            document.getElementById('ana-sel-moneda-precio').value = 'AUTO';
+            window.actualizarAnalisis();
+        };
+
+        window.sincronizarYActualizarAnalisis = async function() {
+            if (currentRole !== 'master') return;
+            document.getElementById('loading-text').innerText = 'Sincronizando cotizaciones para análisis...';
+            document.getElementById('loading-screen').classList.remove('hidden');
+            try {
+                const cotSnap = await getDocs(collection(db, 'cotizaciones'));
+                cotizaciones = cotSnap.docs.map(d => {
+                    const c = normalizarCotizacion(d.data());
+                    cargarVersionEnCotizacion(c, c.versionActiva);
+                    return c;
+                });
+                cotizaciones.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+                if (cotIndexActiva >= cotizaciones.length) cotIndexActiva = 0;
+                window.renderSelectTabs();
+                window.actualizarAnalisis();
+            } catch (e) {
+                console.error(e);
+                alert('❌ Error al sincronizar datos: ' + (e.message || e));
+            } finally {
+                document.getElementById('loading-text').innerText = 'Sincronizando con AlphaZero...';
+                document.getElementById('loading-screen').classList.add('hidden');
+            }
+        };
+
+        window.exportarAnalisisCSV = function() {
+            if (currentRole !== 'master' || !anaUltimoDataset) return;
+            const filas = anaUltimoDataset.registros;
+            if (!filas.length) return alert('⚠️ No hay datos para exportar con los filtros actuales.');
+
+            const csvEsc = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+            const headers = ['Fecha y Hora', 'Folio', 'Revisión', 'Empresa', 'Cliente', 'Modelo', 'Marca', 'Descripción', 'Cantidad', 'Precio Unitario', 'Total', 'Moneda', 'Tipo'];
+            const lines = [headers.map(csvEsc).join(',')];
+
+            filas.forEach(r => {
+                lines.push([
+                    r.fechaHoraStr,
+                    r.folio,
+                    r.revision,
+                    r.empresa,
+                    r.cliente,
+                    r.modelo,
+                    r.marca,
+                    r.descCorta,
+                    r.cantidad,
+                    r.precio,
+                    r.total,
+                    r.moneda,
+                    r.esIncluye ? 'INCLUYE' : 'PARTIDA'
+                ].map(csvEsc).join(','));
+            });
+
+            const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const hoy = new Date();
+            const stamp = `${hoy.getFullYear()}${String(hoy.getMonth()+1).padStart(2,'0')}${String(hoy.getDate()).padStart(2,'0')}`;
+            a.href = url;
+            a.download = `AlphaZero_Analisis_${stamp}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         };
 
         if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('sidebar-collapsed');
