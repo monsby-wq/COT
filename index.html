@@ -224,15 +224,68 @@
             font-weight: 500;
         }
 
-        /* Casillas del Login sin bordes */
+        /* Casillas del Login y Registro sin bordes */
         #login-container input {
-            background-color: rgba(255, 255, 255, 0.06) !important;
+            background-color: rgba(255, 255, 255, 0.07) !important;
             border: none !important;
             outline: none !important;
             box-shadow: none !important;
         }
         #login-container input:focus {
-            background-color: rgba(255, 255, 255, 0.12) !important;
+            background-color: rgba(255, 255, 255, 0.13) !important;
+        }
+        #login-container input:disabled,
+        #login-container button:disabled {
+            opacity: 0.45 !important;
+            cursor: not-allowed !important;
+        }
+        .az-auth-tabs {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.35rem;
+            padding: 0.25rem;
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .az-auth-tab {
+            padding: 0.55rem 0.75rem;
+            border-radius: 0.55rem;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            color: #94A3B8;
+            background: transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .az-auth-tab:hover {
+            color: #F8FAFC;
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .az-auth-tab.active-login {
+            background: linear-gradient(90deg, #0E859F 0%, #0E5DF0 100%);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px -2px rgba(14, 93, 240, 0.38);
+        }
+        .az-auth-tab.active-reg {
+            background: linear-gradient(90deg, #ED813C 0%, #CE8550 100%);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px -2px rgba(237, 129, 60, 0.38);
+        }
+        .az-captcha-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.4rem;
+            border-radius: 0.65rem;
+        }
+        .az-captcha-canvas {
+            border-radius: 0.45rem;
+            width: 170px;
+            height: 44px;
+            flex-shrink: 0;
+            user-select: none;
         }
 
         /* ==========================================
@@ -563,28 +616,91 @@
         <div id="loading-text" class="text-white text-xl font-bold tracking-wider animate-pulse">Sincronizando con AlphaZero...</div>
     </div>
 
-    <!-- PANTALLA DE INICIO DE SESIÓN SIN BORDES CON MARCA DE AGUA TENUE -->
-    <div id="login-container" class="flex h-screen bg-[#0B192C] items-center justify-center relative overflow-hidden hidden">
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+    <!-- PANTALLA DE INICIO DE SESIÓN Y REGISTRO CON CAPTCHA Y BLOQUEO DE SEGURIDAD -->
+    <div id="login-container" class="flex min-h-screen bg-[#0B192C] items-center justify-center relative overflow-y-auto py-6 px-3 hidden">
+        <div class="fixed inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
             <svg id="login-wm-default" class="w-[680px] h-[680px] opacity-[0.10]"><use href="#alphazero-emblem"></use></svg>
             <img id="login-wm-custom" class="w-[620px] h-[620px] max-w-[85vw] max-h-[80vh] object-contain opacity-[0.10] hidden" alt="">
         </div>
 
-        <div class="az-login-card p-8 rounded-xl w-96 max-w-[92vw] relative z-10">
-            <div class="flex flex-col items-center text-center mb-6">
+        <div class="az-login-card p-6 sm:p-7 rounded-2xl w-[440px] max-w-[95vw] relative z-10 my-auto">
+            <div class="flex flex-col items-center text-center mb-5">
                 <div id="login-logo-default" class="flex flex-col items-center">
-                    <svg class="w-24 h-24 mb-2"><use href="#alphazero-emblem"></use></svg>
+                    <svg class="w-20 h-20 mb-2"><use href="#alphazero-emblem"></use></svg>
                     <h2 class="text-3xl font-extrabold tracking-wider leading-none">
                         <span class="text-white">ALPHA</span><span class="az-gradient-text">ZERO</span>
                     </h2>
                     <p class="text-[11px] font-semibold tracking-[0.22em] text-gray-300 mt-1">SISTEMAS CONTRAINCENDIOS</p>
                 </div>
-                <img id="login-logo-custom" class="max-h-28 max-w-[240px] object-contain mb-2 hidden" alt="Logo AlphaZero">
-                <p class="text-gray-400 font-semibold text-[11px] mt-3">CONTACTA A UN ADMINISTRADOR PARA SER DADO DE ALTA</p>
+                <img id="login-logo-custom" class="max-h-24 max-w-[230px] object-contain mb-2 hidden" alt="Logo AlphaZero">
+                <p id="auth-subtitulo" class="text-gray-400 font-semibold text-[11px] mt-2.5">ACCESO PROTEGIDO · VALIDACIÓN POR CAPTCHA</p>
             </div>
-            <input type="email" id="login-user" placeholder="Correo electrónico" class="p-3 w-full mb-3 rounded-lg text-sm font-medium text-white placeholder-gray-400">
-            <input type="password" id="login-pass" placeholder="Contraseña (Mínimo 6 caracteres)" class="p-3 w-full mb-6 rounded-lg text-sm font-medium text-white placeholder-gray-400">
-            <button onclick="iniciarSesion()" class="az-gradient-btn text-white font-bold px-4 py-3 rounded-lg w-full transition tracking-wider">INICIAR SESIÓN</button>
+
+            <!-- Pestañas: Iniciar Sesión / Registro -->
+            <div class="az-auth-tabs mb-5">
+                <button type="button" id="tab-auth-login" onclick="cambiarModoAuth('login')" class="az-auth-tab active-login">🔐 INICIAR SESIÓN</button>
+                <button type="button" id="tab-auth-registro" onclick="cambiarModoAuth('registro')" class="az-auth-tab">📝 REGISTRO</button>
+            </div>
+
+            <!-- PANEL 1: INICIAR SESIÓN -->
+            <div id="panel-auth-login">
+                <div id="login-sec-status" class="hidden mb-3 p-2.5 rounded-lg text-xs font-bold text-center"></div>
+
+                <input type="email" id="login-user" autocomplete="username" placeholder="Correo electrónico" class="p-3 w-full mb-3 rounded-lg text-sm font-medium text-white placeholder-gray-400">
+                <input type="password" id="login-pass" autocomplete="current-password" placeholder="Contraseña (Mínimo 6 caracteres)" class="p-3 w-full mb-3 rounded-lg text-sm font-medium text-white placeholder-gray-400">
+
+                <!-- CAPTCHA LOGIN -->
+                <div class="mb-4">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Verificación de seguridad (CAPTCHA)</label>
+                    <div class="az-captcha-box mb-2">
+                        <canvas id="login-captcha-canvas" width="170" height="44" class="az-captcha-canvas"></canvas>
+                        <button type="button" id="btn-refresh-login-captcha" onclick="generarCaptcha('login')" title="Generar nuevo código" class="px-2.5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-bold transition shrink-0">🔄</button>
+                        <input type="text" id="login-captcha-input" maxlength="6" autocomplete="off" placeholder="Código" class="p-2.5 w-full rounded-lg text-sm font-extrabold tracking-widest uppercase text-center text-white placeholder-gray-400">
+                    </div>
+                </div>
+
+                <button type="button" id="btn-submit-login" onclick="iniciarSesion()" class="az-gradient-btn text-white font-bold px-4 py-3 rounded-lg w-full transition tracking-wider">INICIAR SESIÓN</button>
+            </div>
+
+            <!-- PANEL 2: SOLICITUD DE REGISTRO -->
+            <div id="panel-auth-registro" class="hidden">
+                <div id="reg-sec-status" class="hidden mb-3 p-2.5 rounded-lg text-xs font-bold text-center"></div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
+                    <input type="text" id="reg-nombre" placeholder="Nombre(s)" class="p-2.5 w-full rounded-lg text-sm font-medium text-white placeholder-gray-400">
+                    <input type="text" id="reg-apellido" placeholder="Apellido(s)" class="p-2.5 w-full rounded-lg text-sm font-medium text-white placeholder-gray-400">
+                </div>
+
+                <input type="email" id="reg-email" autocomplete="email" placeholder="Correo electrónico" class="p-2.5 w-full mb-2.5 rounded-lg text-sm font-medium text-white placeholder-gray-400">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
+                    <input type="text" id="reg-empresa" list="lista-empresas-reg" placeholder="Empresa" class="p-2.5 w-full rounded-lg text-sm font-medium text-white placeholder-gray-400">
+                    <datalist id="lista-empresas-reg">
+                        <option value="US FIRE"></option>
+                        <option value="USIICSA"></option>
+                        <option value="ALPHAZERO"></option>
+                    </datalist>
+                    <input type="text" id="reg-puesto" placeholder="Puesto" class="p-2.5 w-full rounded-lg text-sm font-medium text-white placeholder-gray-400">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-3">
+                    <input type="password" id="reg-pass" autocomplete="new-password" placeholder="Contraseña (mín. 6)" class="p-2.5 w-full rounded-lg text-sm font-medium text-white placeholder-gray-400">
+                    <input type="password" id="reg-pass-confirm" autocomplete="new-password" placeholder="Confirmar contraseña" class="p-2.5 w-full rounded-lg text-sm font-medium text-white placeholder-gray-400">
+                </div>
+
+                <!-- CAPTCHA REGISTRO -->
+                <div class="mb-4">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Verificación de seguridad (CAPTCHA)</label>
+                    <div class="az-captcha-box mb-1.5">
+                        <canvas id="reg-captcha-canvas" width="170" height="44" class="az-captcha-canvas"></canvas>
+                        <button type="button" id="btn-refresh-reg-captcha" onclick="generarCaptcha('registro')" title="Generar nuevo código" class="px-2.5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-bold transition shrink-0">🔄</button>
+                        <input type="text" id="reg-captcha-input" maxlength="6" autocomplete="off" placeholder="Código" class="p-2.5 w-full rounded-lg text-sm font-extrabold tracking-widest uppercase text-center text-white placeholder-gray-400">
+                    </div>
+                    <p class="text-[10px] text-gray-400 text-center">Tu solicitud deberá ser aprobada por el administrador Master antes de poder iniciar sesión.</p>
+                </div>
+
+                <button type="button" id="btn-submit-registro" onclick="registrarUsuarioSolicitud()" class="az-orange-btn text-white font-bold px-4 py-3 rounded-lg w-full transition tracking-wider">ENVIAR SOLICITUD DE REGISTRO</button>
+            </div>
         </div>
     </div>
 
@@ -633,8 +749,10 @@
                 <span class="text-xl">📊</span> <span class="sidebar-text">Análisis</span>
             </button>
 
-            <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" title="Gestión de Usuarios" class="liquid-nav-btn text-left mb-2 py-2.5 px-3 text-[#ED813C] hover:text-[#d96e2b] font-bold hidden mt-2 flex items-center gap-3 w-full justify-center md:justify-start">
-                <span class="text-xl">⚙️</span> <span class="sidebar-text">Gestión de Usuarios</span>
+            <button id="btn-admin-usuarios" onclick="mostrarSeccion('usuarios')" title="Gestión de Usuarios" class="liquid-nav-btn text-left mb-2 py-2.5 px-3 text-[#ED813C] hover:text-[#d96e2b] font-bold hidden mt-2 flex items-center gap-3 w-full justify-center md:justify-start relative">
+                <span class="text-xl">⚙️</span>
+                <span class="sidebar-text flex-1">Gestión de Usuarios</span>
+                <span id="badge-usuarios-pendientes" class="hidden bg-[#ED813C] text-white text-[10px] font-black px-1.5 py-0.5 rounded-full shadow-sm">0</span>
             </button>
 
             <button id="btn-admin-logo" onclick="document.getElementById('input-subir-logo').click()" title="Subir Logotipo" class="liquid-nav-btn text-left mb-2.5 py-2.5 px-3 hover:text-[#0E859F] font-bold hidden flex items-center gap-3 w-full justify-center md:justify-start">
@@ -970,20 +1088,40 @@
                         </button>
                     </div>
                 </div>
+                <!-- Solicitudes de Registro Pendientes de Aprobación -->
+                <div id="bloque-solicitudes-pendientes" class="az-ana-panel p-5 mb-6">
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-extrabold text-base text-[#0B192C]">⏳ Solicitudes de Registro Pendientes</h4>
+                            <span id="contador-solicitudes-pendientes" class="az-ana-pill bg-[#ED813C]/15 text-[#ED813C]">0 pendientes</span>
+                        </div>
+                        <button type="button" onclick="cargarUsuariosNube()" class="text-xs font-bold text-[#0E859F] hover:underline">🔄 Actualizar solicitudes</button>
+                    </div>
+                    <p class="text-xs text-gray-600 mb-3">Los nuevos registros no pueden iniciar sesión hasta que la cuenta Master los apruebe aquí.</p>
+                    <div id="lista-solicitudes-pendientes" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                </div>
+
                 <div class="az-card p-6 rounded-xl mb-6">
-                    <h4 class="font-bold mb-1 text-[#0B192C]">Dar de alta o sincronizar vendedor</h4>
-                    <p class="text-xs text-gray-700 mb-3">Si un vendedor ya había sido creado antes y no aparece abajo, ingresa su correo y contraseña aquí para reactivarlo en la lista.</p>
+                    <h4 class="font-bold mb-1 text-[#0B192C]">Dar de alta o sincronizar vendedor manualmente</h4>
+                    <p class="text-xs text-gray-700 mb-3">Si un vendedor ya había sido creado antes y no aparece abajo, ingresa su correo y contraseña aquí para reactivarlo y aprobarlo directamente.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input type="email" id="new-user" placeholder="Correo Electrónico" class="p-2.5 rounded-lg">
                         <input type="text" id="new-pass" placeholder="Contraseña de acceso (mín. 6 caracteres)" class="p-2.5 rounded-lg">
                         <button onclick="crearUsuario()" class="az-gradient-btn text-white px-4 py-2.5 rounded-lg font-bold md:col-span-2 transition">Crear / Sincronizar Cuenta</button>
                     </div>
                 </div>
+
                 <div class="flex justify-between items-center mb-3">
-                    <h4 class="font-bold text-[#0B192C]">Vendedores Activos</h4>
+                    <h4 class="font-bold text-[#0B192C]">Vendedores Activos (Aprobados)</h4>
                     <button onclick="cargarUsuariosNube()" class="text-xs font-bold text-[#0E859F] hover:underline">🔄 Actualizar lista</button>
                 </div>
-                <div id="lista-cuentas" class="az-card rounded-xl p-2 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="lista-cuentas" class="az-card rounded-xl p-2 grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
+
+                <!-- Solicitudes Rechazadas (se muestra solo si existen) -->
+                <div id="bloque-solicitudes-rechazadas" class="hidden mt-4">
+                    <h4 class="font-bold text-sm text-gray-600 mb-2">🚫 Solicitudes Rechazadas</h4>
+                    <div id="lista-solicitudes-rechazadas" class="az-card rounded-xl p-2 grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                </div>
             </div>
 
             <!-- SECCIÓN: VENDEDORES (CON EMPRESA + DRAG & DROP ECONÓMICA / TÉCNICA) -->
@@ -1292,7 +1430,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -1309,6 +1447,7 @@
         const db = getFirestore(app);
         const secondaryApp = initializeApp(firebaseConfig, "Secondary");
         const secondaryAuth = getAuth(secondaryApp);
+        const secondaryDb = getFirestore(secondaryApp);
         const ANIO = String(new Date().getFullYear()).slice(-2);
         document.getElementById('lbl-anio').innerText = `-${ANIO}-`;
         const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1677,9 +1816,40 @@
             };
         }
 
+        function tieneDatosComercialesOCondiciones(d) {
+            if (!d) return false;
+            return Boolean(
+                String(d.folioMid || '').trim() ||
+                String(d.cliente || '').trim() ||
+                String(d.referencia || '').trim() ||
+                String(d.contacto || '').trim() ||
+                String(d.lugar || '').trim() ||
+                String(d.pago || '').trim() ||
+                String(d.vigencia || '').trim() ||
+                String(d.plazo || '').trim() ||
+                String(d.notas || '').trim()
+            );
+        }
+
         function tieneInformacionCapturada(d) {
             if (!d) return false;
-            return Boolean(d.folioMid || d.folioEnd || d.cliente || d.referencia || d.contacto || d.lugar || d.pago || d.vigencia || d.plazo || d.notas);
+            return tieneDatosComercialesOCondiciones(d) || Boolean(String(d.folioEnd || '').trim());
+        }
+
+        function completarDatosFaltantes(destino, origen) {
+            const dest = extraerDatosMoneda(destino);
+            const orig = extraerDatosMoneda(origen);
+            const campos = [
+                'folioMid', 'folioEnd', 'cliente', 'referencia', 'contacto',
+                'lugar', 'pago', 'vigencia', 'plazo', 'notas',
+                'empresa', 'vendedorId', 'tipoPropuesta'
+            ];
+            campos.forEach(k => {
+                if (!String(dest[k] || '').trim() && String(orig[k] || '').trim()) {
+                    dest[k] = orig[k];
+                }
+            });
+            return dest;
         }
 
         function ordenarPartidasConsecutivas(lista) {
@@ -1984,12 +2154,19 @@
                     const ahoraTs = Date.now();
                     const ahoraStr = formatearFechaHora(ahoraTs);
 
+                    const datosMXNBase = mon === 'MXN'
+                        ? datosNuevosUI
+                        : completarDatosFaltantes(cot.datosMXN || crearDatosMonedaVacios(), datosNuevosUI);
+                    const datosUSDBase = mon === 'USD'
+                        ? datosNuevosUI
+                        : completarDatosFaltantes(cot.datosUSD || crearDatosMonedaVacios(), datosNuevosUI);
+
                     const nuevaVer = {
                         idVer: String(ahoraTs),
                         fechaHora: ahoraStr,
                         monedaActiva: mon,
-                        datosMXN: JSON.parse(JSON.stringify(mon === 'MXN' ? datosNuevosUI : (cot.datosMXN || crearDatosMonedaVacios()))),
-                        datosUSD: JSON.parse(JSON.stringify(mon === 'USD' ? datosNuevosUI : (cot.datosUSD || crearDatosMonedaVacios()))),
+                        datosMXN: JSON.parse(JSON.stringify(datosMXNBase)),
+                        datosUSD: JSON.parse(JSON.stringify(datosUSDBase)),
                         partidasMXN: JSON.parse(JSON.stringify(cot.partidasMXN || [])),
                         partidasUSD: JSON.parse(JSON.stringify(cot.partidasUSD || []))
                     };
@@ -2038,8 +2215,16 @@
             const mon = document.getElementById('cot-moneda').value || cot.monedaActiva || 'MXN';
             const datosCapturados = leerFormularioDatosUI();
 
-            const datosMXNClon = JSON.parse(JSON.stringify(mon === 'MXN' ? datosCapturados : (cot.datosMXN || crearDatosMonedaVacios())));
-            const datosUSDClon = JSON.parse(JSON.stringify(mon === 'USD' ? datosCapturados : (cot.datosUSD || crearDatosMonedaVacios())));
+            const datosMXNClon = JSON.parse(JSON.stringify(
+                mon === 'MXN'
+                    ? datosCapturados
+                    : completarDatosFaltantes(cot.datosMXN || crearDatosMonedaVacios(), datosCapturados)
+            ));
+            const datosUSDClon = JSON.parse(JSON.stringify(
+                mon === 'USD'
+                    ? datosCapturados
+                    : completarDatosFaltantes(cot.datosUSD || crearDatosMonedaVacios(), datosCapturados)
+            ));
             datosMXNClon.folioEnd = revLimpia;
             datosUSDClon.folioEnd = revLimpia;
 
@@ -2300,15 +2485,19 @@
             }
 
             const datosDestino = nuevaMoneda === 'USD' ? cot.datosUSD : cot.datosMXN;
-            if (!tieneInformacionCapturada(datosDestino) && tieneInformacionCapturada(datosCapturados)) {
-                const copiaInicial = {
-                    ...datosCapturados,
-                    empresa: datosDestino.empresa || datosCapturados.empresa,
-                    vendedorId: datosDestino.vendedorId || datosCapturados.vendedorId,
-                    tipoPropuesta: datosDestino.tipoPropuesta || datosCapturados.tipoPropuesta || 'economica'
-                };
-                if (nuevaMoneda === 'USD') cot.datosUSD = copiaInicial;
-                else cot.datosMXN = copiaInicial;
+            if (tieneDatosComercialesOCondiciones(datosCapturados) || tieneInformacionCapturada(datosCapturados)) {
+                const datosCombinados = !tieneDatosComercialesOCondiciones(datosDestino)
+                    ? {
+                        ...datosCapturados,
+                        folioEnd: datosDestino.folioEnd || datosCapturados.folioEnd,
+                        empresa: datosDestino.empresa || datosCapturados.empresa,
+                        vendedorId: datosDestino.vendedorId || datosCapturados.vendedorId,
+                        tipoPropuesta: datosDestino.tipoPropuesta || datosCapturados.tipoPropuesta || 'economica'
+                    }
+                    : completarDatosFaltantes(datosDestino, datosCapturados);
+
+                if (nuevaMoneda === 'USD') cot.datosUSD = datosCombinados;
+                else cot.datosMXN = datosCombinados;
             }
 
             cot.monedaActiva = nuevaMoneda;
@@ -2380,9 +2569,9 @@
                 }
             }
 
-            if (tieneInformacionCapturada(datosOrigen)) {
+            if (tieneDatosComercialesOCondiciones(datosOrigen)) {
                 const datosActualesUI = leerFormularioDatosUI();
-                if (!tieneInformacionCapturada(datosActualesUI) || confirm(`¿Deseas copiar también los Datos Comerciales, Folio y Condiciones de ${monOrigen} a ${monActual}?`)) {
+                if (!tieneDatosComercialesOCondiciones(datosActualesUI) || confirm(`¿Deseas copiar también los Datos Comerciales, Folio y Condiciones de ${monOrigen} a ${monActual}?`)) {
                     const vendConservar = datosActualesUI.vendedorId || datosOrigen.vendedorId;
                     const empConservar = datosActualesUI.vendedorId ? datosActualesUI.empresa : datosOrigen.empresa;
                     const tipoConservar = datosActualesUI.vendedorId ? datosActualesUI.tipoPropuesta : (datosOrigen.tipoPropuesta || 'economica');
@@ -2751,19 +2940,370 @@
             `).join('');
         };
 
+        // --- SISTEMA DE SEGURIDAD: CAPTCHA + BLOQUEO (5 ERRORES = 5 MINUTOS) ---
+        const MAX_INTENTOS_SEGURIDAD = 5;
+        const BLOQUEO_SEGURIDAD_MS = 5 * 60 * 1000;
+        const captchaCodigos = { login: '', registro: '' };
+        const seguridadTimers = { login: null, registro: null };
+
+        function obtenerKeySeguridad(tipo) {
+            return tipo === 'registro' ? 'az_sec_reg_v1' : 'az_sec_login_v1';
+        }
+
+        function leerEstadoSeguridad(tipo) {
+            let estado = { fails: 0, lockUntil: 0 };
+            try {
+                const raw = localStorage.getItem(obtenerKeySeguridad(tipo));
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    estado = {
+                        fails: Number(parsed.fails) || 0,
+                        lockUntil: Number(parsed.lockUntil) || 0
+                    };
+                }
+            } catch (e) {}
+
+            if (estado.lockUntil > 0 && Date.now() >= estado.lockUntil) {
+                estado = { fails: 0, lockUntil: 0 };
+                guardarEstadoSeguridad(tipo, estado);
+            }
+            return estado;
+        }
+
+        function guardarEstadoSeguridad(tipo, estado) {
+            try {
+                localStorage.setItem(obtenerKeySeguridad(tipo), JSON.stringify(estado));
+            } catch (e) {}
+        }
+
+        function resetearEstadoSeguridad(tipo) {
+            guardarEstadoSeguridad(tipo, { fails: 0, lockUntil: 0 });
+            if (seguridadTimers[tipo]) {
+                clearInterval(seguridadTimers[tipo]);
+                seguridadTimers[tipo] = null;
+            }
+            actualizarUISeguridad(tipo);
+        }
+
+        function formatearTiempoRestante(ms) {
+            const totalSeg = Math.max(0, Math.ceil(ms / 1000));
+            const min = Math.floor(totalSeg / 60);
+            const seg = totalSeg % 60;
+            return `${String(min).padStart(2, '0')}:${String(seg).padStart(2, '0')}`;
+        }
+
+        function registrarErrorSeguridad(tipo) {
+            const estado = leerEstadoSeguridad(tipo);
+            estado.fails = (estado.fails || 0) + 1;
+            let bloqueadoAhora = false;
+
+            if (estado.fails >= MAX_INTENTOS_SEGURIDAD) {
+                estado.lockUntil = Date.now() + BLOQUEO_SEGURIDAD_MS;
+                bloqueadoAhora = true;
+            }
+            guardarEstadoSeguridad(tipo, estado);
+            actualizarUISeguridad(tipo);
+
+            return {
+                bloqueado: bloqueadoAhora || (estado.lockUntil > Date.now()),
+                fails: estado.fails,
+                restantes: Math.max(0, MAX_INTENTOS_SEGURIDAD - estado.fails),
+                tiempoStr: bloqueadoAhora ? formatearTiempoRestante(BLOQUEO_SEGURIDAD_MS) : ''
+            };
+        }
+
+        function obtenerControlesSeguridad(tipo) {
+            if (tipo === 'registro') {
+                return {
+                    statusEl: document.getElementById('reg-sec-status'),
+                    btnSubmit: document.getElementById('btn-submit-registro'),
+                    btnRefresh: document.getElementById('btn-refresh-reg-captcha'),
+                    inputs: ['reg-nombre', 'reg-apellido', 'reg-email', 'reg-empresa', 'reg-puesto', 'reg-pass', 'reg-pass-confirm', 'reg-captcha-input']
+                        .map(id => document.getElementById(id)).filter(Boolean)
+                };
+            }
+            return {
+                statusEl: document.getElementById('login-sec-status'),
+                btnSubmit: document.getElementById('btn-submit-login'),
+                btnRefresh: document.getElementById('btn-refresh-login-captcha'),
+                inputs: ['login-user', 'login-pass', 'login-captcha-input']
+                    .map(id => document.getElementById(id)).filter(Boolean)
+            };
+        }
+
+        function actualizarUISeguridad(tipo) {
+            const estado = leerEstadoSeguridad(tipo);
+            const { statusEl, btnSubmit, btnRefresh, inputs } = obtenerControlesSeguridad(tipo);
+            if (!statusEl) return;
+
+            const restanteMs = estado.lockUntil - Date.now();
+            const estaBloqueado = restanteMs > 0;
+
+            inputs.forEach(inp => { inp.disabled = estaBloqueado; });
+            if (btnSubmit) btnSubmit.disabled = estaBloqueado;
+            if (btnRefresh) btnRefresh.disabled = estaBloqueado;
+
+            if (estaBloqueado) {
+                statusEl.className = 'mb-3 p-2.5 rounded-lg text-xs font-bold text-center text-red-200 bg-red-500/20';
+                statusEl.textContent = `🔒 Bloqueado temporalmente por 5 intentos fallidos. Espera ${formatearTiempoRestante(restanteMs)} para volver a intentar.`;
+                statusEl.classList.remove('hidden');
+
+                if (!seguridadTimers[tipo]) {
+                    seguridadTimers[tipo] = setInterval(() => {
+                        const st = leerEstadoSeguridad(tipo);
+                        if (st.lockUntil <= Date.now()) {
+                            clearInterval(seguridadTimers[tipo]);
+                            seguridadTimers[tipo] = null;
+                            actualizarUISeguridad(tipo);
+                            window.generarCaptcha(tipo);
+                        } else {
+                            actualizarUISeguridad(tipo);
+                        }
+                    }, 1000);
+                }
+            } else {
+                if (seguridadTimers[tipo]) {
+                    clearInterval(seguridadTimers[tipo]);
+                    seguridadTimers[tipo] = null;
+                }
+                if (estado.fails > 0) {
+                    statusEl.className = 'mb-3 p-2 rounded-lg text-[11px] font-bold text-center text-amber-200 bg-amber-500/20';
+                    statusEl.textContent = `⚠️ Intentos fallidos: ${estado.fails} de ${MAX_INTENTOS_SEGURIDAD} (al 5.º error se bloqueará 5 minutos).`;
+                    statusEl.classList.remove('hidden');
+                } else {
+                    statusEl.classList.add('hidden');
+                    statusEl.textContent = '';
+                }
+            }
+        }
+
+        window.generarCaptcha = function(tipo) {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            captchaCodigos[tipo] = code;
+
+            const canvasId = tipo === 'registro' ? 'reg-captcha-canvas' : 'login-captcha-canvas';
+            const inputId = tipo === 'registro' ? 'reg-captcha-input' : 'login-captcha-input';
+            const canvas = document.getElementById(canvasId);
+            const inp = document.getElementById(inputId);
+            if (inp) inp.value = '';
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            const grad = ctx.createLinearGradient(0, 0, w, h);
+            grad.addColorStop(0, '#0F223D');
+            grad.addColorStop(0.5, '#0B192C');
+            grad.addColorStop(1, '#102C44');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+
+            // Líneas de interferencia
+            const lineColors = ['rgba(237,129,60,0.42)', 'rgba(14,133,159,0.45)', 'rgba(14,93,240,0.38)', 'rgba(255,255,255,0.22)'];
+            for (let i = 0; i < 6; i++) {
+                ctx.strokeStyle = lineColors[i % lineColors.length];
+                ctx.lineWidth = 1.2;
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * w, Math.random() * h);
+                ctx.lineTo(Math.random() * w, Math.random() * h);
+                ctx.stroke();
+            }
+
+            // Puntos de ruido
+            for (let i = 0; i < 36; i++) {
+                ctx.fillStyle = lineColors[i % lineColors.length];
+                ctx.beginPath();
+                ctx.arc(Math.random() * w, Math.random() * h, 1.1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Caracteres con rotación ligera
+            const textColors = ['#FFFFFF', '#FDE68A', '#7DD3FC', '#FDBA74', '#E2E8F0'];
+            for (let i = 0; i < code.length; i++) {
+                ctx.save();
+                const x = 18 + i * 24 + (Math.random() * 4 - 2);
+                const y = 29 + (Math.random() * 6 - 3);
+                const angle = (Math.random() * 0.44) - 0.22;
+                ctx.translate(x, y);
+                ctx.rotate(angle);
+                ctx.font = `900 ${21 + Math.floor(Math.random() * 4)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+                ctx.fillStyle = textColors[i % textColors.length];
+                ctx.fillText(code[i], -7, 0);
+                ctx.restore();
+            }
+        };
+
+        window.cambiarModoAuth = function(modo) {
+            const esReg = modo === 'registro';
+            document.getElementById('panel-auth-login')?.classList.toggle('hidden', esReg);
+            document.getElementById('panel-auth-registro')?.classList.toggle('hidden', !esReg);
+
+            const tLogin = document.getElementById('tab-auth-login');
+            const tReg = document.getElementById('tab-auth-registro');
+            if (tLogin) tLogin.className = 'az-auth-tab' + (!esReg ? ' active-login' : '');
+            if (tReg) tReg.className = 'az-auth-tab' + (esReg ? ' active-reg' : '');
+
+            const sub = document.getElementById('auth-subtitulo');
+            if (sub) {
+                sub.textContent = esReg
+                    ? 'SOLICITA TU ACCESO · REQUIERE APROBACIÓN DEL MASTER'
+                    : 'ACCESO PROTEGIDO · VALIDACIÓN POR CAPTCHA';
+            }
+
+            const tipo = esReg ? 'registro' : 'login';
+            if (!captchaCodigos[tipo]) window.generarCaptcha(tipo);
+            actualizarUISeguridad(tipo);
+        };
+
         // --- AUTENTICACIÓN ---
         window.iniciarSesion = async function() {
+            const estadoSeg = leerEstadoSeguridad('login');
+            if (estadoSeg.lockUntil > Date.now()) {
+                actualizarUISeguridad('login');
+                return alert(`🔒 Acceso bloqueado temporalmente por seguridad. Intenta nuevamente en ${formatearTiempoRestante(estadoSeg.lockUntil - Date.now())}.`);
+            }
+
             const email = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
-            if(!email || !pass) return alert("Ingresa correo y contraseña");
+            const captchaIngresado = (document.getElementById('login-captcha-input')?.value || '').trim().toUpperCase();
+
+            if (!email || !pass) return alert("Ingresa correo y contraseña.");
+
+            if (!captchaIngresado || captchaIngresado !== captchaCodigos.login) {
+                const res = registrarErrorSeguridad('login');
+                window.generarCaptcha('login');
+                return alert(res.bloqueado
+                    ? `🔒 CAPTCHA incorrecto. Alcanzaste 5 intentos fallidos; el acceso se ha bloqueado durante 5 minutos.`
+                    : `❌ Código CAPTCHA incorrecto. Te quedan ${res.restantes} intento(s) antes del bloqueo de 5 minutos.`);
+            }
             
             document.getElementById('loading-screen').classList.remove('hidden');
 
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
+                resetearEstadoSeguridad('login');
+                window.generarCaptcha('login');
             } catch(error) {
-                const credMal = ['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email'].includes(error.code);
-                alert('Error de acceso: ' + (credMal ? 'Correo o contraseña incorrectos.' : (error.message || 'Credenciales incorrectas.')));
+                const credMal = ['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-email','auth/too-many-requests'].includes(error.code);
+                const res = registrarErrorSeguridad('login');
+                window.generarCaptcha('login');
+                if (res.bloqueado) {
+                    alert('🔒 Has superado los 5 intentos fallidos. El inicio de sesión se ha bloqueado durante 5 minutos.');
+                } else {
+                    const msgBase = credMal ? 'Correo o contraseña incorrectos.' : (error.message || 'Credenciales incorrectas.');
+                    alert(`❌ Error de acceso: ${msgBase}
+
+Intentos restantes antes de bloqueo temporal: ${res.restantes}`);
+                }
+                document.getElementById('loading-screen').classList.add('hidden');
+            }
+        };
+
+        // --- SOLICITUD DE REGISTRO CON CAPTCHA Y APROBACIÓN MASTER ---
+        window.registrarUsuarioSolicitud = async function() {
+            const estadoSeg = leerEstadoSeguridad('registro');
+            if (estadoSeg.lockUntil > Date.now()) {
+                actualizarUISeguridad('registro');
+                return alert(`🔒 Registro bloqueado temporalmente por seguridad. Intenta nuevamente en ${formatearTiempoRestante(estadoSeg.lockUntil - Date.now())}.`);
+            }
+
+            const nombre = (document.getElementById('reg-nombre')?.value || '').trim();
+            const apellido = (document.getElementById('reg-apellido')?.value || '').trim();
+            const email = (document.getElementById('reg-email')?.value || '').trim().toLowerCase();
+            const empresa = (document.getElementById('reg-empresa')?.value || '').trim().toUpperCase();
+            const puesto = (document.getElementById('reg-puesto')?.value || '').trim();
+            const pass = (document.getElementById('reg-pass')?.value || '').trim();
+            const passConfirm = (document.getElementById('reg-pass-confirm')?.value || '').trim();
+            const captchaIngresado = (document.getElementById('reg-captcha-input')?.value || '').trim().toUpperCase();
+
+            const fallarRegistro = (mensaje) => {
+                const res = registrarErrorSeguridad('registro');
+                window.generarCaptcha('registro');
+                if (res.bloqueado) {
+                    alert(`🔒 ${mensaje}
+
+Alcanzaste 5 errores en el registro; este apartado se ha bloqueado durante 5 minutos.`);
+                } else {
+                    alert(`⚠️ ${mensaje}
+
+Intentos restantes antes del bloqueo de 5 minutos: ${res.restantes}`);
+                }
+            };
+
+            if (!nombre || !apellido || !email || !empresa || !puesto || !pass || !passConfirm) {
+                return fallarRegistro('Completa todos los campos obligatorios (Nombre, Apellido, Correo, Empresa, Puesto y Contraseña).');
+            }
+
+            const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            if (!emailValido) {
+                return fallarRegistro('Ingresa un correo electrónico válido.');
+            }
+
+            if (pass.length < 6) {
+                return fallarRegistro('La contraseña debe tener al menos 6 caracteres.');
+            }
+
+            if (pass !== passConfirm) {
+                return fallarRegistro('Las contraseñas no coinciden.');
+            }
+
+            if (!captchaIngresado || captchaIngresado !== captchaCodigos.registro) {
+                return fallarRegistro('Código CAPTCHA incorrecto.');
+            }
+
+            document.getElementById('loading-text').innerText = 'Enviando solicitud de registro...';
+            document.getElementById('loading-screen').classList.remove('hidden');
+
+            let credCreada = null;
+            try {
+                credCreada = await createUserWithEmailAndPassword(secondaryAuth, email, pass);
+
+                const solicitud = {
+                    id: email,
+                    email,
+                    nombre,
+                    apellido,
+                    empresa,
+                    puesto,
+                    role: 'vendedor',
+                    estado: 'pendiente',
+                    fechaRegistro: Date.now()
+                };
+
+                await setDoc(doc(secondaryDb, 'usuarios', email), solicitud);
+                await signOut(secondaryAuth);
+
+                resetearEstadoSeguridad('registro');
+                ['reg-nombre', 'reg-apellido', 'reg-email', 'reg-empresa', 'reg-puesto', 'reg-pass', 'reg-pass-confirm', 'reg-captcha-input']
+                    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+                window.generarCaptcha('registro');
+                window.cambiarModoAuth('login');
+
+                alert('✅ Solicitud de registro enviada con éxito.
+
+El administrador Master revisará y aprobará tu cuenta en Gestión de Usuarios. Una vez aprobada, podrás iniciar sesión.');
+            } catch (error) {
+                if (credCreada?.user) {
+                    try { await deleteUser(credCreada.user); } catch (eDel) {}
+                }
+                try { await signOut(secondaryAuth); } catch (eOut) {}
+
+                let msg = error.message || 'No se pudo completar el registro.';
+                if (error.code === 'auth/email-already-in-use') {
+                    msg = 'Este correo electrónico ya está registrado en el sistema.';
+                } else if (error.code === 'auth/invalid-email') {
+                    msg = 'El formato del correo electrónico es inválido.';
+                } else if (error.code === 'auth/weak-password') {
+                    msg = 'La contraseña es demasiado débil (mínimo 6 caracteres).';
+                }
+                fallarRegistro(msg);
+            } finally {
+                document.getElementById('loading-text').innerText = 'Sincronizando con AlphaZero...';
                 document.getElementById('loading-screen').classList.add('hidden');
             }
         };
@@ -2784,7 +3324,21 @@
                         userDoc = await getDoc(doc(db, 'usuarios', user.email));
                     }
                     if (userDoc.exists()) {
-                        currentRole = userDoc.data().role || 'vendedor';
+                        const dataUser = userDoc.data() || {};
+                        const estadoCuenta = dataUser.estado || 'aprobado';
+                        if (estadoCuenta === 'pendiente') {
+                            alert("⏳ Tu solicitud de registro está pendiente de aprobación por el administrador Master.
+
+Podrás iniciar sesión en cuanto sea aprobada.");
+                            await signOut(auth);
+                            return;
+                        }
+                        if (estadoCuenta === 'rechazado') {
+                            alert("🚫 Tu solicitud de registro fue rechazada por el administrador Master.");
+                            await signOut(auth);
+                            return;
+                        }
+                        currentRole = dataUser.role || 'vendedor';
                     } else {
                         alert("Tu cuenta ha sido deshabilitada del sistema.");
                         await signOut(auth);
@@ -2814,6 +3368,10 @@
                 document.getElementById('app-container').classList.add('hidden');
                 document.getElementById('login-container').classList.remove('hidden');
                 document.getElementById('loading-screen').classList.add('hidden');
+                window.generarCaptcha('login');
+                window.generarCaptcha('registro');
+                actualizarUISeguridad('login');
+                actualizarUISeguridad('registro');
             }
         });
 
@@ -2826,7 +3384,14 @@
                     return {
                         id: d.id,
                         email: data.email || d.id,
+                        nombre: data.nombre || '',
+                        apellido: data.apellido || '',
+                        empresa: data.empresa || '',
+                        puesto: data.puesto || '',
                         role: data.role || 'vendedor',
+                        estado: data.estado || 'aprobado',
+                        fechaRegistro: data.fechaRegistro || 0,
+                        fechaAprobacion: data.fechaAprobacion || 0,
                         pass: data.pass || ''
                     };
                 });
@@ -2926,7 +3491,64 @@
 
         window.renderUsuarios = function() {
             const lista = document.getElementById('lista-cuentas');
+            const listaPend = document.getElementById('lista-solicitudes-pendientes');
+            const contPend = document.getElementById('contador-solicitudes-pendientes');
+            const badgeSidebar = document.getElementById('badge-usuarios-pendientes');
+            const bloqueRech = document.getElementById('bloque-solicitudes-rechazadas');
+            const listaRech = document.getElementById('lista-solicitudes-rechazadas');
             if (!lista) return;
+
+            const sinMaster = dbUsuarios.filter(u => (u.email || '').toLowerCase() !== 'master@alphazero.com');
+            const pendientes = sinMaster
+                .filter(u => u.estado === 'pendiente')
+                .sort((a, b) => (b.fechaRegistro || 0) - (a.fechaRegistro || 0));
+            const activos = sinMaster
+                .filter(u => (u.estado || 'aprobado') === 'aprobado')
+                .sort((a, b) => (a.email || '').localeCompare(b.email || '', 'es'));
+            const rechazados = sinMaster
+                .filter(u => u.estado === 'rechazado')
+                .sort((a, b) => (b.fechaRegistro || 0) - (a.fechaRegistro || 0));
+
+            if (badgeSidebar) {
+                badgeSidebar.textContent = String(pendientes.length);
+                badgeSidebar.classList.toggle('hidden', pendientes.length === 0);
+            }
+            if (contPend) {
+                contPend.textContent = `${pendientes.length} pendiente${pendientes.length === 1 ? '' : 's'}`;
+            }
+
+            if (listaPend) {
+                if (pendientes.length === 0) {
+                    listaPend.innerHTML = `
+                        <div class="col-span-full text-xs text-gray-600 font-semibold py-2">
+                            ✅ No hay solicitudes de registro pendientes por revisar.
+                        </div>`;
+                } else {
+                    listaPend.innerHTML = pendientes.map(u => {
+                        const nombreCompleto = `${u.nombre || ''} ${u.apellido || ''}`.trim() || 'Sin nombre';
+                        const fechaStr = u.fechaRegistro ? formatearFechaHora(u.fechaRegistro) : 'Fecha no registrada';
+                        return `
+                        <div class="p-3.5 rounded-xl flex flex-col justify-between gap-2.5" style="background-color: rgba(237, 129, 60, 0.09);">
+                            <div>
+                                <div class="flex flex-wrap items-center justify-between gap-1">
+                                    <span class="font-extrabold text-[#0B192C] text-sm">${esc(nombreCompleto)}</span>
+                                    <span class="az-ana-pill bg-[#ED813C]/20 text-[#ED813C]">⏳ PENDIENTE</span>
+                                </div>
+                                <p class="text-xs font-bold text-[#0E5DF0] mt-0.5 break-all">${esc(u.email)}</p>
+                                <div class="text-xs text-gray-700 mt-1 space-y-0.5">
+                                    <div>🏢 Empresa: <b>${esc(u.empresa || '—')}</b></div>
+                                    <div>💼 Puesto: <b>${esc(u.puesto || '—')}</b></div>
+                                    <div class="text-[11px] opacity-80">📅 Solicitado: ${esc(fechaStr)}</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 pt-1">
+                                <button type="button" onclick="aprobarUsuario('${esc(u.id || u.email)}')" class="az-gradient-btn text-white font-bold px-3 py-1.5 rounded-lg text-xs flex-1 transition shadow-sm">✅ Aprobar Acceso</button>
+                                <button type="button" onclick="rechazarUsuario('${esc(u.id || u.email)}')" class="bg-red-500/15 hover:bg-red-500/25 text-red-600 font-bold px-3 py-1.5 rounded-lg text-xs transition">🚫 Rechazar</button>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            }
 
             const tarjetaMaster = `
                 <div class="bg-transparent p-3.5 rounded-lg flex justify-between items-center">
@@ -2939,24 +3561,81 @@
                 </div>
             `;
 
-            const vendedoresFiltrados = dbUsuarios.filter(u => (u.email || '').toLowerCase() !== 'master@alphazero.com');
-
-            const tarjetasVendedores = vendedoresFiltrados.map(u => `
-                <div class="bg-transparent p-3.5 rounded-lg flex justify-between items-center">
-                    <div>
-                        <span class="font-bold text-[#0B192C]">${esc(u.email)}</span>
-                        <span class="text-xs text-[#0E859F] font-bold px-1.5 py-0.5 rounded ml-1">${esc(u.role || 'vendedor')}</span>
-                        ${u.pass ? `<p class="text-xs text-gray-700 mt-0.5">Contraseña: <b>${esc(u.pass)}</b></p>` : `<p class="text-xs text-emerald-700 font-semibold mt-0.5">Acceso habilitado</p>`}
+            const tarjetasVendedores = activos.map(u => {
+                const nombreCompleto = `${u.nombre || ''} ${u.apellido || ''}`.trim();
+                const metaLaboral = [u.empresa, u.puesto].filter(Boolean).join(' · ');
+                return `
+                <div class="p-3.5 rounded-xl flex justify-between items-start gap-2" style="background-color: rgba(14, 133, 159, 0.05);">
+                    <div class="min-w-0">
+                        ${nombreCompleto ? `<div class="font-extrabold text-[#0B192C] text-sm">${esc(nombreCompleto)}</div>` : ''}
+                        <div class="flex flex-wrap items-center gap-1">
+                            <span class="font-bold text-[#0B192C] text-xs break-all">${esc(u.email)}</span>
+                            <span class="text-[10px] text-[#0E859F] font-bold px-1.5 py-0.5 rounded">${esc(u.role || 'vendedor')}</span>
+                        </div>
+                        ${metaLaboral ? `<p class="text-xs text-gray-700 mt-0.5">🏢 ${esc(metaLaboral)}</p>` : ''}
+                        ${u.pass ? `<p class="text-xs text-gray-700 mt-0.5">Contraseña: <b>${esc(u.pass)}</b></p>` : `<p class="text-xs text-emerald-600 font-semibold mt-0.5">Acceso aprobado 🟢</p>`}
                     </div>
-                    <button onclick="eliminarUsuario('${esc(u.id || u.email)}')" title="Revocar acceso" class="hover:bg-red-500/10 text-red-600 font-bold px-2.5 py-1 rounded text-xs transition">Eliminar</button>
-                </div>
-            `).join('');
+                    <button onclick="eliminarUsuario('${esc(u.id || u.email)}')" title="Revocar acceso" class="hover:bg-red-500/10 text-red-600 font-bold px-2.5 py-1 rounded text-xs transition shrink-0">Eliminar</button>
+                </div>`;
+            }).join('');
 
             lista.innerHTML = tarjetaMaster + (tarjetasVendedores || `
                 <div class="bg-transparent p-3.5 rounded-lg text-xs text-[#0B192C] flex items-center">
-                    No hay vendedores adicionales registrados en la lista. Ingresa arriba el correo y contraseña de tu vendedor y presiona "Crear / Sincronizar Cuenta".
+                    No hay vendedores adicionales activos en la lista. Aprueba solicitudes pendientes o crea una cuenta manualmente arriba.
                 </div>
             `);
+
+            if (bloqueRech && listaRech) {
+                bloqueRech.classList.toggle('hidden', rechazados.length === 0);
+                listaRech.innerHTML = rechazados.map(u => {
+                    const nombreCompleto = `${u.nombre || ''} ${u.apellido || ''}`.trim() || u.email;
+                    const metaLaboral = [u.empresa, u.puesto].filter(Boolean).join(' · ');
+                    return `
+                    <div class="p-3 rounded-xl flex justify-between items-center gap-2 opacity-80" style="background-color: rgba(239, 68, 68, 0.06);">
+                        <div class="min-w-0">
+                            <div class="font-bold text-[#0B192C] text-xs">${esc(nombreCompleto)}</div>
+                            <div class="text-[11px] text-gray-600 break-all">${esc(u.email)}${metaLaboral ? ` · ${esc(metaLaboral)}` : ''}</div>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="button" onclick="aprobarUsuario('${esc(u.id || u.email)}')" class="text-[#0E859F] hover:underline font-bold text-xs px-1.5">↺ Aprobar</button>
+                            <button type="button" onclick="eliminarUsuario('${esc(u.id || u.email)}')" class="text-red-600 hover:underline font-bold text-xs px-1.5">🗑️</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        };
+
+        window.aprobarUsuario = async function(idOrEmail) {
+            if (currentRole !== 'master') return;
+            const u = dbUsuarios.find(x => (x.id || x.email) === idOrEmail);
+            const nombreMostrar = u ? (`${u.nombre || ''} ${u.apellido || ''}`.trim() || u.email) : idOrEmail;
+            if (!confirm(`¿Aprobar el acceso para "${nombreMostrar}" (${u?.email || idOrEmail})? Una vez aprobado podrá iniciar sesión.`)) return;
+
+            document.getElementById('loading-screen').classList.remove('hidden');
+            const docRef = doc(db, 'usuarios', idOrEmail);
+            await setDoc(docRef, {
+                estado: 'aprobado',
+                role: u?.role || 'vendedor',
+                fechaAprobacion: Date.now()
+            }, { merge: true });
+            await window.cargarUsuariosNube();
+            document.getElementById('loading-screen').classList.add('hidden');
+            alert(`✅ Acceso aprobado para ${u?.email || idOrEmail}. Ya puede iniciar sesión.`);
+        };
+
+        window.rechazarUsuario = async function(idOrEmail) {
+            if (currentRole !== 'master') return;
+            const u = dbUsuarios.find(x => (x.id || x.email) === idOrEmail);
+            const nombreMostrar = u ? (`${u.nombre || ''} ${u.apellido || ''}`.trim() || u.email) : idOrEmail;
+            if (!confirm(`¿Rechazar la solicitud de registro de "${nombreMostrar}"? No podrá iniciar sesión.`)) return;
+
+            document.getElementById('loading-screen').classList.remove('hidden');
+            await setDoc(doc(db, 'usuarios', idOrEmail), {
+                estado: 'rechazado',
+                fechaRechazo: Date.now()
+            }, { merge: true });
+            await window.cargarUsuariosNube();
+            document.getElementById('loading-screen').classList.add('hidden');
         };
 
         window.crearUsuario = async function() {
@@ -2981,14 +3660,14 @@
                     }
                 }
                 
-                const newUser = { id: emailKey, email: emailKey, pass: pass, role: 'vendedor' };
-                await setDoc(doc(db, 'usuarios', emailKey), newUser);
+                const newUser = { id: emailKey, email: emailKey, pass: pass, role: 'vendedor', estado: 'aprobado', fechaAprobacion: Date.now() };
+                await setDoc(doc(db, 'usuarios', emailKey), newUser, { merge: true });
                 
                 document.getElementById('new-user').value = '';
                 document.getElementById('new-pass').value = '';
                 await window.cargarUsuariosNube();
                 alert(yaExistiaEnAuth
-                    ? "✅ El correo ya existía en Firebase y ha sido reactivado y agregado a Vendedores Activos."
+                    ? "✅ El correo ya existía en Firebase y ha sido reactivado y aprobado en Vendedores Activos."
                     : "✅ Vendedor creado y activado en la nube.");
             } catch (e) { alert("Error: " + e.message); }
             document.getElementById('loading-screen').classList.add('hidden');
@@ -5222,7 +5901,7 @@
         if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('sidebar-collapsed');
         window.seleccionarEquipoPorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipo(c); };
         window.seleccionarIncluyePorId = id => { const c = catalogo.find(x => x.id === id); if (c) window.seleccionarEquipoIncluye(c); };
-        ['guardarEquipo','eliminarEquipo','eliminarVendedor','eliminarUsuario','nuevaCotizacion','duplicarCotizacion',
+        ['guardarEquipo','eliminarEquipo','eliminarVendedor','eliminarUsuario','aprobarUsuario','rechazarUsuario','nuevaCotizacion','duplicarCotizacion',
          'eliminarCotizacionActual','cambiarCotizacionTab','cambiarVersionCotizacion','crearNuevaRevision','eliminarVersionActual','manejarCambioCampoRev',
          'cambiarMonedaCotizacion','copiarPartidasOtraMoneda','agregarPartida','eliminarPartida','generarDocumentoWord','restaurarLogoPredeterminado'].forEach(n => {
             const f = window[n];
@@ -5238,7 +5917,9 @@
                 if (l && !l.contains(e.target) && e.target.id !== inp) l.classList.add('hidden');
             });
         });
-        document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') window.iniciarSesion(); });
+        document.getElementById('login-pass')?.addEventListener('keydown', e => { if (e.key === 'Enter') window.iniciarSesion(); });
+        document.getElementById('login-captcha-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') window.iniciarSesion(); });
+        document.getElementById('reg-captcha-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') window.registrarUsuarioSolicitud(); });
     </script>
 </body>
 </html>
